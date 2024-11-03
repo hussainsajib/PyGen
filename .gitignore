@@ -28,3 +28,12 @@ archive.zip
 
 # macOS
 .DS_Store
+
+# Env
+.env
+.env.*
+
+# Artifacts
+*.mp3
+*.mp4
+*.log
