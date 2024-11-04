@@ -8,7 +8,7 @@ from moviepy.video.fx.resize import resize
 from processes.logger import logger
 from processes.verse import Verse, IMAGE_API_URL
 from processes.video_configs import (
-    MAIN_TEXT_BOXES_SIZE, ARABIC_TEXT_CLIP_POS, TRANS_TEXT_CLIP_POS, FOOTER_FONT_SIZE, FOOTER_FONT_COLOR)
+    ARABIC_TEXT_CLIP_POS, ARABIC_TEXT_BOX_CONFIG, TRANS_TEXT_CLIP_POS, TRANSLATON_TEXT_BOX_CONFIG, FOOTER_CONFIG)
 
 
 
@@ -45,37 +45,34 @@ def generate_video(surah, start_verse, end_verse):
             current_clips.append(background_clip)
 
             # Create the text overlay
-            arabic_text_clip = TextClip(v.arabic, fontsize=50, color='white', method='caption', size=MAIN_TEXT_BOXES_SIZE)\
+            arabic_text_clip = TextClip(v.arabic, **ARABIC_TEXT_BOX_CONFIG)\
                                 .set_position(lambda t: ARABIC_TEXT_CLIP_POS)\
                                 .set_duration(audio_clip.duration)
             current_clips.append(arabic_text_clip)
 
             # Create translation overlay
-            translation_clip = TextClip(v.translation, fontsize=30, color='white', font='Kalpurush', method='caption', size=MAIN_TEXT_BOXES_SIZE)\
+            translation_clip = TextClip(v.translation, **TRANSLATON_TEXT_BOX_CONFIG)\
                                 .set_position(lambda t: TRANS_TEXT_CLIP_POS)\
                                 .set_duration(audio_clip.duration)
             current_clips.append(translation_clip)
             logger.info(f"Verse ${verse} TextClip created")
 
             # Surah name overlay
-            surah_name_clip = TextClip(f'{v.surah_name}:{str(v.verse)}', fontsize=FOOTER_FONT_SIZE, color=FOOTER_FONT_COLOR)\
-                                .set_position(('center', 'bottom'))\
-                                .set_duration(audio_clip.duration)\
-                                .margin(bottom=10)
+            surah_name_clip = TextClip(f'{v.surah_name} : {str(v.verse)}', **FOOTER_CONFIG)\
+                                .set_position(lambda t:(0.45, 0.95), relative=True)\
+                                .set_duration(audio_clip.duration)
             current_clips.append(surah_name_clip)
 
             # Reciter name overlay
-            reciter_name_clip = TextClip(v.reciter_name, fontsize=FOOTER_FONT_SIZE, color=FOOTER_FONT_COLOR)\
-                                .set_position(('left', 'bottom'))\
-                                .set_duration(audio_clip.duration)\
-                                .margin(bottom=10, left=10)
+            reciter_name_clip = TextClip(v.reciter_name, **FOOTER_CONFIG)\
+                                .set_position((0.05, 0.95), relative=True)\
+                                .set_duration(audio_clip.duration)
             current_clips.append(reciter_name_clip)
 
             # Verser number overlay
-            verse_number_clip = TextClip("Taqwa Bangla", fontsize=FOOTER_FONT_SIZE, color=FOOTER_FONT_COLOR)\
-                                .set_position(('right', 'bottom'))\
-                                .set_duration(audio_clip.duration)\
-                                .margin(bottom=10, right=10)
+            verse_number_clip = TextClip("Taqwa Bangla", **FOOTER_CONFIG)\
+                                .set_position((0.85, 0.95), relative=True)\
+                                .set_duration(audio_clip.duration)
             current_clips.append(verse_number_clip)
 
             # Composite the video with text and audio
@@ -85,8 +82,8 @@ def generate_video(surah, start_verse, end_verse):
             clips.append(video_clip)
             
         except Exception as e:
-            print(f"Error processing verse {verse}: {e}")
-            continue
+            print(str(e))
+            raise
     
     # Check if clips list is empty before concatenation
     if not clips:

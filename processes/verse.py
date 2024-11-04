@@ -1,6 +1,6 @@
 import os
 import requests
-
+import json
 
 
 ACCESS_KEY = os.getenv("ACCESS_KEY")
@@ -16,7 +16,8 @@ class Verse:
     surah_name: str = None
     arabic: str = None
     translation: str = None
-    reciter_name: str = "Misary Rashid al-Afasy"
+    reciter_name: str = ""
+    reciter_key: str = "ar.ibrahimakhbar"
     link_to_audio: str = None
 
     quran_payload: str = None
@@ -29,10 +30,11 @@ class Verse:
         self.get_quran_data()
         self.get_audio_data()
         self.get_translation_data()
+        self.get_reciter_name()
         self.arabic = self.fetch_verse_text()
         self.translation = self.fetch_verse_translation()
         self.link_to_audio = self.fetch_verse_audio()
-        self.surah_name = "Surah " +self.quran_payload['data']['surah']['englishName']
+        self.surah_name = f"Surah {self.quran_payload['data']['surah']['englishName']}"
 
     def get_quran_data(self):
         response = requests.get(QURAN_API_URL.format(surah=self.surah, verse=self.verse))
@@ -63,3 +65,11 @@ class Verse:
 
     def fetch_verse_audio(self):
         return self.audio_payload['data']['audio']
+    
+    def get_reciter_name(self):
+        with open("data/reciter_info.json", "r") as f:
+            reciters = json.load(f)
+            print(reciters)
+            for k, v in reciters.items():
+                if v["identifier"] == self.reciter_key:
+                    self.reciter_name = k
