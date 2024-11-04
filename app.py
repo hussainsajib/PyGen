@@ -2,8 +2,8 @@ import os
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
-from video_utils import generate_video
-from youtube_utils import upload_to_youtube
+from processes.video_utils import generate_video
+from processes.youtube_utils import upload_to_youtube
 
 load_dotenv()
 IMAGEMAGICK_BINARY=os.getenv("IMAGEMAGICK_BINARY")
