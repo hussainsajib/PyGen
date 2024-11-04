@@ -1,53 +1,70 @@
 {
-    "Abdullah Basfar": {
-        "identifier": "ar.abdullahbasfar"
+    "ar.abdullahbasfar": {
+        "english_name": "Abdullah Basfar",
+        "bangla_name": "আব্দুল্লাহ বাসফার"
     },
-    "Abdurrahmaan As-Sudais": {
-        "identifier": "ar.abdurrahmaansudais"
+    "ar.abdurrahmaansudais": {
+        "english_name": "Abdurrahmaan As-Sudais",
+        "bangla_name": "আব্দুররাহমান আস-সুদাইস"
     },
-    "Abdul Samad": {
-        "identifier": "ar.abdulsamad"
+    "ar.abdulsamad": {
+        "english_name": "Abdul Samad",
+        "bangla_name": "আব্দুল সামাদ"
     },
-    "Abu Bakr Ash-Shaatree": {
-        "identifier": "ar.shaatree"
+    "ar.shaatree": {
+        "english_name": "Abu Bakr Ash-Shaatree",
+        "bangla_name": "আবু বাকর আশ-শাত্রি"
     },
-    "Ahmed ibn Ali al-Ajamy": {
-        "identifier": "ar.ahmedajamy"
+    "ar.ahmedajamy": {
+        "english_name": "Ahmed ibn Ali al-Ajamy",
+        "bangla_name": "আহমাদ ইবন আলি আল-আজামি"
     },
-    "Alafasy": {
-        "identifier": "ar.alafasy"
+    "ar.alafasy": {
+        "english_name": "Alafasy",
+        "bangla_name": "আল-আফাসি"
     },
-    "Hani Rifai": {
-        "identifier": "ar.hanirifai"
+    "ar.hanirifai": {
+        "english_name": "Hani Rifai",
+        "bangla_name": "হানি রিফাই"
     },
-    "Husary": {
-        "identifier": "ar.husary"
+    "ar.husary": {
+        "english_name": "Husary",
+        "bangla_name": "আল-হুসারি"
     },
-    "Husary (Mujawwad)": {
-        "identifier": "ar.husarymujawwad"
+    "ar.husarymujawwad": {
+        "english_name": "Husary (Mujawwad)",
+        "bangla_name": "আল-হুসারি"
     },
-    "Hudhaify": {
-        "identifier": "ar.hudhaify"
+    "ar.hudhaify": {
+        "english_name": "Hudhaify",
+        "bangla_name": "হুযাইফি"
     },
-    "Ibrahim Akhdar": {
-        "identifier": "ar.ibrahimakhbar"
+    "ar.ibrahimakhbar": {
+        "english_name": "Ibrahim Akhdar",
+        "bangla_name": "ইব্রাহিম আখদার"
     },
-    "Maher Al Muaiqly": {
-        "identifier": "ar.mahermuaiqly"
+    "ar.mahermuaiqly": {
+        "english_name": "Maher Al Muaiqly",
+        "bangla_name": "মাহের আল মুয়াইকলি"
     },
-    "Muhammad Ayyoub": {
-        "identifier": "ar.muhammadayyoub"
+    "ar.muhammadayyoub": {
+        "english_name": "Muhammad Ayyoub",
+        "bangla_name": "মুহাম্মাদ আয়্যুব"
     },
-    "Muhammad Jibreel": {
-        "identifier": "ar.muhammadjibreel"
+    "ar.muhammadjibreel": {
+        "english_name": "Muhammad Jibreel",
+        "bangla_name": "মুহাম্মাদ জিব্রিল"
     },
-    "Saood bin Ibraaheem Ash-Shuraym": {
-        "identifier": "ar.saoodshuraym"
+    "ar.saoodshuraym": {
+        "english_name": "Saood bin Ibraaheem Ash-Shuraym",
+        "bangla_name": "সাউদ ইবন ইব্রাহিম আশ-শুরাইম"
     },
-    "Parhizgar": {
-        "identifier": "ar.parhizgar"
+    "ar.parhizgar": {
+        "english_name": "Parhizgar",
+        "bangla_name": "পারহিযগার"
     },
-    "Ayman Sowaid": {
-        "identifier": "ar.aymanswoaid"
+    "ar.aymanswoaid": {
+        "english_name": "Ayman Sowaid",
+        "bangla_name": "আইমান সুয়াইদ"
     }
 }

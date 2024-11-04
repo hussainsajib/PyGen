@@ -1,3 +1,4 @@
+RECITER="ar.mahermuaiqly"
 MAIN_TEXT_BOXES_SIZE=(1500, 400)
 ARABIC_TEXT_CLIP_POS = ('center', 200)
 TRANS_TEXT_CLIP_POS = ('center', 500)
@@ -18,3 +19,4 @@ ARABIC_TEXT_BOX_CONFIG = {
     "method": 'caption', 
     "size": MAIN_TEXT_BOXES_SIZE
 }
+INTRO_DURATION = 4

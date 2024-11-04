@@ -6,10 +6,12 @@ from moviepy.editor import *
 from moviepy.video.fx.resize import resize 
 
 from processes.logger import logger
+from processes.reciter import Reciter
+from processes.surah import Surah
 from processes.verse import Verse, IMAGE_API_URL
-from processes.video_configs import (
-    ARABIC_TEXT_CLIP_POS, ARABIC_TEXT_BOX_CONFIG, TRANS_TEXT_CLIP_POS, TRANSLATON_TEXT_BOX_CONFIG, FOOTER_CONFIG)
+from processes.video_configs import *
 
+TARGET_RESOLUTION = (1920, 1080)
 
 
 def fetch_background_image():
@@ -18,18 +20,34 @@ def fetch_background_image():
         raise Exception("Response from Unsplash API for the background image was not successful")
     return response.json()['urls']['regular']
 
-def generate_video(surah, start_verse, end_verse):
-    clips = []
-    
+def generate_background(background_image_url: str, duration: int, resolution: tuple):
+    background_clip = ImageClip(background_image_url).set_duration(duration)
+    return resize(background_clip, resolution)
+
+def generate_intro(surah: Surah, reciter: Reciter, background_image_url):
+    background = generate_background(background_image_url, INTRO_DURATION, TARGET_RESOLUTION)
+    title = TextClip(txt=surah.name_bangla, font="kalpurush", fontsize=100, color="white")\
+            .set_position(("center", 0.4), relative=True)\
+            .set_duration(INTRO_DURATION)
+    sub_title = TextClip(txt=reciter.bangla_name, font="kalpurush", fontsize=50, color='white')\
+                .set_position(("center", 0.6), relative=True)\
+                .set_duration(INTRO_DURATION)
+    return CompositeVideoClip([background, title, sub_title])
+
+
+def generate_video(surah_number, start_verse, end_verse):
     # Prepare background
     background_image_url = fetch_background_image()
     logger.info("Background image downloaded")
 
-    target_resolution = (1920, 1080)
+    surah = Surah(surah_number)
+    reciter = Reciter(tag=RECITER)
+    intro = generate_intro(surah, reciter, background_image_url)
+    clips = [intro]
 
     for verse in range(start_verse, end_verse + 1):
         current_clips = []
-        v = Verse(surah=surah, verse=verse)
+        v = Verse(surah=surah, verse=verse, reciter=reciter)
         
         # Skip if any component is missing
         if not (v.arabic and v.link_to_audio and v.translation and background_image_url):
@@ -40,8 +58,7 @@ def generate_video(surah, start_verse, end_verse):
         try:
             audio_clip = AudioFileClip(v.link_to_audio)
 
-            background_clip = ImageClip(background_image_url).set_duration(audio_clip.duration)
-            background_clip = resize(background_clip, target_resolution)
+            background_clip = generate_background(background_image_url, audio_clip.duration, TARGET_RESOLUTION)
             current_clips.append(background_clip)
 
             # Create the text overlay
@@ -58,22 +75,22 @@ def generate_video(surah, start_verse, end_verse):
             logger.info(f"Verse ${verse} TextClip created")
 
             # Surah name overlay
-            surah_name_clip = TextClip(f'{v.surah_name} : {str(v.verse)}', **FOOTER_CONFIG)\
+            surah_name_clip = TextClip(f'{v.surah.name_bangla} : {str(v.verse)}', font="kalpurush", **FOOTER_CONFIG)\
                                 .set_position(lambda t:(0.45, 0.95), relative=True)\
                                 .set_duration(audio_clip.duration)
             current_clips.append(surah_name_clip)
 
             # Reciter name overlay
-            reciter_name_clip = TextClip(v.reciter_name, **FOOTER_CONFIG)\
+            reciter_name_clip = TextClip(v.reciter.bangla_name, font="kalpurush", **FOOTER_CONFIG)\
                                 .set_position((0.05, 0.95), relative=True)\
                                 .set_duration(audio_clip.duration)
             current_clips.append(reciter_name_clip)
 
             # Verser number overlay
-            verse_number_clip = TextClip("Taqwa Bangla", **FOOTER_CONFIG)\
+            taqwa_bangla_clip = TextClip("Taqwa Bangla", **FOOTER_CONFIG)\
                                 .set_position((0.85, 0.95), relative=True)\
                                 .set_duration(audio_clip.duration)
-            current_clips.append(verse_number_clip)
+            current_clips.append(taqwa_bangla_clip)
 
             # Composite the video with text and audio
             video_clip = CompositeVideoClip(current_clips).set_audio(audio_clip)
@@ -91,9 +108,8 @@ def generate_video(surah, start_verse, end_verse):
         return None
 
     # Concatenate all clips
-    print(clips)
     final_video = concatenate_videoclips(clips)
-    output_path = f"quran_video_{surah}_{start_verse}_{end_verse}.mp4"
+    output_path = f"quran_video_{surah_number}_{start_verse}_{end_verse}.mp4"
     final_video.write_videofile(output_path, codec='libx264', fps=24, audio_codec="aac")
     
     return output_path
