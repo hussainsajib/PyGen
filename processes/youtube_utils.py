@@ -1,39 +1,37 @@
 import os
-import google.auth
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
+import google_auth_oauthlib.flow
+import googleapiclient.discovery
+import googleapiclient.errors
 
-API_SERVICE_NAME = "youtube"
-API_VERSION = "v3"
+# Set up the API service
+scopes = ["https://www.googleapis.com/auth/youtube.upload"]
+api_service_name = "youtube"
+api_version = "v3"
+client_secrets_file = "client_secret.json"
 
-def upload_to_youtube(video_path):
-    try:
-        credentials, project = google.auth.default()
-        youtube = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
-        
-        # Create the request for uploading the video
-        request_body = {
+def upload_to_youtube(video_path: str):
+    # Authenticate and create the API client
+    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
+    credentials = flow.run_console()
+    youtube = googleapiclient.discovery.build(api_service_name, api_version, credentials=credentials)
+
+    # Upload video
+    request = youtube.videos().insert(
+        part="snippet,status",
+        body={
             "snippet": {
-                "title": "Quran Recitation Video",
-                "description": "A recitation of selected verses from the Quran.",
-                "tags": ["Quran", "Islam", "Recitation"],
-                "categoryId": "28",
+                "title": "Your Video Title",
+                "description": "This is a description of the video.",
+                "tags": ["tag1", "tag2"],
+                "categoryId": "22"  # Category ID (e.g., 22 for People & Blogs)
             },
             "status": {
-                "privacyStatus": "public"
+                "privacyStatus": "private",  # Can be public, unlisted, private
+                "publishAt": "2024-11-20T15:00:00Z"  # Schedule for later (ISO 8601 format)
             }
-        }
-        
-        with open(video_path, "rb") as video_file:
-            request = youtube.videos().insert(
-                part="snippet,status",
-                body=request_body,
-                media_body=video_path
-            )
-            response = request.execute()
-        
-        return f"https://www.youtube.com/watch?v={response['id']}"
-    
-    except HttpError as e:
-        print(f"An error occurred: {e}")
-        return None
+        },
+        media_body=video_path
+    )
+    response = request.execute()
+
+    return f"https://www.youtube.com/watch?v={response['id']}"

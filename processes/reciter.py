@@ -2,9 +2,10 @@ import json
 
 
 class Reciter:
-    tag: str = ""
-    eng_name: str = ""
-    bangla_name: str = ""
+    tag: str = None
+    eng_name: str = None
+    bangla_name: str = None
+    folder_name: str = None
 
     def __init__(self, tag) -> None:
         self.tag = tag
@@ -14,3 +15,4 @@ class Reciter:
                 if k == self.tag:
                     self.eng_name = v["english_name"]
                     self.bangla_name = v["bangla_name"]
+                    self.folder_name = v.get("folder", None)

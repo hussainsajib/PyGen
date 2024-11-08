@@ -2,7 +2,7 @@
     "1": {
         "serial": "1",
         "english_name": "Al-Fatiha",
-        "bangla_name": "আল ফাতিহা",
+        "bangla_name": "আল-ফাতিহা",
         "arabic_name": "سُوْرَۃُ الفَاتِحَة",
         "bangla_meaning": "সূচনা",
         "english_meaning": "The Opening",
@@ -13,7 +13,7 @@
     "2": {
         "serial": "2",
         "english_name": "Al-Baqarah",
-        "bangla_name": "আল বাকারা",
+        "bangla_name": "আল-বাকারা",
         "arabic_name": "سُوْرَۃُ البَقَرَة",
         "bangla_meaning": "বকনা-বাছুর",
         "english_meaning": "The Cow",
@@ -24,7 +24,7 @@
     "3": {
         "serial": "3",
         "english_name": "Aal-E-Imran",
-        "bangla_name": "আল ইমরান",
+        "bangla_name": "আল-এ-ইমরান",
         "arabic_name": "سُوْرَۃ آلِ عِمْرَان",
         "bangla_meaning": "ইমরানের পরিবার",
         "english_meaning": "The Family of Imran",
@@ -35,7 +35,7 @@
     "4": {
         "serial": "4",
         "english_name": "An-Nisa",
-        "bangla_name": "আন নিসা",
+        "bangla_name": "আন-নিসা",
         "arabic_name": "سُوْرَۃُ النِّسَاء",
         "bangla_meaning": "মহিলা",
         "english_meaning": "The Women",
@@ -46,7 +46,7 @@
     "5": {
         "serial": "5",
         "english_name": "Al-Ma'idah",
-        "bangla_name": "আল মায়িদাহ",
+        "bangla_name": "আল-মায়িদাহ",
         "arabic_name": "سُوْرَۃُ المَائِدَة",
         "bangla_meaning": "খাদ্য পরিবেশিত টেবিল",
         "english_meaning": "The Table Spread",
@@ -57,7 +57,7 @@
     "6": {
         "serial": "6",
         "english_name": "Al-An'am",
-        "bangla_name": "আল আনআম",
+        "bangla_name": "আল-আন'আম",
         "arabic_name": "سُوْرَۃُ الأَِنْعَام",
         "bangla_meaning": "গৃৃহপালিত পশু",
         "english_meaning": "The Cattle",
@@ -68,7 +68,7 @@
     "7": {
         "serial": "7",
         "english_name": "Al-A'raf",
-        "bangla_name": "আল আরাফ",
+        "bangla_name": "আল-আরাফ",
         "arabic_name": "سُوْرَۃُ الأَعْرَاف",
         "bangla_meaning": "উচু স্থানসমূহ",
         "english_meaning": "The Heights",
@@ -79,7 +79,7 @@
     "8": {
         "serial": "8",
         "english_name": "Al-Anfal",
-        "bangla_name": "আল আনফাল",
+        "bangla_name": "আল-আনফাল",
         "arabic_name": "سُوْرَۃُ الأَنْفَال",
         "bangla_meaning": "যুদ্ধে-লব্ধ ধনসম্পদ",
         "english_meaning": "The Spoils of War",
@@ -134,7 +134,7 @@
     "13": {
         "serial": "13",
         "english_name": "Ar-Ra'd",
-        "bangla_name": "আর-রাদ",
+        "bangla_name": "আর-রা'দ",
         "arabic_name": "سُوْرَۃ الرَّعْد",
         "bangla_meaning": "বজ্রনাদ",
         "english_meaning": "The Thunder",
@@ -156,7 +156,7 @@
     "15": {
         "serial": "15",
         "english_name": "Al-Hijr",
-        "bangla_name": "আল হিজর",
+        "bangla_name": "আল-হিজর",
         "arabic_name": "سُوْرَۃُ الحِجْر",
         "bangla_meaning": "পাথুরে পাহাড়",
         "english_meaning": "The Rocky Tract",
@@ -167,7 +167,7 @@
     "16": {
         "serial": "16",
         "english_name": "An-Nahl",
-        "bangla_name": "আন নাহল",
+        "bangla_name": "আন-নাহল",
         "arabic_name": "سُوْرَۃُ النَّحْل",
         "bangla_meaning": "মৌমাছি",
         "english_meaning": "The Bee",
@@ -178,7 +178,7 @@
     "17": {
         "serial": "17",
         "english_name": "Al-Isra",
-        "bangla_name": "বনী-ইসরা",
+        "bangla_name": "আল-ইসরা",
         "arabic_name": "سُوْرَۃُ الإِسْرَاء",
         "bangla_meaning": "ইসরায়েলের সন্তানগণ",
         "english_meaning": "The Night Journey",
@@ -189,7 +189,7 @@
     "18": {
         "serial": "18",
         "english_name": "Al-Kahf",
-        "bangla_name": "আল কাহফ",
+        "bangla_name": "আল-কাহফ",
         "arabic_name": "سُوْرَۃ الكَهْف",
         "bangla_meaning": "গুহা",
         "english_meaning": "The Cave",
@@ -222,7 +222,7 @@
     "21": {
         "serial": "21",
         "english_name": "Al-Anbiya",
-        "bangla_name": "আল আম্বিয়া",
+        "bangla_name": "আল-আম্বিয়া",
         "arabic_name": "سُوْرَۃُ الأَنْبِيَاء",
         "bangla_meaning": "নবীগণ",
         "english_meaning": "The Prophets",
@@ -233,7 +233,7 @@
     "22": {
         "serial": "22",
         "english_name": "Al-Hajj",
-        "bangla_name": "আল হাজ্জ্ব",
+        "bangla_name": "আল-হাজ্জ্ব",
         "arabic_name": "سُوْرَۃ الحَجّ",
         "bangla_meaning": "হাজ্জ",
         "english_meaning": "The Pilgrimage",
@@ -244,7 +244,7 @@
     "23": {
         "serial": "23",
         "english_name": "Al-Mu'minun",
-        "bangla_name": "আল মু'মিনূন",
+        "bangla_name": "আল-মু'মিনূন",
         "arabic_name": "سُوْرَۃُ المُؤْمِنُون",
         "bangla_meaning": "বিশ্বাসীগণ",
         "english_meaning": "The Believers",
@@ -255,7 +255,7 @@
     "24": {
         "serial": "24",
         "english_name": "An-Nur",
-        "bangla_name": "আন নূর",
+        "bangla_name": "আন-নূর",
         "arabic_name": "سُوْرَۃ النُّور",
         "bangla_meaning": "আলো,জ্যোতি",
         "english_meaning": "The Light",
@@ -266,7 +266,7 @@
     "25": {
         "serial": "25",
         "english_name": "Al-Furqan",
-        "bangla_name": "আল ফুরকান",
+        "bangla_name": "আল-ফুরকান",
         "arabic_name": "سُوْرَۃ الفُرْقَان",
         "bangla_meaning": "সত্য মিথ্যার পার্থক্য নির্ধারণকারী গ্রন্থ",
         "english_meaning": "The Criterion",
@@ -277,7 +277,7 @@
     "26": {
         "serial": "26",
         "english_name": "Ash-Shu'ara",
-        "bangla_name": "আশ শুআরা",
+        "bangla_name": "আশ-শুআরা",
         "arabic_name": "سُوْرَۃُ الشُّعَرَاء",
         "bangla_meaning": "কবিগণ",
         "english_meaning": "The Poets",
@@ -288,7 +288,7 @@
     "27": {
         "serial": "27",
         "english_name": "An-Naml",
-        "bangla_name": "আন নম্‌ল",
+        "bangla_name": "আন-নম্‌ল",
         "arabic_name": "سُوْرَۃُ النَّمْل",
         "bangla_meaning": "পিপীলিকা",
         "english_meaning": "The Ant",
@@ -299,7 +299,7 @@
     "28": {
         "serial": "28",
         "english_name": "Al-Qasas",
-        "bangla_name": "আল কাসাস",
+        "bangla_name": "আল-কাসাস",
         "arabic_name": "سُوْرَۃُ القَصَص",
         "bangla_meaning": "ঘটনা,কাহিনী",
         "english_meaning": "The Stories",
@@ -310,7 +310,7 @@
     "29": {
         "serial": "29",
         "english_name": "Al-Ankabut",
-        "bangla_name": "আল আনকাবূত",
+        "bangla_name": "আল-আনকাবূত",
         "arabic_name": "سُوْرَۃُ العَنْكَبُوت",
         "bangla_meaning": "মাকড়সা",
         "english_meaning": "The Spider",
@@ -321,7 +321,7 @@
     "30": {
         "serial": "30",
         "english_name": "Ar-Rum",
-        "bangla_name": "আর রুম",
+        "bangla_name": "আর-রুম",
         "arabic_name": "سُوْرَۃ الرُّوم",
         "bangla_meaning": "রোমান জাতি",
         "english_meaning": "The Romans",
@@ -343,7 +343,7 @@
     "32": {
         "serial": "32",
         "english_name": "As-Sajdah",
-        "bangla_name": "আস সেজদাহ্",
+        "bangla_name": "আস-সাজদাহ্",
         "arabic_name": "سُوْرَۃُ السَّجْدَة",
         "bangla_meaning": "সিজদাহ",
         "english_meaning": "The Prostration",
@@ -354,7 +354,7 @@
     "33": {
         "serial": "33",
         "english_name": "Al-Ahzab",
-        "bangla_name": "আল আহ্‌যাব",
+        "bangla_name": "আল-আহ্‌যাব",
         "arabic_name": "سُوْرَۃُ الأَحْزَاب",
         "bangla_meaning": "জোট",
         "english_meaning": "The Confederates",
@@ -398,7 +398,7 @@
     "37": {
         "serial": "37",
         "english_name": "As-Saffat",
-        "bangla_name": "আস ছাফ্‌ফাত",
+        "bangla_name": "আস-ছাফ্‌ফাত",
         "arabic_name": "سُوْرَۃُ الصَّافَّات",
         "bangla_meaning": "সারিবদ্ধভাবে দাড়ানো",
         "english_meaning": "Those Who Set the Ranks",
@@ -431,7 +431,7 @@
     "40": {
         "serial": "40",
         "english_name": "Ghafir",
-        "bangla_name": "আল মু'মিন",
+        "bangla_name": "ঘাফির",
         "arabic_name": "سُوْرَۃ غَافِر",
         "bangla_meaning": "বিশ্বাসী",
         "english_meaning": "The Forgiver",
@@ -442,7 +442,7 @@
     "41": {
         "serial": "41",
         "english_name": "Fussilat",
-        "bangla_name": "হা-মীম সেজদাহ্‌",
+        "bangla_name": "ফুসসিলাত",
         "arabic_name": "سُوْرَۃ فُصِّلَت",
         "bangla_meaning": "সুস্পষ্ট বিবরণ",
         "english_meaning": "Explained in Detail",
@@ -475,7 +475,7 @@
     "44": {
         "serial": "44",
         "english_name": "Ad-Dukhan",
-        "bangla_name": "আদ-দোখান",
+        "bangla_name": "আদ-দুখান",
         "arabic_name": "سُوْرَۃ الدُّخَان",
         "bangla_meaning": "ধোঁয়া",
         "english_meaning": "The Smoke",
@@ -486,7 +486,7 @@
     "45": {
         "serial": "45",
         "english_name": "Al-Jathiya",
-        "bangla_name": "আল জাসিয়াহ",
+        "bangla_name": "আল-জাসিয়াহ",
         "arabic_name": "سُوْرَۃ الجَاثِيَة",
         "bangla_meaning": "নতজানু",
         "english_meaning": "The Crouching",
@@ -497,7 +497,7 @@
     "46": {
         "serial": "46",
         "english_name": "Al-Ahqaf",
-        "bangla_name": "আল আহ্‌ক্বাফ",
+        "bangla_name": "আল-আহ্‌ক্বাফ",
         "arabic_name": "سُوْرَۃُ الأَحْقَاف",
         "bangla_meaning": "বালুর পাহাড়",
         "english_meaning": "The Wind-Curved Sandhills",
@@ -519,7 +519,7 @@
     "48": {
         "serial": "48",
         "english_name": "Al-Fath",
-        "bangla_name": "আল ফাত্‌হ",
+        "bangla_name": "আল-ফাত্‌হ",
         "arabic_name": "سُوْرَۃُ الفَتْح",
         "bangla_meaning": "বিজয় (মক্কা বিজয়)",
         "english_meaning": "The Victory",
@@ -530,7 +530,7 @@
     "49": {
         "serial": "49",
         "english_name": "Al-Hujurat",
-        "bangla_name": "আল হুজুরাত",
+        "bangla_name": "আল-হুজুরাত",
         "arabic_name": "سُوْرَۃُ الحُجُرَات",
         "bangla_meaning": "বাসগৃহসমূূহ",
         "english_meaning": "The Chambers",
@@ -563,7 +563,7 @@
     "52": {
         "serial": "52",
         "english_name": "At-Tur",
-        "bangla_name": "আত্ব তূর",
+        "bangla_name": "আত্ব-তূর",
         "arabic_name": "سُوْرَۃ الطُّور",
         "bangla_meaning": "পাহাড়",
         "english_meaning": "The Mount",
@@ -585,7 +585,7 @@
     "54": {
         "serial": "54",
         "english_name": "Al-Qamar",
-        "bangla_name": "আল ক্বামার",
+        "bangla_name": "আল-ক্বামার",
         "arabic_name": "سُوْرَۃُ القَمَر",
         "bangla_meaning": "চন্দ্র",
         "english_meaning": "The Moon",
@@ -596,7 +596,7 @@
     "55": {
         "serial": "55",
         "english_name": "Ar-Rahman",
-        "bangla_name": "আর রাহমান",
+        "bangla_name": "আর-রাহমান",
         "arabic_name": "سُوْرَۃ الرَّحْمَٰن",
         "bangla_meaning": "অনন্ত করুণাময়",
         "english_meaning": "The Beneficent",
@@ -695,7 +695,7 @@
     "64": {
         "serial": "64",
         "english_name": "At-Taghabun",
-        "bangla_name": "আত-তাগাবুন",
+        "bangla_name": "আত-তাঘাবুন",
         "arabic_name": "سُوْرَۃُ التَّغَابُن",
         "bangla_meaning": "মোহ অপসারণ",
         "english_meaning": "The Mutual Disillusion",
@@ -783,7 +783,7 @@
     "72": {
         "serial": "72",
         "english_name": "Al-Jinn",
-        "bangla_name": "আল জ্বিন",
+        "bangla_name": "আল-জ্বিন",
         "arabic_name": "سُوْرَۃُ الجِنّ",
         "bangla_meaning": "জ্বিন সম্প্রদায়",
         "english_meaning": "The Jinn",
@@ -794,7 +794,7 @@
     "73": {
         "serial": "73",
         "english_name": "Al-Muzzammil",
-        "bangla_name": "আল মুজাম্মিল",
+        "bangla_name": "আল-মুজাম্মিল",
         "arabic_name": "سُوْرَۃُ المُزَّمِّل",
         "bangla_meaning": "বস্ত্র আচ্ছাদনকারী",
         "english_meaning": "The Enshrouded One",
@@ -805,7 +805,7 @@
     "74": {
         "serial": "74",
         "english_name": "Al-Muddathir",
-        "bangla_name": "আল মুদ্দাস্সির",
+        "bangla_name": "আল-মুদ্দাস্সির",
         "arabic_name": "سُوْرَۃُ المُدَّثِّر",
         "bangla_meaning": "পোশাক পরিহিত",
         "english_meaning": "The Cloaked One",
@@ -915,7 +915,7 @@
     "84": {
         "serial": "84",
         "english_name": "Al-Inshiqaq",
-        "bangla_name": "আল ইন‌শিকাক",
+        "bangla_name": "আল-ইন‌শিকাক",
         "arabic_name": "سُوْرَۃُ الإِنْشِقَاق",
         "bangla_meaning": "খন্ড-বিখন্ড করণ",
         "english_meaning": "The Splitting Open",
@@ -948,7 +948,7 @@
     "87": {
         "serial": "87",
         "english_name": "Al-A'la",
-        "bangla_name": "আল আ'লা",
+        "bangla_name": "আল-আ'লা",
         "arabic_name": "سُوْرَۃُ الأَعْلَىٰ",
         "bangla_meaning": "সর্বোর্ধ্ব",
         "english_meaning": "The Most High",
@@ -959,7 +959,7 @@
     "88": {
         "serial": "88",
         "english_name": "Al-Ghashiyah",
-        "bangla_name": "আল ঘশিয়াহ্‌",
+        "bangla_name": "আল-ঘশিয়াহ্‌",
         "arabic_name": "سُوْرَۃُ الغَاشِيَة",
         "bangla_meaning": "বিহ্বলকর ঘটনা",
         "english_meaning": "The Overwhelming",
@@ -970,7 +970,7 @@
     "89": {
         "serial": "89",
         "english_name": "Al-Fajr",
-        "bangla_name": "আল ফাজ্‌র",
+        "bangla_name": "আল-ফাজ্‌র",
         "arabic_name": "سُوْرَۃُ الفَجْر",
         "bangla_meaning": "ভোরবেলা",
         "english_meaning": "The Dawn",
@@ -981,7 +981,7 @@
     "90": {
         "serial": "90",
         "english_name": "Al-Balad",
-        "bangla_name": "আল বালাদ",
+        "bangla_name": "আল-বালাদ",
         "arabic_name": "سُوْرَۃُ البَلَد",
         "bangla_meaning": "নগর",
         "english_meaning": "The City",
@@ -1003,7 +1003,7 @@
     "92": {
         "serial": "92",
         "english_name": "Al-Lail",
-        "bangla_name": "আল লাইল",
+        "bangla_name": "আল-লাইল",
         "arabic_name": "سُوْرَۃُ اللَّيْل",
         "bangla_meaning": "রাত্রি",
         "english_meaning": "The Night",
@@ -1025,7 +1025,7 @@
     "94": {
         "serial": "94",
         "english_name": "Al-Inshirah",
-        "bangla_name": "আল ইনশিরাহ",
+        "bangla_name": "আল-ইনশিরাহ",
         "arabic_name": "سُوْرَۃُ الشَّرْح",
         "bangla_meaning": "বক্ষ প্রশস্তকরণ",
         "english_meaning": "The Relief",
@@ -1047,7 +1047,7 @@
     "96": {
         "serial": "96",
         "english_name": "Al-Alaq",
-        "bangla_name": "আল-আলাক্ব",
+        "bangla_name": "আলআলাক্ব",
         "arabic_name": "سُوْرَۃُ العَلَق",
         "bangla_meaning": "রক্তপিন্ড",
         "english_meaning": "The Clot",

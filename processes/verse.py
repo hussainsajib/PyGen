@@ -49,10 +49,11 @@ class Verse:
         self.translation_payload = response.json()
 
     def get_audio_data(self):
-        response = requests.get(AUDIO_API_URL.format(surah=self.surah.number, verse=self.verse, reciter=self.reciter.tag))
-        if response.status_code != 200:
-            raise Exception("Response from QURAN API for the audio was not successful")
-        self.audio_payload = response.json()
+        if not self.reciter.folder_name:
+            response = requests.get(AUDIO_API_URL.format(surah=self.surah.number, verse=self.verse, reciter=self.reciter.tag))
+            if response.status_code != 200:
+                raise Exception("Response from QURAN API for the audio was not successful")
+            self.audio_payload = response.json()
 
     def fetch_verse_text(self):
         verse_text = self.quran_payload['data']['text']
@@ -64,5 +65,7 @@ class Verse:
         return self.translation_payload['verse']['translations'][0]['text']
 
     def fetch_verse_audio(self):
+        if self.reciter.folder_name:
+            return f"recitation_data/{self.reciter.folder_name}/{str(self.surah.number).zfill(3)}{str(self.verse).zfill(3)}.mp3"
         return self.audio_payload['data']['audio']
     

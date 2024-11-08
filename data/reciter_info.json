@@ -20,8 +20,9 @@
         "bangla_name": "আহমাদ ইবন আলি আল-আজামি"
     },
     "ar.alafasy": {
-        "english_name": "Alafasy",
-        "bangla_name": "আল-আফাসি"
+        "english_name": "Mishary Alafasy",
+        "bangla_name": "মিশারি আল-আফাসি",
+        "folder": "mishary_al_afasy"
     },
     "ar.hanirifai": {
         "english_name": "Hani Rifai",
@@ -41,11 +42,13 @@
     },
     "ar.ibrahimakhbar": {
         "english_name": "Ibrahim Akhdar",
-        "bangla_name": "ইব্রাহিম আখদার"
+        "bangla_name": "ইব্রাহিম আখদার",
+        "folder": "ibrabim_akhdar"
     },
     "ar.mahermuaiqly": {
         "english_name": "Maher Al Muaiqly",
-        "bangla_name": "মাহের আল মুয়াইকলি"
+        "bangla_name": "মাহের আল মুয়াইকলি",
+        "folder": "maher_al_muaiqly"
     },
     "ar.muhammadayyoub": {
         "english_name": "Muhammad Ayyoub",
