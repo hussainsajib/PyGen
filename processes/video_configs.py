@@ -1,5 +1,5 @@
 RECITER="ar.alafasy"
-FONT_COLOR = "black"
+FONT_COLOR = "white"
 BACKGROUND = "background/mountains.jpg"
 TARGET_HEIGHT = 1080
 TARGET_WIDTH = 1920
@@ -13,7 +13,7 @@ FOOTER_CONFIG = {
     "color": FONT_COLOR
 }
 TRANSLATON_TEXT_BOX_CONFIG = {
-    "fontsize": 40, 
+    "fontsize": 50, 
     "color": FONT_COLOR, 
     "font": 'Kalpurush', 
     "method": 'caption', 
@@ -21,8 +21,10 @@ TRANSLATON_TEXT_BOX_CONFIG = {
     "interline": 4
 }
 ARABIC_TEXT_BOX_CONFIG = {
-    "fontsize": 65, 
-    "color": FONT_COLOR, 
+    "fontsize": 70, 
+    "color": FONT_COLOR
+    
+    , 
     "method": 'caption', 
     "size": MAIN_TEXT_BOXES_SIZE,
     "font": "KFGQPC Uthmanic Script Regular",

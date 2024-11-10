@@ -76,7 +76,6 @@ def generate_video(surah_number, start_verse, end_verse):
             arabic_text_clip = TextClip(f"{v.arabic[:-1]} \u06DD{e2a(v.verse)}", **ARABIC_TEXT_BOX_CONFIG)
             arabic_text_clip = arabic_text_clip.set_position(('center', (TARGET_HEIGHT // 2) - (arabic_text_clip.h + 25)))\
                                 .set_duration(audio_clip.duration)
-            print(arabic_text_clip.h)
             current_clips.append(arabic_text_clip)
 
             # Create translation overlay
@@ -93,7 +92,7 @@ def generate_video(surah_number, start_verse, end_verse):
             current_clips.append(surah_name_clip)
 
             # Reciter name overlay
-            reciter_name_clip = TextClip(v.reciter.bangla_name, font="kalpurush", fontsize=30, color="white")\
+            reciter_name_clip = TextClip(v.reciter.bangla_name, font="kalpurush", **FOOTER_CONFIG)\
                                 .set_position((0.05, 0.92), relative=True)\
                                 .set_duration(audio_clip.duration)
             current_clips.append(reciter_name_clip)

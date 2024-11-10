@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<h1>Select Surah and Verse Range</h1>
+<form action="/create-video" method="get">
+    <!-- Surah Selection -->
+    <label for="surah">Select Surah:</label>
+    <select id="surah" name="surah" onchange="updateVerseOptions()" required>
+        <option value="" disabled selected>Select Surah</option>
+        {% for surah in surahs %}
+            <option value="{{ surah.number }}">{{ surah.number }}. {{ surah.name }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- Start Verse -->
+    <label for="start_verse">Starting Verse:</label>
+    <select id="start_verse" name="start_verse" required>
+        <!-- Options populated by JavaScript -->
+    </select>
+
+    <!-- End Verse -->
+    <label for="end_verse">Ending Verse:</label>
+    <select id="end_verse" name="end_verse" required>
+        <!-- Options populated by JavaScript -->
+    </select>
+
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+    const surahs = {{ surahs | tojson }};
+    const startVerseSelect = document.getElementById("start_verse");
+    const endVerseSelect = document.getElementById("end_verse");
+
+    // Populate verse options when a surah is selected
+    function updateVerseOptions() {
+        const surahNumber = document.getElementById("surah").value;
+        const selectedSurah = surahs.find(surah => surah.number == surahNumber);
+        
+        // Clear existing options
+        startVerseSelect.innerHTML = "";
+        endVerseSelect.innerHTML = "";
+
+        // Populate start and end verse options with the full range of verses
+        for (let i = 1; i <= selectedSurah.total_verses; i++) {
+            const startOption = document.createElement("option");
+            startOption.value = i;
+            startOption.text = i;
+            startVerseSelect.add(startOption);
+        }
+
+        // Initially populate end_verse with the full range of verses
+        updateEndVerseOptions();
+    }
+
+    // Adjust end_verse options based on selected start_verse
+    function updateEndVerseOptions() {
+        const startVerse = parseInt(startVerseSelect.value, 10);
+        const surahNumber = document.getElementById("surah").value;
+        const selectedSurah = surahs.find(surah => surah.number == surahNumber);
+
+        // Clear current options in end_verse
+        endVerseSelect.innerHTML = "";
+
+        // Populate end_verse dropdown with values starting from start_verse to total verses
+        for (let i = startVerse; i <= selectedSurah.total_verses; i++) {
+            const endOption = document.createElement("option");
+            endOption.value = i;
+            endOption.text = i;
+            endVerseSelect.add(endOption);
+        }
+    }
+</script>
+{% endblock %}
