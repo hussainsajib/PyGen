@@ -23,7 +23,7 @@ def fetch_background_image():
     return response.json()['urls']['regular']
 
 def generate_background(background_image_url: str, duration: int, resolution: tuple):
-    background_clip = ImageClip(BACKGROUND).set_duration(duration)
+    background_clip = ImageClip(BACKGROUND).set_opacity(BACKGROUND_OPACITY).set_duration(duration)
     return resize(background_clip, resolution)
 
 def generate_intro(surah: Surah, reciter: Reciter, background_image_url):

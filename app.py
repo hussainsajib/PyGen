@@ -3,7 +3,7 @@ import json
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, BackgroundTasks, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from processes.video_utils import generate_video
@@ -21,9 +21,9 @@ change_settings({"IMAGEMAGICK_BINARY": IMAGEMAGICK_BINARY})
 
 
 @app.get("/create-video")
-async def create_video(surah: int, start_verse: int, end_verse: int, background_tasks: BackgroundTasks):
+async def create_video(request: Request, surah: int, start_verse: int, end_verse: int, background_tasks: BackgroundTasks):
     background_tasks.add_task(create_and_post, surah, start_verse, end_verse)
-    return {"message": "Video creation and posting is added to the queue"}
+    return RedirectResponse(request.url_for("read_root"))
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):

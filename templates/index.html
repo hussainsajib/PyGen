@@ -3,31 +3,33 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<h1>Select Surah and Verse Range</h1>
-<form action="/create-video" method="get">
-    <!-- Surah Selection -->
-    <label for="surah">Select Surah:</label>
-    <select id="surah" name="surah" onchange="updateVerseOptions()" required>
-        <option value="" disabled selected>Select Surah</option>
-        {% for surah in surahs %}
-            <option value="{{ surah.number }}">{{ surah.number }}. {{ surah.name }}</option>
-        {% endfor %}
-    </select>
+<div>
+    <h1>Select Surah and Verse Range</h1>
+    <form action="/create-video" method="get">
+        <!-- Surah Selection -->
+        <label for="surah">Select Surah:</label>
+        <select id="surah" name="surah" onchange="updateVerseOptions()" required>
+            <option value="" disabled selected>Select Surah</option>
+            {% for surah in surahs %}
+                <option value="{{ surah.number }}">{{ surah.number }}. {{ surah.name }}</option>
+            {% endfor %}
+        </select>
 
-    <!-- Start Verse -->
-    <label for="start_verse">Starting Verse:</label>
-    <select id="start_verse" name="start_verse" onchange="updateEndVerseOptions()" required>
-        <!-- Options populated by JavaScript -->
-    </select>
+        <!-- Start Verse -->
+        <label for="start_verse">Starting Verse:</label>
+        <select id="start_verse" name="start_verse" onchange="updateEndVerseOptions()" required>
+            <!-- Options populated by JavaScript -->
+        </select>
 
-    <!-- End Verse -->
-    <label for="end_verse">Ending Verse:</label>
-    <select id="end_verse" name="end_verse" required>
-        <!-- Options populated by JavaScript -->
-    </select>
+        <!-- End Verse -->
+        <label for="end_verse">Ending Verse:</label>
+        <select id="end_verse" name="end_verse" required>
+            <!-- Options populated by JavaScript -->
+        </select>
 
-    <button type="submit">Submit</button>
-</form>
+        <button type="submit">Submit</button>
+    </form>
+</div>
 
 <script>
     const surahs = {{ surahs | tojson }};

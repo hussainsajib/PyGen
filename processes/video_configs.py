@@ -1,6 +1,7 @@
 RECITER="ar.alafasy"
 FONT_COLOR = "white"
-BACKGROUND = "background/mountains.jpg"
+BACKGROUND = "background/dawn.jpg"
+BACKGROUND_OPACITY = 0.5
 TARGET_HEIGHT = 1080
 TARGET_WIDTH = 1920
 MAIN_BOXES_HEIGHT = None
