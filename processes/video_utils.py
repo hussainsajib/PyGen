@@ -26,9 +26,12 @@ def generate_background(background_image_url: str, duration: int, resolution: tu
     background_clip = ImageClip(BACKGROUND).set_opacity(BACKGROUND_OPACITY).set_duration(duration)
     return resize(background_clip, resolution)
 
+def generate_solid_background(duration: int, resolution: tuple):
+    return ColorClip(size=resolution, color=BACKGROUND_RGB).set_duration(duration)
+
 def generate_intro(surah: Surah, reciter: Reciter, background_image_url):
     audio = AudioFileClip("recitation_data/basmalah.mp3")
-    background = generate_background(background_image_url, audio.duration, TARGET_RESOLUTION)
+    background = generate_solid_background(audio.duration, TARGET_RESOLUTION)
     title = TextClip(txt=f"সুরাহ {surah.name_bangla}", font="kalpurush", fontsize=100, color=FONT_COLOR)\
             .set_position(("center", 0.4), relative=True)\
             .set_duration(audio.duration)
@@ -38,7 +41,7 @@ def generate_intro(surah: Surah, reciter: Reciter, background_image_url):
     return CompositeVideoClip([background, title, sub_title]).set_audio(audio)
 
 def generate_outro(background_image_url):
-    background = generate_background(background_image_url, duration=5, resolution=TARGET_RESOLUTION)
+    background = generate_solid_background(duration=5, resolution=TARGET_RESOLUTION)
     title = TextClip("তাকওয়া বাংলা", font="kalpurush", fontsize=70, color=FONT_COLOR)\
             .set_position(('center', 'center'))\
             .set_duration(5)
@@ -69,7 +72,7 @@ def generate_video(surah_number, start_verse, end_verse):
         try:
             audio_clip = AudioFileClip(v.link_to_audio)
 
-            background_clip = generate_background(background_image_url, audio_clip.duration, TARGET_RESOLUTION)
+            background_clip = generate_solid_background(audio_clip.duration, TARGET_RESOLUTION)
             current_clips.append(background_clip)
 
             # Create the text overlay
@@ -98,7 +101,7 @@ def generate_video(surah_number, start_verse, end_verse):
             current_clips.append(reciter_name_clip)
 
             # Verser number overlay
-            taqwa_bangla_clip = TextClip("Taqwa Bangla", **FOOTER_CONFIG)\
+            taqwa_bangla_clip = TextClip("তাকওয়া বাংলা", font="kalpurush", **FOOTER_CONFIG)\
                                 .set_position((0.85, 0.92), relative=True)\
                                 .set_duration(audio_clip.duration)
             current_clips.append(taqwa_bangla_clip)

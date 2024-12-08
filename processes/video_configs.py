@@ -1,6 +1,7 @@
 RECITER="ar.alafasy"
 FONT_COLOR = "white"
 BACKGROUND = "background/dawn.jpg"
+BACKGROUND_RGB = (0, 0, 0) #black
 BACKGROUND_OPACITY = 0.5
 TARGET_HEIGHT = 1080
 TARGET_WIDTH = 1920
