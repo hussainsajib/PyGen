@@ -14,7 +14,7 @@
                 <option value="{{ surah.number }}">{{ surah.number }}. {{ surah.name }}</option>
             {% endfor %}
         </select>
-
+        <br/>
         <!-- Start Verse -->
         <label for="start_verse">Starting Verse:</label>
         <select id="start_verse" name="start_verse" onchange="updateEndVerseOptions()" required>
@@ -26,6 +26,16 @@
         <select id="end_verse" name="end_verse" required>
             <!-- Options populated by JavaScript -->
         </select>
+        <br>
+        <label>Create short:</label>
+        <div>
+            <input type="radio" id="is_short" name="is_short" value="true">
+            <label for="short">Yes</label>
+        </div>
+        <div>
+            <input type="radio" id="is_short" name="is_short" value="false" checked>
+            <label for="regular">No</label>
+        </div>
 
         <button type="submit">Submit</button>
     </form>

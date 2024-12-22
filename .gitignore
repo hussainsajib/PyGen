@@ -1,5 +1,7 @@
 recitation_data/
 background/
+exported_data/
+
 .idea
 .ipynb_checkpoints
 .mypy_cache

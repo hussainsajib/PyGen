@@ -1,5 +1,5 @@
 import json
-from processes.configs import *
+
 
 class Surah:
     number: int = 0

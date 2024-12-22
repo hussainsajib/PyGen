@@ -1,9 +1,9 @@
 import os
 import requests
 import json
-from processes.reciter import Reciter
-from processes.surah import Surah
-from processes.configs import *
+from processes.Classes.reciter import Reciter
+from processes.Classes.surah import Surah
+from processes.video_configs import QURAN_API_URL, TRANSLATION_URL, AUDIO_API_URL
 
 
 ACCESS_KEY = os.getenv("ACCESS_KEY")
