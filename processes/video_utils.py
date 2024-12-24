@@ -1,5 +1,6 @@
 import os
 import requests
+import json
 
 from fastapi import HTTPException
 from moviepy.editor import *
@@ -12,6 +13,7 @@ from processes.Classes.reciter import Reciter
 from processes.Classes.surah import Surah
 from processes.Classes.verse import Verse
 from processes.video_configs import *
+from processes.description import generate_details
 
 
 def get_resolution(is_short: bool) -> tuple:
@@ -162,5 +164,7 @@ def generate_video(surah_number, start_verse, end_verse, is_short: bool):
     final_video = concatenate_videoclips(clips)
     output_path = f"exported_data/videos/quran_video_{surah_number}_{start_verse}_{end_verse}.mp4"
     final_video.write_videofile(output_path, codec='libx264', fps=24, audio_codec="aac")
+    
+    generate_details(surah, reciter, True, start_verse, end_verse)
     
     return output_path

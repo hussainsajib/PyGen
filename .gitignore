@@ -41,3 +41,6 @@ archive.zip
 *.mp3
 *.mp4
 *.log
+
+# Secrets
+client_info.json

@@ -5,7 +5,7 @@ IMAGE_API_URL = "https://api.unsplash.com/photos/random?query=universe&orientati
 RECITER="ar.alafasy"
 FONT_COLOR = "white"
 BACKGROUND = "background/dawn.jpg"
-BACKGROUND_RGB = (7, 107, 40) #black (0, 0, 0)
+BACKGROUND_RGB = (0, 0, 0) #black (0, 0, 0)
 BACKGROUND_OPACITY = 0.5
 
 TARGET_HEIGHT = 1080
@@ -53,11 +53,11 @@ def get_arabic_textbox_size(is_short: bool):
     if is_short:
         return {
             "size": (SHORT["width"] * 0.85, None),
-            "fontsize": 60
+            "fontsize": 55
         }
     return {
         "size": (LONG["width"] * 0.85, None),
-        "fontsize": 70
+        "fontsize": 65
     }
 
 def get_translation_textbox_size(is_short: bool):
@@ -75,8 +75,8 @@ COMMON = {
     "long_side": 1920,
     "short_side": 1080,
     "font_color": "white",
-    "is_solid_bg": True,
-    "bg_image": "background/makkah.jpg",
+    "is_solid_bg": False,
+    "bg_image": "background/night.jpg",
     "enable_intro": True,
     "enable_outro": True,
     "enable_title": True,
@@ -95,7 +95,7 @@ COMMON = {
     "arabic_textbox_config": {
         "color": FONT_COLOR, 
         "method": 'caption',
-        "font": "KFGQPC Uthmanic Script Regular",
+        "font": "KFGQPC Uthmanic Script Regular",     
         "interline": 4
     },
     "translation_textbox_config": {
