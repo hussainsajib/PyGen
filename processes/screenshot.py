@@ -31,7 +31,7 @@ def extract_frame(video_path: str):
     if ret:
         # Save the frame as an image
         cv2.imwrite(output_image_path, frame)
-        print(f"Frame at {frame_time}s saved as {output_image_path}.")
+        print(f"Thumbnail at {frame_time}s saved as {output_image_path}.")
     else:
         print(f"Error: Could not read frame at {frame_time}s.")
 

@@ -14,6 +14,7 @@ from processes.Classes.surah import Surah
 from processes.Classes.verse import Verse
 from processes.video_configs import *
 from processes.description import generate_details
+from processes.images import crop_image
 
 
 def get_resolution(is_short: bool) -> tuple:
@@ -24,7 +25,17 @@ def fetch_background_image():
     return COMMON["bg_image"]
 
 
-def generate_image_background(background_image_url: str, duration: int, resolution: tuple):
+def edit_image(background_image_url: str, is_short: bool):
+    file_name = background_image_url.split("/")[-1]
+    output_path = f"background/c_{file_name}"
+    target_resolution = get_resolution(is_short)
+    return crop_image(background_image_url, output_path, target_resolution[0], target_resolution[1])
+
+
+
+def generate_image_background(background_image_url: str, duration: int, is_short: bool):
+    resolution = get_resolution(is_short)
+    background_image_url = edit_image(background_image_url, is_short)
     background_clip = ImageClip(background_image_url).set_opacity(BACKGROUND_OPACITY).set_duration(duration)
     return resize(background_clip, resolution)
 
@@ -33,16 +44,17 @@ def generate_solid_background(duration: int, resolution: tuple):
     return ColorClip(size=resolution, color=BACKGROUND_RGB).set_duration(duration)
 
 
-def generate_background(background_image_url: str, duration: int, resolution: tuple):
+def generate_background(background_image_url: str, duration: int, is_short: bool):
+    resolution = get_resolution(is_short)
     if background_image_url:
-        return generate_image_background(background_image_url, duration, resolution)
+        return generate_image_background(background_image_url, duration, is_short)
     return generate_solid_background(duration, resolution)
 
 
 def generate_intro(surah: Surah, reciter: Reciter, background_image_url, is_short: bool):
     intro_clips = []
     audio = AudioFileClip("recitation_data/basmalah.mp3")
-    background = generate_background(background_image_url, audio.duration, get_resolution(is_short))
+    background = generate_background(background_image_url, audio.duration, is_short)
     intro_clips.append(background)
 
     if COMMON["enable_title"]:
@@ -61,7 +73,8 @@ def generate_intro(surah: Surah, reciter: Reciter, background_image_url, is_shor
 
 
 def generate_outro(background_image_url, is_short):
-    background = generate_background(background_image_url, duration=5, resolution=get_resolution(is_short))
+    res = get_resolution(is_short)
+    background = generate_background(background_image_url, duration=5, resolution=res)
     title = TextClip("তাকওয়া বাংলা", font="kalpurush", fontsize=70, color=FONT_COLOR)\
             .set_position(('center', 'center'))\
             .set_duration(5)
