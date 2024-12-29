@@ -4,40 +4,52 @@
 
 {% block content %}
 <div>
-    <h1>Select Surah and Verse Range</h1>
+    <h1 style="margin-bottom: 20px;">Select Surah and Verse Range</h1>
     <form action="/create-video" method="get">
         <!-- Surah Selection -->
-        <label for="surah">Select Surah:</label>
-        <select id="surah" name="surah" onchange="updateVerseOptions()" required>
-            <option value="" disabled selected>Select Surah</option>
-            {% for surah in surahs %}
-                <option value="{{ surah.number }}">{{ surah.number }}. {{ surah.name }}</option>
-            {% endfor %}
-        </select>
-        <br/>
-        <!-- Start Verse -->
-        <label for="start_verse">Starting Verse:</label>
-        <select id="start_verse" name="start_verse" onchange="updateEndVerseOptions()" required>
-            <!-- Options populated by JavaScript -->
-        </select>
-
-        <!-- End Verse -->
-        <label for="end_verse">Ending Verse:</label>
-        <select id="end_verse" name="end_verse" required>
-            <!-- Options populated by JavaScript -->
-        </select>
-        <br>
-        <label>Create short:</label>
         <div>
+            <label for="surah">Select Surah:</label>
+            <select id="surah" name="surah" onchange="updateVerseOptions()" required>
+                <option value="" disabled selected>Select Surah</option>
+                {% for surah in surahs %}
+                <option value="{{ surah.number }}">{{ surah.number }}. {{ surah.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <br/>
+        
+        <div>
+            <label for="start_verse">Starting Verse:</label>
+            <select id="start_verse" name="start_verse" onchange="updateEndVerseOptions()" required>
+                <!-- Options populated by JavaScript -->
+            </select>
+            
+            <label for="end_verse">Ending Verse:</label>
+            <select id="end_verse" name="end_verse" required>
+                <!-- Options populated by JavaScript -->
+            </select>
+        </div>
+        <br>
+        <div>
+            <label for="reciter">Select Reciter:</label>
+            <select id="reciter" name="reciter" required>
+                {% for r in reciters %}
+                <option value="{{r.key}}" {% if r.key=="ar.alafasy" %} selected="selected"{% endif %}>{{ r.english_name }}</option>
+                {% endfor %}
+                
+            </select>
+        </div>
+        <br>
+
+        <div>
+        <label>Create short:</label>
             <input type="radio" id="is_short" name="is_short" value="true">
             <label for="short">Yes</label>
-        </div>
-        <div>
             <input type="radio" id="is_short" name="is_short" value="false" checked>
             <label for="regular">No</label>
         </div>
-
-        <button type="submit">Submit</button>
+        <br>
+        <button type="submit" class="btn btn-primary btn-lg">Submit</button>
     </form>
 </div>
 

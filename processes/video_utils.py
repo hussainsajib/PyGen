@@ -1,8 +1,3 @@
-import os
-import requests
-import json
-
-from fastapi import HTTPException
 from moviepy.editor import *
 from moviepy.video.fx.resize import resize 
 from bangla import convert_english_digit_to_bangla_digit as e2b
@@ -14,7 +9,7 @@ from processes.Classes.surah import Surah
 from processes.Classes.verse import Verse
 from processes.video_configs import *
 from processes.description import generate_details
-from processes.images import crop_image
+from processes.backgrounds import crop_image
 
 
 def get_resolution(is_short: bool) -> tuple:
@@ -73,24 +68,28 @@ def generate_intro(surah: Surah, reciter: Reciter, background_image_url, is_shor
 
 
 def generate_outro(background_image_url, is_short):
-    res = get_resolution(is_short)
-    background = generate_background(background_image_url, duration=5, resolution=res)
+    background = generate_background(background_image_url, duration=5, is_short=is_short)
     title = TextClip("তাকওয়া বাংলা", font="kalpurush", fontsize=70, color=FONT_COLOR)\
             .set_position(('center', 'center'))\
             .set_duration(5)
     return CompositeVideoClip([background, title])
 
+def get_filename(surah: int, start: int, end: int, reciter: str, is_short: bool):
+    b_filename = f"{surah}_{start}_{end}_{reciter.lower().replace(' ', '_')}.mp4"
+    if is_short:
+        return f"exported_data/shorts/quran_shorts_{b_filename}"
+    return f"exported_data/videos/quran_video_{b_filename}"
 
-def generate_video(surah_number, start_verse, end_verse, is_short: bool):
+def generate_video(surah_number, start_verse, end_verse, reciter_key, is_short: bool):
     # Prepare background
-
     background_image_url = fetch_background_image() if not COMMON["is_solid_bg"] else None
     logger.info("Background image downloaded")
 
     surah = Surah(surah_number)
-    reciter = Reciter(tag=RECITER)
+    reciter = Reciter(tag=reciter_key)
     clips = []
     
+    # Conditionally create Intro
     if not is_short and COMMON["enable_intro"]:
         intro = generate_intro(surah, reciter, background_image_url, is_short)
         clips.append(intro)
@@ -108,7 +107,7 @@ def generate_video(surah_number, start_verse, end_verse, is_short: bool):
         try:
             audio_clip = AudioFileClip(v.link_to_audio)
 
-            background_clip = generate_background(background_image_url, audio_clip.duration, get_resolution(is_short))
+            background_clip = generate_background(background_image_url, audio_clip.duration, is_short)
             current_clips.append(background_clip)
 
             # Create the text overlay
@@ -175,7 +174,8 @@ def generate_video(surah_number, start_verse, end_verse, is_short: bool):
         clips.append(outro)
 
     final_video = concatenate_videoclips(clips)
-    output_path = f"exported_data/videos/quran_video_{surah_number}_{start_verse}_{end_verse}.mp4"
+    output_path = get_filename(surah_number, start_verse, end_verse, reciter.eng_name, is_short)
+    
     final_video.write_videofile(output_path, codec='libx264', fps=24, audio_codec="aac")
     
     generate_details(surah, reciter, True, start_verse, end_verse)

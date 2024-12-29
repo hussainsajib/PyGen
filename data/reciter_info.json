@@ -1,4 +1,9 @@
 {
+    "ar.abdulbasit": {
+        "english_name": "Abdul Basit",
+        "bangla_name": "আব্দুল বাসিত",
+        "folder": "abdul_basit_murattal"
+    },
     "ar.abdullahbasfar": {
         "english_name": "Abdullah Basfar",
         "bangla_name": "আব্দুল্লাহ বাসফার"
@@ -26,7 +31,8 @@
     },
     "ar.hanirifai": {
         "english_name": "Hani Rifai",
-        "bangla_name": "হানি রিফাই"
+        "bangla_name": "হানি রিফাই",
+        "folder": "hani_rifai"
     },
     "ar.husary": {
         "english_name": "Husary",
@@ -49,6 +55,11 @@
         "english_name": "Maher Al Muaiqly",
         "bangla_name": "মাহের আল মুয়াইকলি",
         "folder": "maher_al_muaiqly"
+    },
+    "ar.minshawi": {
+        "english_name": "Muhammad Siddiq Al Minshawi",
+        "bangla_name": "মোহাম্মাদ সিদ্দিক আল মিনশাওই",
+        "folder": "muhammad_siddiq_al_minshawi"
     },
     "ar.muhammadayyoub": {
         "english_name": "Muhammad Ayyoub",

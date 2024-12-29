@@ -2,20 +2,11 @@ QURAN_API_URL = "https://api.alquran.cloud/v1/ayah/{surah}:{verse}"
 TRANSLATION_URL = "https://api.quran.com/api/v4/verses/by_key/{surah}:{verse}?translations=161"
 AUDIO_API_URL = "https://api.alquran.cloud/v1/ayah/{surah}:{verse}/{reciter}"
 IMAGE_API_URL = "https://api.unsplash.com/photos/random?query=universe&orientation=landscape&client_id=gvKXwU6tDDoZl6N3O1YWUIrT19yqZZW6CQLlSEGoxew"
-RECITER="ar.mahermuaiqly"
+RECITER="ar.alafasy"
 FONT_COLOR = "white"
-BACKGROUND = "background/dawn.jpg"
 BACKGROUND_RGB = (0, 0, 0) #black (0, 0, 0)
 BACKGROUND_OPACITY = 0.5
 
-TARGET_HEIGHT = 1080
-TARGET_WIDTH = 1920
-TARGET_RESOLUTION = (TARGET_WIDTH, TARGET_HEIGHT)
-MAIN_BOXES_HEIGHT = None
-MAIN_BOXES_WIDTH = 1600
-MAIN_TEXT_BOXES_SIZE=(MAIN_BOXES_WIDTH, MAIN_BOXES_HEIGHT)
-ARABIC_TEXT_CLIP_POS = ('center', (TARGET_HEIGHT // 2) - 450)
-TRANS_TEXT_CLIP_POS = ('center', (TARGET_HEIGHT // 2) + 50)
 FOOTER_CONFIG = {
     "fontsize": 30, 
     "color": FONT_COLOR
@@ -53,7 +44,7 @@ def get_arabic_textbox_size(is_short: bool):
     if is_short:
         return {
             "size": (SHORT["width"] * 0.85, None),
-            "fontsize": 55
+            "fontsize": 65
         }
     return {
         "size": (LONG["width"] * 0.85, None),
@@ -64,7 +55,7 @@ def get_translation_textbox_size(is_short: bool):
     if is_short:
         return {
             "size": (SHORT["width"] * 0.85, None),
-            "fontsize": 30
+            "fontsize": 40
         }
     return {
         "size": (LONG["width"] * 0.85, None),
@@ -75,8 +66,8 @@ COMMON = {
     "long_side": 1920,
     "short_side": 1080,
     "font_color": "white",
-    "is_solid_bg": False,
-    "bg_image": "background/stars.jpg",
+    "is_solid_bg": True,
+    "bg_image": "background/flower.jpg",
     "enable_intro": True,
     "enable_outro": True,
     "enable_title": True,
