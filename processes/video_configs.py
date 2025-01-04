@@ -67,7 +67,7 @@ COMMON = {
     "short_side": 1080,
     "font_color": "white",
     "is_solid_bg": True,
-    "bg_image": "background/flower.jpg",
+    "bg_image": "background/moon.jpg",
     "enable_intro": True,
     "enable_outro": True,
     "enable_title": True,

@@ -6,7 +6,8 @@
     },
     "ar.abdullahbasfar": {
         "english_name": "Abdullah Basfar",
-        "bangla_name": "আব্দুল্লাহ বাসফার"
+        "bangla_name": "আব্দুল্লাহ বাসফার",
+        "folder": "abdullah_basfar"
     },
     "ar.abdurrahmaansudais": {
         "english_name": "Abdurrahmaan As-Sudais",
@@ -18,7 +19,8 @@
     },
     "ar.shaatree": {
         "english_name": "Abu Bakr Ash-Shaatree",
-        "bangla_name": "আবু বাকর আশ-শাত্রি"
+        "bangla_name": "আবু বাকর আশ-শাত্রি",
+        "folder": "abu_bakr_ash_shaatree"
     },
     "ar.ahmedajamy": {
         "english_name": "Ahmed ibn Ali al-Ajamy",
@@ -28,6 +30,10 @@
         "english_name": "Mishary Alafasy",
         "bangla_name": "মিশারি আল-আফাসি",
         "folder": "mishary_al_afasy"
+    },
+    "ar.aymanswoaid": {
+        "english_name": "Ayman Sowaid",
+        "bangla_name": "আইমান সুয়াইদ"
     },
     "ar.hanirifai": {
         "english_name": "Hani Rifai",
@@ -67,18 +73,25 @@
     },
     "ar.muhammadjibreel": {
         "english_name": "Muhammad Jibreel",
-        "bangla_name": "মুহাম্মাদ জিব্রিল"
-    },
-    "ar.saoodshuraym": {
-        "english_name": "Saood bin Ibraaheem Ash-Shuraym",
-        "bangla_name": "সাউদ ইবন ইব্রাহিম আশ-শুরাইম"
+        "bangla_name": "মুহাম্মাদ জিব্রিল",
+        "folder": "muhammad_jibreel"
     },
     "ar.parhizgar": {
         "english_name": "Parhizgar",
         "bangla_name": "পারহিযগার"
     },
-    "ar.aymanswoaid": {
-        "english_name": "Ayman Sowaid",
-        "bangla_name": "আইমান সুয়াইদ"
+    "ar.saadalghamdi": {
+        "english_name": "Saad al-Ghamdi",
+        "bangla_name": "সাদ আল-ঘামদি",
+        "folder": "saad_al_ghamdi"
+    },
+    "ar.saoodshuraym": {
+        "english_name": "Saood bin Ibraaheem Ash-Shuraym",
+        "bangla_name": "সাউদ ইবন ইব্রাহিম আশ-শুরাইম"
+    },  
+    "ar.yasserdossary": {
+        "english_name": "Yasser Al-Dosari",
+        "bangla_name": "ইয়াসের আল-দোসারি",
+        "folder": "yasser_al_dossary"
     }
 }

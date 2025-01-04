@@ -15,17 +15,17 @@ def crop_image(input_path, output_path, target_width, target_height):
         target_aspect_ratio = target_width / target_height
         
         # Resize the image if smaller than the target dimensions
-        if original_width < target_width or original_height < target_height:
-            original_aspect_ratio = original_width / original_height
-            # Determine new dimensions to maintain aspect ratio
-            if original_aspect_ratio > target_aspect_ratio:
-                new_height = target_height
-                new_width = int(new_height * original_aspect_ratio)
-            else:
-                new_width = target_width
-                new_height = int(new_width / original_aspect_ratio)
-            img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-        
+        #if original_width < target_width or original_height < target_height:
+        original_aspect_ratio = original_width / original_height
+        # Determine new dimensions to maintain aspect ratio
+        if original_aspect_ratio > target_aspect_ratio:
+            new_height = target_height
+            new_width = int(new_height * original_aspect_ratio)
+        else:
+            new_width = target_width
+            new_height = int(new_width / original_aspect_ratio)
+        img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    
         # Update resized dimensions
         resized_width, resized_height = img.size
         
