@@ -6,8 +6,10 @@ from fastapi import FastAPI, BackgroundTasks, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from functools import lru_cache
 
 from processes.processes import create_and_post
+from config import Settings
 
 load_dotenv()
 IMAGEMAGICK_BINARY=os.getenv("IMAGEMAGICK_BINARY")
@@ -15,6 +17,10 @@ IMAGEMAGICK_BINARY=os.getenv("IMAGEMAGICK_BINARY")
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+@lru_cache
+def get_settings():
+    return Settings()
 
 from moviepy.config import change_settings
 change_settings({"IMAGEMAGICK_BINARY": IMAGEMAGICK_BINARY})

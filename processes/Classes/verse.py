@@ -4,9 +4,10 @@ import json
 from processes.Classes.reciter import Reciter
 from processes.Classes.surah import Surah
 from processes.video_configs import QURAN_API_URL, TRANSLATION_URL, AUDIO_API_URL
+from config import settings
 
 
-ACCESS_KEY = os.getenv("ACCESS_KEY")
+ACCESS_KEY = settings.access_key
 
 
 class Verse:

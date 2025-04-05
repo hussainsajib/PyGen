@@ -3,8 +3,8 @@ import cv2
 def extract_frame(video_path: str):
     # Open the video file
     frame_time = 1
-    screenshot_name = f"screenshot_{video_path.split("/")[-1].split(".")[0]}.png"
-    output_image_path = f"exported_data/screenshots/{screenshot_name}"
+    screenshot_name = f'screenshot_{video_path.split("/")[-1].split(".")[0]}.png'
+    output_image_path = f'exported_data/screenshots/{screenshot_name}'
     cap = cv2.VideoCapture(video_path)
     
     if not cap.isOpened():
@@ -17,7 +17,7 @@ def extract_frame(video_path: str):
     video_duration = total_frames / fps
 
     if frame_time > video_duration:
-        print(f"Error: Specified time {frame_time} exceeds video duration {video_duration:.2f} seconds.")
+        print(f'Error: Specified time {frame_time} exceeds video duration {video_duration:.2f} seconds.')
         return
 
     # Calculate the frame number

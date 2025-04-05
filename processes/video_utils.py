@@ -3,6 +3,7 @@ from moviepy.video.fx.resize import resize
 from bangla import convert_english_digit_to_bangla_digit as e2b
 from convert_numbers import english_to_arabic as e2a
 
+from config import settings
 from processes.logger import logger
 from processes.Classes.reciter import Reciter
 from processes.Classes.surah import Surah
@@ -48,7 +49,7 @@ def generate_background(background_image_url: str, duration: int, is_short: bool
 
 def generate_intro(surah: Surah, reciter: Reciter, background_image_url, is_short: bool):
     intro_clips = []
-    audio = AudioFileClip("recitation_data/basmalah.mp3")
+    audio = AudioFileClip(f'{settings.asset_location}/basmalah.mp3')
     background = generate_background(background_image_url, audio.duration, is_short)
     intro_clips.append(background)
 

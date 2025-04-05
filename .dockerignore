@@ -1,0 +1,6 @@
+.env
+
+__pycache__/
+background/
+exported_data/
+recitation_data/
