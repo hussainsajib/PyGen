@@ -15,9 +15,10 @@ def generate_video_description(surah: Surah, reciter: Reciter, filename: str):
         f.write(f"""{e2b(str(surah.number))} - সুরাহ {surah.name_bangla}\nতিলাওয়াতঃ {reciter.bangla_name}\n\n""")
         f.write("#ইসলামিক_ভিডিও #ইসলাম #ইসলামিক#ইসলামিক_ভিডিও #ইসলামিকভিডিও #ইসলামিক #ইসলাম #ইসলামিক_ভিডিও #কোরান #তিলাওয়াত #quran #qurantilawat #surah #misaryalafasy #memorize")
 
-def generate_details(surah: Surah, reciter: Reciter, has_translation: bool, start: int, end: int):
+def generate_details(surah: Surah, reciter: Reciter, has_translation: bool, start: int, end: int) -> str:
     filename = f"exported_data/details/{surah.number}_{start}_{end}_{reciter.eng_name.lower().replace(" ", "_")}.txt"
     if os.path.isfile(filename):
         os.remove(filename)
     generate_video_title(surah, reciter, has_translation, filename)
     generate_video_description(surah, reciter, filename)
+    return filename

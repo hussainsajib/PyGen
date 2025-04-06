@@ -4,16 +4,17 @@ from processes.screenshot import extract_frame
 
 def create_and_post(surah: int, start_verse: int, end_verse:int, 
                     reciter: str, is_short:bool = False):
-    video_path = generate_video(surah, start_verse, end_verse, reciter, is_short)
+    video_details = generate_video(surah, start_verse, end_verse, reciter, is_short)
     
-    if not video_path:
+    if not video_details:
         raise Exception("Error generating video")
     
-    extract_frame(video_path)
+    screenshot_path = extract_frame(video_path=video_details["video"])
+    video_details["screenshot"] = screenshot_path
     
-    # Upload to YouTube
-    # try:
-    #     youtube_url = upload_to_youtube(video_path)
-    #     print(youtube_url)
-    # except Exception as e:
-    #     print(str(e))
+    #Upload to YouTube
+    try:
+        youtube_url = upload_to_youtube(video_details)
+        print(youtube_url)
+    except Exception as e:
+        print(str(e))

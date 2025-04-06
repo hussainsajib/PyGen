@@ -178,6 +178,6 @@ def generate_video(surah_number, start_verse, end_verse, reciter_key, is_short: 
     
     final_video.write_videofile(output_path, codec='libx264', fps=24, audio_codec="aac")
     
-    generate_details(surah, reciter, True, start_verse, end_verse)
+    info_file_path = generate_details(surah, reciter, True, start_verse, end_verse)
     
-    return output_path
+    return {"video": output_path, "info": info_file_path}

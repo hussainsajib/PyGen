@@ -37,3 +37,4 @@ def extract_frame(video_path: str):
 
     # Release the video capture
     cap.release()
+    return output_image_path
