@@ -1,10 +1,13 @@
 import os
 import json
+
+from datetime import datetime
 from google_auth_oauthlib.flow import InstalledAppFlow, Flow
 import googleapiclient.discovery
 import googleapiclient.errors
 from googleapiclient.http import MediaFileUpload
 
+from .Classes import YoutubeVideoDC, PrivacyStatus
 
 # Set up the API service
 scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
@@ -45,7 +48,7 @@ def initialize_upload_request(youtube, video_details: dict):
                 "categoryId": "22"  # Category ID (e.g., 22 for People & Blogs)
             },
             "status": {
-                "privacyStatus": "private",  # Can be public, unlisted, private
+                "privacyStatus": PrivacyStatus.PRIVATE.value,  # Can be public, unlisted, private
             }
         },
         media_body=MediaFileUpload(video_details["video"], chunksize=-1, resumable=True, mimetype="video/*")
@@ -122,3 +125,23 @@ def upload_to_youtube(video_details: str):
     if success:    
         print(f"https://www.youtube.com/watch?v={video_id}")
     
+    v_title, v_description = get_video_details(video_details["info"])
+    
+    return YoutubeVideoDC(
+        surah_number=video_details["surah"],
+        start_verse=video_details["start_verse"],
+        end_verse=video_details["end_verse"],
+        reciter_tag=video_details["reciter"],
+        video_title=v_title,
+        video_description=v_description,
+        video_path=video_details["video"],
+        youtube_id=video_id,
+        playlist_id=playlist_id,
+        thumbnail_name=video_details["screenshot"],
+        thumbnail_details="",
+        privacy_status=PrivacyStatus.PRIVATE.value,
+        scheduled_time=None,
+        uploaded_at=datetime.now(),
+        created_at=datetime.now(),
+        updated_at=datetime.now()
+    )
