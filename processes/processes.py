@@ -14,7 +14,6 @@ def create_and_post(surah: int, start_verse: int, end_verse:int,
     
     #Upload to YouTube
     try:
-        youtube_url = upload_to_youtube(video_details)
-        print(youtube_url)
+        upload_to_youtube(video_details)
     except Exception as e:
         print(str(e))

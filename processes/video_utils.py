@@ -180,4 +180,4 @@ def generate_video(surah_number, start_verse, end_verse, reciter_key, is_short: 
     
     info_file_path = generate_details(surah, reciter, True, start_verse, end_verse)
     
-    return {"video": output_path, "info": info_file_path}
+    return {"video": output_path, "info": info_file_path, "is_short": is_short, "reciter": reciter.tag}

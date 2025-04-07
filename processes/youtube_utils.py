@@ -12,8 +12,8 @@ api_service_name = "youtube"
 api_version = "v3"
 client_secrets_file = "client_info.json"
 playlist = {
-    "mishary": "PLvbeiWY3e2Qe8VLdBCLe5HeheC00U7Wfa",
-    "akhdar": "PLvbeiWY3e2Qe5KAoGBhsteMaYNV-4ZqNk"
+    "ar.alafasy": "PLvbeiWY3e2Qe8VLdBCLe5HeheC00U7Wfa",
+    "ar.ibrahimakhbar": "PLvbeiWY3e2Qe5KAoGBhsteMaYNV-4ZqNk"
 }
 
 def get_video_details(info_file_path: str):
@@ -89,32 +89,36 @@ def upload_to_youtube(video_details: str):
     youtube = get_authenticated_service()
     success = True
     video_id = None
-    playlist_id = playlist["akhdar"]
+    playlist_id = playlist[video_details["reciter"]]
     try:
         request = initialize_upload_request(youtube, video_details)
         video_id = resumable_upload(request)
     except Exception as e:
         print(str(e))
+        print("❌ Video upload failed")
         success = False
     else:
         print("✅ Video uploaded successfully")
         
-    if success:
+    if success and not video_details["is_short"]:
         try:
             upload_thumbnail(youtube, video_id, video_details["screenshot"])
         except Exception as e:
             print(str(e))
+            print("❌ Thumbnail upload failed")
             success = False
         else:
             print("✅ Thumbnail added to video successfully")
             
-    if success:
+    if success and not video_details["is_short"] and video_details["reciter"] in playlist:
         try:
             add_video_to_playlist(youtube, video_id, playlist_id)
         except Exception as e:
             print(str(e))
+            print("❌ Video not added to playlist")
             success = False
         else:
             print(f"✅ Video added to playlist {playlist_id}: {video_id}")
-        
-    print(f"https://www.youtube.com/watch?v={video_id}")
+    if success:    
+        print(f"https://www.youtube.com/watch?v={video_id}")
+    
