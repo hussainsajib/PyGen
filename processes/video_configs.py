@@ -55,11 +55,11 @@ def get_translation_textbox_size(is_short: bool):
     if is_short:
         return {
             "size": (SHORT["width"] * 0.85, None),
-            "fontsize": 55
+            "fontsize": 50
         }
     return {
         "size": (LONG["width"] * 0.85, None),
-        "fontsize": 40
+        "fontsize": 60
     }
 
 COMMON = {

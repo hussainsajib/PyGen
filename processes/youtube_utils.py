@@ -4,7 +4,12 @@ from google_auth_oauthlib.flow import InstalledAppFlow, Flow
 import googleapiclient.discovery
 import googleapiclient.errors
 from googleapiclient.http import MediaFileUpload
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
+RELEASE_INCREMENT = 1  # Increment the release date by this many days
+TIMESTAMP_FILE = "video_release_date.txt"
+TIMEZONE = ZoneInfo("America/New_York")
 
 # Set up the API service
 scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
@@ -24,6 +29,32 @@ def get_video_details(info_file_path: str):
         description = ''.join(lines[1:]).strip()
         return title, description
 
+def read_last_upload_time():
+    try:
+        with open(TIMESTAMP_FILE, "r") as f:
+            content = f.read().strip()
+            if content:
+                return datetime.fromisoformat(content)
+    except (FileNotFoundError, ValueError):
+        print("Timestamp file not found or invalid.")
+    return None
+
+def write_new_upload_time(timestamp: datetime):
+    with open(TIMESTAMP_FILE, "w") as f:
+        f.write(timestamp.isoformat())
+        
+def get_release_date():
+    now = datetime.now(TIMEZONE)
+    last_uploaded_at = read_last_upload_time()
+
+    if not last_uploaded_at or last_uploaded_at < now:
+        release_date = now
+    else:
+        release_date = last_uploaded_at + timedelta(days=RELEASE_INCREMENT)
+
+    write_new_upload_time(release_date)
+    return release_date
+
 def get_authenticated_service():
     # Authenticate and create the API client
     flow = InstalledAppFlow.from_client_secrets_file(
@@ -35,6 +66,7 @@ def get_authenticated_service():
 
 def initialize_upload_request(youtube, video_details: dict):
     title, description = get_video_details(video_details["info"])
+    relase_date = get_release_date()
     return youtube.videos().insert(
         part="snippet,status",
         body={
@@ -46,6 +78,7 @@ def initialize_upload_request(youtube, video_details: dict):
             },
             "status": {
                 "privacyStatus": "private",  # Can be public, unlisted, private
+                "publishAt": relase_date.strftime("%Y-%m-%dT%H:%M:%SZ")
             }
         },
         media_body=MediaFileUpload(video_details["video"], chunksize=-1, resumable=True, mimetype="video/*")
