@@ -1,6 +1,10 @@
+from sqlite3 import Connection
+
 from processes.video_utils import generate_video
 from processes.youtube_utils import upload_to_youtube
 from processes.screenshot import extract_frame
+from processes.surah_video import generate_surah
+
 
 def create_and_post(surah: int, start_verse: int, end_verse:int, 
                     reciter: str, is_short:bool = False):
@@ -17,3 +21,6 @@ def create_and_post(surah: int, start_verse: int, end_verse:int,
         upload_to_youtube(video_details)
     except Exception as e:
         print(str(e))
+        
+def create_surah_video(surah: int):
+    generate_surah(surah)

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div>
+    <h1 style="margin-bottom: 20px;">Select Surah and Verse Range</h1>
+    <form method="get" id="surah-form">
+        <label for="surah">Select Surah:</label>
+        <select name="surah_number" id="surah-select">
+            {% for surah in surahs %}
+                <option value="{{ surah.number }}">
+                    {{ surah.number }} - {{ surah.name }}
+                </option>
+            {% endfor %}
+        </select>
+    
+        <button type="submit">Generate</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('surah-form').addEventListener('submit', function(e) {
+        e.preventDefault();  // prevent default form submit
+        const surahNumber = document.getElementById('surah-select').value;
+        const form = e.target;
+    
+        // dynamically set form action
+        form.action = `/surah/${surahNumber}`;
+        form.submit();  // now submit with updated action
+    });
+</script>
+
+{% endblock %}

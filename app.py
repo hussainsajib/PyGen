@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from processes.processes import create_and_post
+from processes.processes import create_and_post, create_surah_video
 
 load_dotenv()
 IMAGEMAGICK_BINARY=os.getenv("IMAGEMAGICK_BINARY")
@@ -20,7 +20,7 @@ from moviepy.config import change_settings
 change_settings({"IMAGEMAGICK_BINARY": IMAGEMAGICK_BINARY})
 
 
-@app.get("/create-video")
+@app.get("/create-video", name="index")
 def create_video(request: Request, background_tasks: BackgroundTasks, 
                  surah: int, start_verse: int, end_verse: int, reciter: str,
                  is_short: bool = False):
@@ -50,3 +50,20 @@ async def read_root(request: Request):
     reciters.sort(key=lambda x: x["english_name"])
     context = {"request": request, "surahs": surahs, "reciters": reciters}
     return templates.TemplateResponse("index.html", context)
+
+@app.get("/surah", name="surah", response_class=HTMLResponse)
+def create_surah(request: Request, background_tasks: BackgroundTasks):
+    surahs = []
+    with open("data/surah_data.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+        for k, v in data.items():
+            surah_data = {"number": int(v["serial"]), "name": v["english_name"], "total_verses": v["total_ayah"]}
+            surahs.append(surah_data)
+    surahs.sort(key=lambda x: x["number"])
+    context = {"request": request, "surahs": surahs}
+    return templates.TemplateResponse("surah.html", context)
+
+@app.get("/surah/{surah_number}", name="create_surah_video")
+def create_surah(request: Request, surah_number: int, background_tasks: BackgroundTasks):
+    background_tasks.add_task(create_surah_video, surah_number)
+    return RedirectResponse(request.url_for("surah"))
