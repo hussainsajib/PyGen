@@ -54,16 +54,32 @@ async def read_root(request: Request):
 @app.get("/surah", name="surah", response_class=HTMLResponse)
 def create_surah(request: Request, background_tasks: BackgroundTasks):
     surahs = []
+    reciters = []
     with open("data/surah_data.json", "r", encoding="utf-8") as f:
         data = json.load(f)
         for k, v in data.items():
             surah_data = {"number": int(v["serial"]), "name": v["english_name"], "total_verses": v["total_ayah"]}
             surahs.append(surah_data)
     surahs.sort(key=lambda x: x["number"])
-    context = {"request": request, "surahs": surahs}
+    
+    with open("data/reciter_info.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+        for k, v in data.items():
+            if "database" in v.keys():
+                reciters.append({
+                        "english_name": v["english_name"],
+                        "key": k
+                })
+    reciters.sort(key=lambda x: x["english_name"])
+    
+    context = {"request": request, "surahs": surahs, "reciters": reciters}
     return templates.TemplateResponse("surah.html", context)
 
-@app.get("/surah/{surah_number}", name="create_surah_video")
-def create_surah(request: Request, surah_number: int, background_tasks: BackgroundTasks):
-    background_tasks.add_task(create_surah_video, surah_number)
+@app.get("/create-surah-video", name="create_surah_video")
+def create_surah(request: Request, 
+                 surah_number: int, 
+                 reciter: str,
+                 background_tasks: BackgroundTasks
+    ):
+    background_tasks.add_task(create_surah_video, surah_number, reciter)
     return RedirectResponse(request.url_for("surah"))

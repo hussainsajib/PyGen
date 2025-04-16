@@ -2,7 +2,7 @@ QURAN_API_URL = "https://api.alquran.cloud/v1/ayah/{surah}:{verse}"
 TRANSLATION_URL = "https://api.quran.com/api/v4/verses/by_key/{surah}:{verse}?translations=161"
 AUDIO_API_URL = "https://api.alquran.cloud/v1/ayah/{surah}:{verse}/{reciter}"
 IMAGE_API_URL = "https://api.unsplash.com/photos/random?query=universe&orientation=landscape&client_id=gvKXwU6tDDoZl6N3O1YWUIrT19yqZZW6CQLlSEGoxew"
-RECITER="ar.alafasy"
+RECITER="ar.yasserdossary"
 FONT_COLOR = "white"
 BACKGROUND_RGB = (0, 0, 0) #black (0, 0, 0)
 BACKGROUND_OPACITY = 0.5
@@ -58,8 +58,8 @@ def get_translation_textbox_size(is_short: bool):
             "fontsize": 50
         }
     return {
-        "size": (LONG["width"] * 0.85, None),
-        "fontsize": 60
+        "size": (LONG["width"] * 0.95, None),
+        "fontsize": 50
     }
 
 COMMON = {
@@ -86,7 +86,7 @@ COMMON = {
     "arabic_textbox_config": {
         "color": FONT_COLOR, 
         "method": 'caption',
-        "font": "KFGQPC Uthmanic Script Regular",     
+        "font": "QCF2047",     
         "interline": 4
     },
     "translation_textbox_config": {

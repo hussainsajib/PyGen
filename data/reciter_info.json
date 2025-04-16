@@ -13,6 +13,11 @@
         "english_name": "Abdurrahmaan As-Sudais",
         "bangla_name": "আব্দুররাহমান আস-সুদাইস"
     },
+    "ar.abdullahaljuhany": {
+        "english_name": "Abdullah Al Juhany",
+        "bangla_name": "আব্দুল্লাহ আল জুহানি",
+        "database": "Abdullah Al-Juhany"
+    },
     "ar.abdulsamad": {
         "english_name": "Abdul Samad",
         "bangla_name": "আব্দুল সামাদ"
@@ -20,7 +25,8 @@
     "ar.shaatree": {
         "english_name": "Abu Bakr Ash-Shaatree",
         "bangla_name": "আবু বাকর আশ-শাত্রি",
-        "folder": "abu_bakr_ash_shaatree"
+        "folder": "abu_bakr_ash_shaatree",
+        "database": "Abu Bakr al-Shatri"
     },
     "ar.ahmedajamy": {
         "english_name": "Ahmed ibn Ali al-Ajamy",
@@ -29,11 +35,17 @@
     "ar.alafasy": {
         "english_name": "Mishary Alafasy",
         "bangla_name": "মিশারি আল-আফাসি",
-        "folder": "mishary_al_afasy"
+        "folder": "mishary_al_afasy",
+        "database": "Mishari"
     },
     "ar.aymanswoaid": {
         "english_name": "Ayman Sowaid",
         "bangla_name": "আইমান সুয়াইদ"
+    },
+    "ar.hadytoure": {
+        "english_name": "Hady Toure",
+        "bangla_name": "হাদি তুর",
+        "database": "HadyToure"
     },
     "ar.hanirifai": {
         "english_name": "Hani Rifai",
@@ -65,7 +77,8 @@
     "ar.minshawi": {
         "english_name": "Muhammad Siddiq Al Minshawi",
         "bangla_name": "মোহাম্মাদ সিদ্দিক আল মিনশাওই",
-        "folder": "muhammad_siddiq_al_minshawi"
+        "folder": "muhammad_siddiq_al_minshawi",
+        "database": "Muhammad Siddiq al-Minshawi"
     },
     "ar.muhammadayyoub": {
         "english_name": "Muhammad Ayyoub",
@@ -74,7 +87,8 @@
     "ar.muhammadjibreel": {
         "english_name": "Muhammad Jibreel",
         "bangla_name": "মুহাম্মাদ জিব্রিল",
-        "folder": "muhammad_jibreel"
+        "folder": "muhammad_jibreel",
+        "database": "Muhammad Jibreel"
     },
     "ar.parhizgar": {
         "english_name": "Parhizgar",
@@ -92,6 +106,7 @@
     "ar.yasserdossary": {
         "english_name": "Yasser Al-Dosari",
         "bangla_name": "ইয়াসের আল-দোসারি",
-        "folder": "yasser_al_dossary"
+        "folder": "yasser_al_dossary",
+        "database": "Yasser-ad-Dussary"
     }
 }

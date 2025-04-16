@@ -18,7 +18,9 @@ api_version = "v3"
 client_secrets_file = "client_info.json"
 playlist = {
     "ar.alafasy": "PLvbeiWY3e2Qe8VLdBCLe5HeheC00U7Wfa",
-    "ar.ibrahimakhbar": "PLvbeiWY3e2Qe5KAoGBhsteMaYNV-4ZqNk"
+    "ar.ibrahimakhbar": "PLvbeiWY3e2Qe5KAoGBhsteMaYNV-4ZqNk",
+    "ar.yasserdossary": "PLvbeiWY3e2QcvuqO3ScgzD6Fi1n9mnEUR"
+    
 }
 
 def get_video_details(info_file_path: str):
@@ -78,7 +80,7 @@ def initialize_upload_request(youtube, video_details: dict):
             },
             "status": {
                 "privacyStatus": "private",  # Can be public, unlisted, private
-                "publishAt": relase_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+                #"publishAt": relase_date.strftime("%Y-%m-%dT%H:%M:%SZ")
             }
         },
         media_body=MediaFileUpload(video_details["video"], chunksize=-1, resumable=True, mimetype="video/*")

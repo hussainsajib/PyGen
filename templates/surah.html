@@ -14,6 +14,16 @@
                 </option>
             {% endfor %}
         </select>
+        <br>
+        <div>
+            <label for="reciter">Select Reciter:</label>
+            <select id="reciter" name="reciter" required>
+                {% for r in reciters %}
+                <option value="{{r.key}}" {% if r.key=="ar.yasserdossary" %} selected="selected"{% endif %}>{{ r.english_name }}</option>
+                {% endfor %}
+                
+            </select>
+        </div>
     
         <button type="submit">Generate</button>
     </form>
@@ -26,7 +36,7 @@
         const form = e.target;
     
         // dynamically set form action
-        form.action = `/surah/${surahNumber}`;
+        form.action = `/create-surah-video`;
         form.submit();  // now submit with updated action
     });
 </script>
