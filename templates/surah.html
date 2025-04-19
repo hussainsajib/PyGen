@@ -5,27 +5,30 @@
 {% block content %}
 <div>
     <h1 style="margin-bottom: 20px;">Select Surah and Verse Range</h1>
-    <form method="get" id="surah-form">
-        <label for="surah">Select Surah:</label>
-        <select name="surah_number" id="surah-select">
-            {% for surah in surahs %}
-                <option value="{{ surah.number }}">
-                    {{ surah.number }} - {{ surah.name }}
-                </option>
-            {% endfor %}
-        </select>
-        <br>
-        <div>
-            <label for="reciter">Select Reciter:</label>
-            <select id="reciter" name="reciter" required>
-                {% for r in reciters %}
-                <option value="{{r.key}}" {% if r.key=="ar.yasserdossary" %} selected="selected"{% endif %}>{{ r.english_name }}</option>
-                {% endfor %}
-                
-            </select>
+    <form method="get" id="surah-form" action="/create-surah-video">
+        <div class="d-flex gap-3" style="margin-bottom: 20px;">
+            <div>
+                <label for="surah">Select Surah:</label>
+                <select class="form-select" name="surah_number" id="surah-select">
+                    {% for surah in surahs %}
+                        <option value="{{ surah.number }}">
+                            {{ surah.number }} - {{ surah.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <br>
+            <div>
+                <label for="reciter">Select Reciter:</label>
+                <select class="form-select" id="reciter" name="reciter" required>
+                    {% for r in reciters %}
+                    <option value="{{r.key}}" {% if r.key=="ar.yasserdossary" %} selected="selected"{% endif %}>{{ r.english_name }}</option>
+                    {% endfor %}
+                    
+                </select>
+            </div>
         </div>
-    
-        <button type="submit">Generate</button>
+        <button type="button" class="btn btn-primary btn-lg">Generate</button>
     </form>
 </div>
 

@@ -1,20 +1,35 @@
 import os
 import json
+import asyncio
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, BackgroundTasks, Request
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, BackgroundTasks, Request, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from db.database import init_db, get_db
 from processes.processes import create_and_post, create_surah_video
+from processes.background_worker import job_worker
+from db_ops.crud_jobs import get_all_jobs, enqueue_job
 
 load_dotenv()
 IMAGEMAGICK_BINARY=os.getenv("IMAGEMAGICK_BINARY")
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    asyncio.create_task(job_worker())
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+
 
 from moviepy.config import change_settings
 change_settings({"IMAGEMAGICK_BINARY": IMAGEMAGICK_BINARY})
@@ -76,10 +91,19 @@ def create_surah(request: Request, background_tasks: BackgroundTasks):
     return templates.TemplateResponse("surah.html", context)
 
 @app.get("/create-surah-video", name="create_surah_video")
-def create_surah(request: Request, 
+async def create_surah(request: Request, 
                  surah_number: int, 
                  reciter: str,
-                 background_tasks: BackgroundTasks
+                 db: AsyncSession = Depends(get_db)
     ):
-    background_tasks.add_task(create_surah_video, surah_number, reciter)
+    with open("data/surah_data.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+        surah_name = data[str(surah_number)]["english_name"]
+    job = await enqueue_job(db, surah_number, surah_name=surah_name, reciter=reciter)
+    #background_tasks.add_task(create_surah_video, surah_number, reciter)
     return RedirectResponse(request.url_for("surah"))
+
+@app.get("/jobs", name="jobs", response_class=HTMLResponse)
+async def view_jobs(request: Request, db: AsyncSession = Depends(get_db)):
+    jobs = await get_all_jobs(db)
+    return templates.TemplateResponse("jobs.html", {"request": request, "jobs": jobs})
