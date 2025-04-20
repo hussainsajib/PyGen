@@ -107,3 +107,21 @@ async def create_surah(request: Request,
 async def view_jobs(request: Request, db: AsyncSession = Depends(get_db)):
     jobs = await get_all_jobs(db)
     return templates.TemplateResponse("jobs.html", {"request": request, "jobs": jobs})
+
+
+@app.get("/tafseer", name="tafseer", response_class=HTMLResponse)
+def tafseer(request: Request):
+    surahs = []
+    tafseer_data = []
+    with open("data/tafseer_data.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+        for k, v in data.items():
+            tafseer_data.append({"key": k, "name": v["name"]})
+            
+    with open("data/surah_data.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+        for k, v in data.items():
+            surah_data = {"number": int(v["serial"]), "name": v["english_name"], "total_verses": v["total_ayah"]}
+            surahs.append(surah_data)
+    surahs.sort(key=lambda x: x["number"])
+    return templates.TemplateResponse("tafseer.html", {"request": request, "tafseers": tafseer_data, "surahs": surahs})

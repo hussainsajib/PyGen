@@ -1,0 +1,33 @@
+{
+    "ibn-kathir": {
+        "name": "Tafseer ibn Kathir",
+        "Author": "ঈমাম ইবন কাসীর",
+        "language": "Bengali",
+        "database": "Tafseer ibn Kathir"
+    },
+    "abridged": {
+        "name": "Bengali Abridged Explanation",
+        "Author": "",
+        "language": "Bengali",
+        "database": "Bengali Abridged Explanation of the Quran"
+    },
+    "abu-bakr-zakaria": {
+        "name": "Tafsir Abu Bakr Zakaria",
+        "Author": "",
+        "language": "Bengali",
+        "database": "Tafsir Abu Bakr Zakaria"
+        
+    },
+    "ahsanul-bayan": {
+        "name": "Tafsir Ahsanul Bayaan",
+        "Author": "",
+        "language": "Bengali",
+        "database": "Tafsir Ahsanul Bayaan"
+    },
+    "fathul-majid": {
+        "name": "Tafsir Fathul Majid",
+        "Author": "শাইখ শহীদুল্লাহ খান মাদানী",
+        "language": "Bengali",
+        "database": "Tafsir Fathul Majid"
+    }
+}

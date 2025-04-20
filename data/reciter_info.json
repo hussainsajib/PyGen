@@ -2,7 +2,8 @@
     "ar.abdulbasit": {
         "english_name": "Abdul Basit",
         "bangla_name": "আব্দুল বাসিত",
-        "folder": "abdul_basit_murattal"
+        "folder": "abdul_basit_murattal",
+        "database": "Abdul Basit Abdul Samad"
     },
     "ar.abdullahbasfar": {
         "english_name": "Abdullah Basfar",
@@ -53,8 +54,9 @@
         "folder": "hani_rifai"
     },
     "ar.husary": {
-        "english_name": "Husary",
-        "bangla_name": "আল-হুসারি"
+        "english_name": "Mahmoud Khalil Al-Hussary",
+        "bangla_name": "মাহমুদ খলিল আল-হুসারি",
+        "database": "Mahmoud Khaleel Al-Husary"
     },
     "ar.husarymujawwad": {
         "english_name": "Husary (Mujawwad)",

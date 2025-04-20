@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Jobs{% endblock %}
+
+{% block content %}
+<h1>Tafseer Generator</h1>
+<form method="get" id="tafseer-form" action="/create-tafseer-video">
+    <div class="d-flex gap-3" style="margin-bottom: 20px;">
+        <div>
+            <label for="tafseer">Select Tafseer:</label>
+            <select class="form-select" name="tafseer" id="tafseer-select">
+                {% for tafseer in tafseers %}
+                    <option value="{{ tafseer.key }}">
+                        {{ tafseer.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="surah">Select Surah:</label>
+            <select class="form-select" name="surah_number" id="surah-select">
+                {% for surah in surahs %}
+                    <option value="{{ surah.number }}">
+                        {{ surah.number }} - {{ surah.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="start_ayah">Start Ayah:</label>
+            <input type="number" class="form-control" name="start_ayah" id="start-ayah" value="1" min="1" required>
+        </div>
+        <div>
+            <label for="end_ayah">End Ayah:</label>
+            <input type="number" class="form-control" name="end_ayah" id="end-ayah" value="1" min="1" required>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary btn-lg">Generate</button>
+</form>
+
+<script>
+    document.getElementById('tafseer-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = e.target;
+        form.action = `/create-tafseer-video`;
+        form.submit();
+    });
+</script>
+
+{% endblock %}
