@@ -1,6 +1,6 @@
 from db.models import Job, JobStatus
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 async def enqueue_job(session: AsyncSession, surah_number: int, surah_name: str, reciter: str,  scheduled_time=None):
     job = Job(
@@ -20,4 +20,10 @@ async def get_all_jobs(session: AsyncSession):
 async def update_job_progress(session: AsyncSession, job_id: int, progress: float):
     job = await session.get(Job, job_id)
     job.progress = progress
+    await session.commit()
+    
+async def clear_completed_jobs(session):
+    await session.execute(
+        delete(Job).where(Job.status.in_([JobStatus.done, JobStatus.failed]))
+    )
     await session.commit()

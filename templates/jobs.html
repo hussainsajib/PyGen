@@ -3,30 +3,36 @@
 {% block title %}Jobs{% endblock %}
 
 {% block content %}
-<h1>Job Queue</h1>
-    <table class="table table-striped">
-        <tr>
-            <th>ID</th>
-            <th>Surah Number</th>
-            <th>Surah Name</th>
-            <th>Reciter</th>
-            <th>Status</th>
-            <th>Progress</th>
-            <th>Retries</th>
-            <th>Created</th>
-        </tr>
-        {% for job in jobs %}
-        <tr>
-            <td>{{ job.id }}</td>
-            <td>{{ job.surah_number }}</td>
-            <td>{{ job.surah_name }}</td>
-            <td>{{ job.reciter }}</td>
-            <td>{{ job.status }}</td>
-            <td>{{ job.progress }}%</td>
-            <td>{{ job.retry_count }}/{{ job.max_retries }}</td>
-            <td>{{ job.created_at }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Job Queue</h1>
+    <form action="/clear-jobs" method="post" style="margin-bottom: 20px;">
+        <button type="submit" class="btn btn-danger">🧹 Clear Completed/Failed Jobs</button>
+    </form>
+</div>
+
+<table class="table table-striped">
+    <tr>
+        <th>ID</th>
+        <th>Surah Number</th>
+        <th>Surah Name</th>
+        <th>Reciter</th>
+        <th>Status</th>
+        <th>Progress</th>
+        <th>Retries</th>
+        <th>Created</th>
+    </tr>
+    {% for job in jobs %}
+    <tr>
+        <td>{{ job.id }}</td>
+        <td>{{ job.surah_number }}</td>
+        <td>{{ job.surah_name }}</td>
+        <td>{{ job.reciter }}</td>
+        <td>{{ job.status }}</td>
+        <td>{{ job.progress }}%</td>
+        <td>{{ job.retry_count }}/{{ job.max_retries }}</td>
+        <td>{{ job.created_at }}</td>
+    </tr>
+    {% endfor %}
+</table>
 
 {% endblock %}

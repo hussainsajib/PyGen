@@ -13,7 +13,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.database import init_db, get_db
 from processes.processes import create_and_post, create_surah_video
 from processes.background_worker import job_worker
-from db_ops.crud_jobs import get_all_jobs, enqueue_job
+from db_ops.crud_jobs import (
+    get_all_jobs, 
+    enqueue_job, 
+    clear_completed_jobs
+)
 
 load_dotenv()
 IMAGEMAGICK_BINARY=os.getenv("IMAGEMAGICK_BINARY")
@@ -125,3 +129,8 @@ def tafseer(request: Request):
             surahs.append(surah_data)
     surahs.sort(key=lambda x: x["number"])
     return templates.TemplateResponse("tafseer.html", {"request": request, "tafseers": tafseer_data, "surahs": surahs})
+
+@app.post("/clear-jobs")
+async def clear_jobs(db: AsyncSession = Depends(get_db)):
+    await clear_completed_jobs(db)
+    return RedirectResponse(url="/jobs", status_code=303)
