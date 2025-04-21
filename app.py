@@ -44,7 +44,7 @@ def create_video(request: Request, background_tasks: BackgroundTasks,
                  surah: int, start_verse: int, end_verse: int, reciter: str,
                  is_short: bool = False):
     background_tasks.add_task(create_and_post, surah, start_verse, end_verse, reciter, is_short)
-    return RedirectResponse(request.url_for("read_root"))
+    return RedirectResponse(request.url_for("index"))
 
 @app.get("/", name="index", response_class=HTMLResponse)
 async def read_root(request: Request):

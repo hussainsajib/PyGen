@@ -40,18 +40,30 @@ def get_channel_info_position(is_short: bool, clip_width: int):
         return ((SHORT["width"] - clip_width) / (SHORT["width"] * 2), 0.09)
     return (0.85, 0.92)
 
-def get_arabic_textbox_size(is_short: bool):
+def get_arabic_textbox_size(is_short: bool, text: str):
+    if 0 < len(text) < 450:
+        v_size = 65
+    elif len(text) < 900:
+        v_size = 50
+    else:
+        v_size = 40
     if is_short:
         return {
             "size": (SHORT["width"] * 0.85, None),
             "fontsize": 65
         }
     return {
-        "size": (LONG["width"] * 0.85, None),
-        "fontsize": 65
+        "size": (LONG["width"] * 0.95, None),
+        "fontsize": v_size
     }
 
-def get_translation_textbox_size(is_short: bool):
+def get_translation_textbox_size(is_short: bool, text: str):
+    if 0 < len(text) < 450:
+        v_size = 50
+    elif len(text) < 1000:
+        v_size = 35
+    else:
+        v_size = 25
     if is_short:
         return {
             "size": (SHORT["width"] * 0.85, None),
@@ -59,7 +71,7 @@ def get_translation_textbox_size(is_short: bool):
         }
     return {
         "size": (LONG["width"] * 0.95, None),
-        "fontsize": 50
+        "fontsize": v_size
     }
 
 COMMON = {

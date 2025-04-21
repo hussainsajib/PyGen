@@ -23,7 +23,7 @@ def generate_background(background_image_url: str, duration: int, is_short: bool
     return generate_solid_background(duration, resolution)
 
 def generate_arabic_text_clip(text: str, is_short: bool, duration: int) -> TextClip:
-    arabic_sizes = COMMON["f_arabic_size"](is_short)
+    arabic_sizes = COMMON["f_arabic_size"](is_short, text)
     arabic_text_clip = TextClip(f"{text[:-1]} \u06DD{e2a(text)}", **arabic_sizes, **COMMON["arabic_textbox_config"])
     arabic_pos = COMMON["f_arabic_position"](is_short, arabic_text_clip.h)
     arabic_text_clip = arabic_text_clip.set_position(('center', arabic_pos))\
@@ -31,7 +31,7 @@ def generate_arabic_text_clip(text: str, is_short: bool, duration: int) -> TextC
     return arabic_text_clip
 
 def generate_translation_text_clip(text: str, is_short: bool, duration: int) -> TextClip:
-    translation_sizes = COMMON["f_translation_size"](is_short)
+    translation_sizes = COMMON["f_translation_size"](is_short, text)
     translation_clip = TextClip(text, **translation_sizes, **COMMON["translation_textbox_config"])
     translation_pos = COMMON["f_translation_position"](is_short)
     translation_clip = translation_clip.set_position(('center', translation_pos))\
