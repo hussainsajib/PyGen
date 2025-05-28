@@ -17,12 +17,14 @@ def generate_intro(surah: Surah, reciter: Reciter, background_image_url, is_shor
         intro_clips.append(title)
 
     if COMMON["enable_subtitle"]:
-        sub_title = TextClip(txt=reciter.bangla_name, font="kalpurush", fontsize=50, color=FONT_COLOR)\
+        sub_title = TextClip(txt=f"{reciter.bangla_name}", font="kalpurush", fontsize=50, color=FONT_COLOR)\
                 .set_position(("center", 0.6), relative=True)\
                 .set_duration(audio.duration)
         intro_clips.append(sub_title)
-    
-    return CompositeVideoClip(intro_clips).set_audio(audio)
+    composite_clip = CompositeVideoClip(intro_clips)
+    if surah.number == 9:
+        return composite_clip
+    return composite_clip.set_audio(audio)
 
 def generate_outro(background_image_url, is_short):
     background = generate_background(background_image_url, duration=5, is_short=is_short)

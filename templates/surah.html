@@ -22,7 +22,7 @@
                 <label for="reciter">Select Reciter:</label>
                 <select class="form-select" id="reciter" name="reciter" required>
                     {% for r in reciters %}
-                    <option value="{{r.key}}" {% if r.key=="ar.yasserdossary" %} selected="selected"{% endif %}>{{ r.english_name }}</option>
+                    <option value="{{r.key}}" {% if r.key=="ar.abdulbasit" %} selected="selected"{% endif %}>{{ r.english_name }}</option>
                     {% endfor %}
                     
                 </select>

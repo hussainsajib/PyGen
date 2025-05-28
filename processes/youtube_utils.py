@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from google_auth_oauthlib.flow import InstalledAppFlow, Flow
 import googleapiclient.discovery
 import googleapiclient.errors
@@ -17,10 +18,11 @@ api_service_name = "youtube"
 api_version = "v3"
 client_secrets_file = "client_info.json"
 playlist = {
-    "ar.alafasy": "PLvbeiWY3e2Qe8VLdBCLe5HeheC00U7Wfa",
+    "ar.alafasy": "PLvbeiWY3e2QdAVhMyI3No2J5NnBupVBud",
+    "ar.abdulbasit": "PLvbeiWY3e2QdeIRQsi82skdXhYLg2gqv0",
+    # manual videos mishary: "PLvbeiWY3e2Qe8VLdBCLe5HeheC00U7Wfa",
     "ar.ibrahimakhbar": "PLvbeiWY3e2Qe5KAoGBhsteMaYNV-4ZqNk",
     "ar.yasserdossary": "PLvbeiWY3e2QcvuqO3ScgzD6Fi1n9mnEUR"
-    
 }
 
 def get_video_details(info_file_path: str):
@@ -80,7 +82,7 @@ def initialize_upload_request(youtube, video_details: dict):
             },
             "status": {
                 "privacyStatus": "private",  # Can be public, unlisted, private
-                #"publishAt": relase_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+                "publishAt": relase_date.strftime("%Y-%m-%dT%H:%M:%SZ")
             }
         },
         media_body=MediaFileUpload(video_details["video"], chunksize=-1, resumable=True, mimetype="video/*")
@@ -136,6 +138,7 @@ def upload_to_youtube(video_details: str):
         print("✅ Video uploaded successfully")
         
     if success and not video_details["is_short"]:
+        time.sleep(30)
         try:
             upload_thumbnail(youtube, video_id, video_details["screenshot"])
         except Exception as e:

@@ -23,6 +23,7 @@ import json
 def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio):
     screen_size = get_resolution(False)
     current_clips = []
+    gend_ms = gend_ms if gend_ms < full_audio.duration * 1000 else full_audio.duration * 1000
     # Calculate the ayah duration in seconds
     duration = (gend_ms - gstart_ms) / 1000.0
     
@@ -47,26 +48,29 @@ def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, s
     current_clips.append(translation_clip)
     
     if COMMON["enable_footer"]:
-                # Reciter name overlay
-                if COMMON["enable_reciter_info"]:
-                    reciter_name_clip = generate_reciter_name_clip(reciter.bangla_name, is_short=False, duration=duration)
-                    current_clips.append(reciter_name_clip)
+        # Reciter name overlay
+        if COMMON["enable_reciter_info"]:
+            reciter_name_clip = generate_reciter_name_clip(f"{reciter.bangla_name}", is_short=False, duration=duration)
+            current_clips.append(reciter_name_clip)
 
-                if COMMON["enable_surah_info"]:
-                    surah_name_clip = generate_surah_info_clip(surah.name_bangla, ayah, is_short=False, duration=duration)
-                    current_clips.append(surah_name_clip)
+        if COMMON["enable_surah_info"]:
+            surah_name_clip = generate_surah_info_clip(surah.name_bangla, ayah, is_short=False, duration=duration)
+            current_clips.append(surah_name_clip)
 
-                # Verser number overlay
-                if COMMON["enable_channel_info"]:
-                    brand_name_clip = generate_brand_clip("তাকওয়া বাংলা", is_short=False, duration=duration)
-                    current_clips.append(brand_name_clip)
-    
-    composite = CompositeVideoClip(current_clips, size=screen_size).set_duration(duration)
+        # Verser number overlay
+        if COMMON["enable_channel_info"]:
+            brand_name_clip = generate_brand_clip("তাকওয়া বাংলা", is_short=False, duration=duration)
+            current_clips.append(brand_name_clip)
+    try:
+        composite = CompositeVideoClip(current_clips, size=screen_size).set_duration(duration)
+    except Exception as e:
+        print(f"[ERROR ] - Error creating composite video clip for ayah{ayah}: {e}", flush=True)
+        raise e
     
     # Subclip the audio for the ayah (convert global ms to seconds)
     ayah_audio = full_audio.subclip(gstart_ms / 1000.0, gend_ms / 1000.0)
     composite = composite.set_audio(ayah_audio)
-    
+    print(f"[INFO] - Created composite video clip for Surah {surah.number}, Ayah {ayah}", flush=True)
     return composite
 
 
@@ -84,24 +88,39 @@ def generate_surah(surah_number: int, reciter_tag: str):
     if COMMON["enable_intro"]:
         intro = generate_intro(surah=surah, reciter=reciter, background_image_url=None, is_short=False)
         clips.append(intro)
-    
+    print(f"[INFO] - Going inside the ayah loop", flush=True)
     for tdata in timestamp_data:
         surah_number, ayah, gstart_ms, gend_ms, seg_str = tdata
-        clip = create_ayah_clip(surah, ayah, reciter,gstart_ms, gend_ms, surah_data, translation_data, full_audio)
+        try:
+            clip = create_ayah_clip(surah, ayah, reciter,gstart_ms, gend_ms, surah_data, translation_data, full_audio)
+        except Exception as e:
+            print(f"[ERROR ] - Error creating clip for Surah {surah_number}, Ayah {ayah}: {e}", flush=True)
+            raise e
         clips.append(clip)
 
     if COMMON["enable_outro"]:
         outro = generate_outro(background_image_url=None, is_short=False)
         clips.append(outro)
-        
+    print(f"[INFO] - Going to concatenate the clips", flush=True)
     # Concatenate all ayah clips one after the other
     final_video = concatenate_videoclips(clips)
+    print(f"[INFO] - Going to write the final video", flush=True)
 
     # Write the final video to a temporary file.
     #output_path = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False).name
     output_path = f"exported_data/videos/quran_video_{surah_number}_{reciter.eng_name}.mp4"
-    final_video.write_videofile(output_path, codec='libx264', fps=24, audio_codec="aac")
+    try:
+        final_video.write_videofile(
+            output_path, 
+            codec='libx264', 
+            fps=24, 
+            audio_codec="aac"
+        )
+    except Exception as e:
+        print(str(e), flush=True)
+    print(f"[INFO] - Final video written to {output_path}", flush=True)
     info_file_path = generate_details(surah, reciter, True, 1, 1)
+    print(f"[INFO] - Info file written to {info_file_path}", flush=True)
     
     return {"video": output_path, "info": info_file_path, "is_short": False, "reciter": reciter.tag}
     

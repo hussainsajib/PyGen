@@ -1,8 +1,11 @@
 QURAN_API_URL = "https://api.alquran.cloud/v1/ayah/{surah}:{verse}"
-TRANSLATION_URL = "https://api.quran.com/api/v4/verses/by_key/{surah}:{verse}?translations=161"
+TRANSLATION_URL = "https://api.quran.com/api/v4/verses/by_key/{surah}:{verse}?translations=162"
 AUDIO_API_URL = "https://api.alquran.cloud/v1/ayah/{surah}:{verse}/{reciter}"
 IMAGE_API_URL = "https://api.unsplash.com/photos/random?query=universe&orientation=landscape&client_id=gvKXwU6tDDoZl6N3O1YWUIrT19yqZZW6CQLlSEGoxew"
-RECITER="ar.yasserdossary"
+RECITER="ar.alafasy"
+TRANSLATION="rawai_al_bayan"
+TRANSLATION_AUDIO = False
+TRANSLATION_AUDIO_GAP = 0.5
 FONT_COLOR = "white"
 BACKGROUND_RGB = (0, 0, 0) #black (0, 0, 0)
 BACKGROUND_OPACITY = 0.5

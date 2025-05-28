@@ -1,7 +1,7 @@
+import numpy as np
+
 from moviepy.editor import *
 from moviepy.video.fx.resize import resize 
-
-
 
 from processes.logger import logger
 from processes.Classes.reciter import Reciter
@@ -16,7 +16,13 @@ from factories.single_clip import *
 from factories.composite_clip import *
 from factories.file import *
 
+def make_silence(duration, fps=44100):
+    return AudioClip(make_frame=lambda t: np.zeros((1,)), duration=duration, fps=fps)
 
+def get_translation_clip(surah_number, verse_number):
+    path = f"translation_audio/{surah_number}_{verse_number}.wav"
+    print(f"Loading translation audio from {path}")
+    return AudioFileClip(f"translation_audio/{surah_number}_{verse_number}.wav")
 
 def generate_video(surah_number, start_verse, end_verse, reciter_key, is_short: bool):
     # Prepare background
@@ -44,6 +50,10 @@ def generate_video(surah_number, start_verse, end_verse, reciter_key, is_short: 
         # Download and create the media components
         try:
             audio_clip = AudioFileClip(v.link_to_audio)
+            if TRANSLATION_AUDIO:
+                translation_clip = get_translation_clip(surah_number, verse)
+                silence = make_silence(TRANSLATION_AUDIO_GAP)
+                audio_clip = concatenate_audioclips([audio_clip, silence, translation_clip])
 
             background_clip = generate_background(background_image_url, audio_clip.duration, is_short)
             current_clips.append(background_clip)

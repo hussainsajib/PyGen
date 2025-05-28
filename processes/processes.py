@@ -17,10 +17,10 @@ def create_and_post(surah: int, start_verse: int, end_verse:int,
     video_details["screenshot"] = screenshot_path
     
     #Upload to YouTube
-    try:
-        upload_to_youtube(video_details)
-    except Exception as e:
-        print(str(e))
+    # try:
+    #     upload_to_youtube(video_details)
+    # except Exception as e:
+    #     print(str(e))
         
 def create_surah_video(surah: int, reciter: str):
     video_details = generate_surah(surah, reciter)
