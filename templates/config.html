@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<h1>App Configuration</h1>
+<h2>Create New Config</h2>
+<form method="post" action="/config/new">
+    <label for="key">Key:</label>
+    <input type="text" name="key" required>
+    <label for="value">Value:</label>
+    <input type="text" name="value" required>
+    <button type="submit">Add Config</button>
+</form>
+<hr>
+
+<form method="post" action="/config">
+    {% for item in config %}
+        <label>{{ item.key }}</label>
+        <input type="text" name="{{ item.key }}" value="{{ item.value }}">
+        <br>
+    {% endfor %}
+    <button type="submit">Save</button>
+</form>
+
+{% endblock %}

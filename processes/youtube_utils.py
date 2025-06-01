@@ -21,6 +21,7 @@ playlist = {
     "ar.alafasy": "PLvbeiWY3e2QdAVhMyI3No2J5NnBupVBud",
     "ar.abdulbasit": "PLvbeiWY3e2QdeIRQsi82skdXhYLg2gqv0",
     # manual videos mishary: "PLvbeiWY3e2Qe8VLdBCLe5HeheC00U7Wfa",
+    "ar.abdullahaljuhany": "PLvbeiWY3e2QfDUsdWO1dunljV9TBmTEo1",
     "ar.ibrahimakhbar": "PLvbeiWY3e2Qe5KAoGBhsteMaYNV-4ZqNk",
     "ar.yasserdossary": "PLvbeiWY3e2QcvuqO3ScgzD6Fi1n9mnEUR"
 }

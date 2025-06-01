@@ -6,8 +6,8 @@ RECITER="ar.alafasy"
 TRANSLATION="rawai_al_bayan"
 TRANSLATION_AUDIO = False
 TRANSLATION_AUDIO_GAP = 0.5
-FONT_COLOR = "white"
-BACKGROUND_RGB = (0, 0, 0) #black (0, 0, 0)
+FONT_COLOR = "rgb(247, 197, 72)" #white (255, 255, 255)
+BACKGROUND_RGB = (37, 89, 87) #black (0, 0, 0)
 BACKGROUND_OPACITY = 0.5
 
 FOOTER_CONFIG = {
