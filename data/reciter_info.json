@@ -50,9 +50,10 @@
         "database": "HadyToure"
     },
     "ar.hanirifai": {
-        "english_name": "Hani Rifai",
-        "bangla_name": "হানি রিফাই",
-        "folder": "hani_rifai"
+        "english_name": "Hani al-Rifai",
+        "bangla_name": "হানি আল-রিফাই",
+        "folder": "hani_rifai",
+        "database": "hani al-rifai"
     },
     "ar.husary": {
         "english_name": "Mahmoud Khalil Al-Hussary",
@@ -93,6 +94,11 @@
         "folder": "muhammad_jibreel",
         "database": "Muhammad Jibreel"
     },
+    "ar.nasserqatami": {
+        "english_name": "Nasser Al-Qatami",
+        "bangla_name": "নাসের আল-কাতামি",
+        "database": "Nasser-al-Qatami"
+    },
     "ar.parhizgar": {
         "english_name": "Parhizgar",
         "bangla_name": "পারহিযগার"
@@ -103,8 +109,9 @@
         "folder": "saad_al_ghamdi"
     },
     "ar.saoodshuraym": {
-        "english_name": "Saood bin Ibraaheem Ash-Shuraym",
-        "bangla_name": "সাউদ ইবন ইব্রাহিম আশ-শুরাইম"
+        "english_name": "Saud Al-Shuraym",
+        "bangla_name": "সাউদ আল-শুরাইম",
+        "database": "Saud ash Shuraym"
     },  
     "ar.yasserdossary": {
         "english_name": "Yasser Al-Dosari",

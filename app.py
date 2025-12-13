@@ -16,7 +16,9 @@ from processes.background_worker import job_worker
 from db_ops.crud_jobs import (
     get_all_jobs, 
     enqueue_job, 
-    clear_completed_jobs
+    clear_completed_jobs,
+    delete_single_job,
+    retry_job
 )
 from db_ops.crud_config import get_all_config, set_config_value, reload_config
 from config_store import config_values
@@ -99,7 +101,6 @@ def create_surah(request: Request, background_tasks: BackgroundTasks):
                         "key": k
                 })
     reciters.sort(key=lambda x: x["english_name"])
-    print(config_values)
     context = {
         "request": request, 
         "surahs": surahs, 
@@ -117,8 +118,20 @@ async def create_surah(request: Request,
     with open("data/surah_data.json", "r", encoding="utf-8") as f:
         data = json.load(f)
         surah_name = data[str(surah_number)]["english_name"]
-    job = await enqueue_job(db, surah_number, surah_name=surah_name, reciter=reciter)
+    await enqueue_job(db, surah_number, surah_name=surah_name, reciter=reciter)
     #background_tasks.add_task(create_surah_video, surah_number, reciter)
+    return RedirectResponse(request.url_for("surah"))
+
+@app.get("/create-all-surah-videos", name="create_all_surah_videos")
+async def create_all_surah_videos(request: Request, reciter: str, db: AsyncSession = Depends(get_db)):
+    with open("data/surah_data.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+    
+        for surah_number in range(1, 115):
+            surah_name = data[str(surah_number)]["english_name"]
+            print(f"Enqueuing job for Surah {surah_number}: {surah_name} with reciter {reciter}")
+            await enqueue_job(db, surah_number, surah_name=surah_name, reciter=reciter)
+    
     return RedirectResponse(request.url_for("surah"))
 
 @app.get("/jobs", name="jobs", response_class=HTMLResponse)
@@ -150,10 +163,22 @@ async def clear_jobs(db: AsyncSession = Depends(get_db)):
     return RedirectResponse(url="/jobs", status_code=303)
 
 
+@app.post("/delete-job/{job_id}", response_class=RedirectResponse)
+async def delete_job(job_id: int, db: AsyncSession = Depends(get_db)):
+    await delete_single_job(db, job_id)
+    return RedirectResponse(url="/jobs", status_code=303)
+
+
+@app.post("/retry-job/{job_id}", response_class=RedirectResponse)
+async def retry_job_endpoint(job_id: int, db: AsyncSession = Depends(get_db)):
+    print(f"Retrying job with ID: {job_id}")
+    await retry_job(db, job_id)
+    return RedirectResponse(url="/jobs", status_code=303)
+
+
 @app.get("/config", response_class=HTMLResponse, name="config")
 async def config_form(request: Request, db: AsyncSession = Depends(get_db)):
     config = await get_all_config(db)
-    print(config_values)
     return templates.TemplateResponse("config.html", {"request": request, "config": config})
 
 @app.post("/config")

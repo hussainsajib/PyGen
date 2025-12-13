@@ -23,7 +23,10 @@ import json
 def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio):
     screen_size = get_resolution(False)
     current_clips = []
-    gend_ms = gend_ms if gend_ms < full_audio.duration * 1000 else full_audio.duration * 1000
+    audio_duration = full_audio.duration * 1000  # Convert to milliseconds
+    if gstart_ms < 0 or gstart_ms >= audio_duration:
+        raise ValueError(f"Invalid start time {gstart_ms} for Surah {surah.number}, Ayah {ayah}")
+    gend_ms = gend_ms if gend_ms < audio_duration else audio_duration
     # Calculate the ayah duration in seconds
     duration = (gend_ms - gstart_ms) / 1000.0
     

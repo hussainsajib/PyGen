@@ -22,7 +22,11 @@ playlist = {
     "ar.abdulbasit": "PLvbeiWY3e2QdeIRQsi82skdXhYLg2gqv0",
     # manual videos mishary: "PLvbeiWY3e2Qe8VLdBCLe5HeheC00U7Wfa",
     "ar.abdullahaljuhany": "PLvbeiWY3e2QfDUsdWO1dunljV9TBmTEo1",
+    "ar.hanirifai": "PLvbeiWY3e2QffC6tRZbrgg6XqhJpGhoGV",
+    "ar.husary": "PLvbeiWY3e2QexlQuJlqb-NbptmMO-KIJ1",
+    "ar.nasserqatami": "PLvbeiWY3e2QfmJW5vg0MX2YZ-cjdhfOUi",
     "ar.ibrahimakhbar": "PLvbeiWY3e2Qe5KAoGBhsteMaYNV-4ZqNk",
+    "ar.saoodshuraym": "PLvbeiWY3e2Qc7Qxv_L8ZW2QGuoDSBDDt1",
     "ar.yasserdossary": "PLvbeiWY3e2QcvuqO3ScgzD6Fi1n9mnEUR"
 }
 
@@ -128,6 +132,8 @@ def upload_to_youtube(video_details: str):
     success = True
     video_id = None
     playlist_id = playlist[video_details["reciter"]]
+    
+    # Upload the video file to YouTube
     try:
         request = initialize_upload_request(youtube, video_details)
         video_id = resumable_upload(request)
@@ -138,6 +144,7 @@ def upload_to_youtube(video_details: str):
     else:
         print("✅ Video uploaded successfully")
         
+    # Upload the thumbnail if this is not a short video
     if success and not video_details["is_short"]:
         time.sleep(30)
         try:
@@ -148,7 +155,8 @@ def upload_to_youtube(video_details: str):
             success = False
         else:
             print("✅ Thumbnail added to video successfully")
-            
+    
+    # Add video to playlist if applicable
     if success and not video_details["is_short"] and video_details["reciter"] in playlist:
         try:
             add_video_to_playlist(youtube, video_id, playlist_id)

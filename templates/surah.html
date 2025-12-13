@@ -19,8 +19,8 @@
             </div>
             <br>
             <div>
-                <label for="reciter">Select Reciter:</label>
-                <select class="form-select" id="reciter" name="reciter" required>
+                <label for="reciter1">Select Reciter:</label>
+                <select class="form-select" id="reciter1" name="reciter" required>
                     {% for r in reciters %}
                     <option value="{{r.key}}" {% if r.key == c_reciter %} selected="selected"{% endif %}>{{ r.english_name }}</option>
                     {% endfor %}
@@ -30,6 +30,19 @@
         </div>
         <button type="submit" class="btn btn-primary btn-lg">Generate</button>
     </form>
+
+    <h1>Queue Video Jobs for All Surah</h1>
+    <form method="get" id="all-surah-form" action="/create-all-surah-videos">
+    <div>
+        <label for="reciter2">Select Reciter:</label>
+        <select class="form-select" id="reciter2" name="reciter" required>
+            {% for r in reciters %}
+                <option value="{{r.key}}" {% if r.key == c_reciter %} selected="selected"{% endif %}>{{ r.english_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary btn-lg">Create 114 Jobs</button>
+</form>
 </div>
 
 <script>
@@ -37,9 +50,14 @@
         e.preventDefault();  // prevent default form submit
         const surahNumber = document.getElementById('surah-select').value;
         const form = e.target;
-    
-        // dynamically set form action
         form.action = `/create-surah-video`;
+        form.submit();  // now submit with updated action
+    });
+
+    document.getElementById('all-surah-form').addEventListener('submit', function(e) {
+        e.preventDefault();  // prevent default form submit
+        const form = e.target;
+        form.action = `/create-all-surah-videos`;
         form.submit();  // now submit with updated action
     });
 </script>

@@ -5,6 +5,7 @@ from moviepy.video.fx.resize import resize
 from convert_numbers import english_to_arabic as e2a
 from bangla import convert_english_digit_to_bangla_digit as e2b
 from processes.video_configs import BACKGROUND_OPACITY, BACKGROUND_RGB, COMMON, FOOTER_CONFIG
+from config_store import config_values as cv
 
 def generate_image_background(background_image_url: str, duration: int, is_short: bool):
     resolution = get_resolution(is_short)

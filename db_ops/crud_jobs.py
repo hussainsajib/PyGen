@@ -24,6 +24,21 @@ async def update_job_progress(session: AsyncSession, job_id: int, progress: floa
     
 async def clear_completed_jobs(session):
     await session.execute(
-        delete(Job).where(Job.status.in_([JobStatus.done, JobStatus.failed]))
+        delete(Job).where(Job.status.in_([JobStatus.done]))
     )
     await session.commit()
+
+async def delete_single_job(session: AsyncSession, job_id: int):
+    job = await session.get(Job, job_id)
+    if job:
+        await session.delete(job)
+        await session.commit()
+
+
+async def retry_job(session: AsyncSession, job_id: int):
+    job = await session.get(Job, job_id)
+    if job:
+        job.status = JobStatus.pending
+        job.progress = 0.0
+        job.retry_count = 0
+        await session.commit()

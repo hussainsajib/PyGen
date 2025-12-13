@@ -7,21 +7,35 @@
 <h1>App Configuration</h1>
 <h2>Create New Config</h2>
 <form method="post" action="/config/new">
-    <label for="key">Key:</label>
-    <input type="text" name="key" required>
-    <label for="value">Value:</label>
-    <input type="text" name="value" required>
-    <button type="submit">Add Config</button>
+    <div>
+        <label for="key">Key:</label>
+        <input type="text" name="key" required>
+        <label for="value">Value:</label>
+        <input type="text" name="value" required>
+        <button type="submit" class="btn btn-primary btn-sm">Add Config</button>
+    </div>
 </form>
 <hr>
 
 <form method="post" action="/config">
-    {% for item in config %}
-        <label>{{ item.key }}</label>
-        <input type="text" name="{{ item.key }}" value="{{ item.value }}">
-        <br>
-    {% endfor %}
-    <button type="submit">Save</button>
+    <table>
+        <thead>
+            <tr>
+                <th>Key</th>
+                <th>Value</th>
+            </tr>
+        {% for item in config %}
+        <tr>
+            <td>
+                <label>{{ item.key }}</label>
+            </td>
+            <td>
+                <input type="text" name="{{ item.key }}" value="{{ item.value }}">
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <button type="submit" class="btn btn-success">Save</button>
 </form>
 
 {% endblock %}
