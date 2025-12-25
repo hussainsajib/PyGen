@@ -11,10 +11,13 @@ def generate_intro(surah: Surah, reciter: Reciter, background_image_url, is_shor
     intro_clips.append(background)
 
     if COMMON["enable_title"]:
-        title = TextClip(txt=f"সুরাহ {surah.name_bangla}", font="kalpurush", fontsize=100, color=FONT_COLOR)\
-            .set_position(("center", 0.4), relative=True)\
-            .set_duration(audio.duration)
-        intro_clips.append(title)
+        try:
+            title = TextClip(txt=f"সুরাহ {surah.name_bangla}", font="kalpurush", fontsize=100, color=FONT_COLOR)\
+                    .set_position(("center", 0.4), relative=True)\
+                    .set_duration(audio.duration)
+            intro_clips.append(title)
+        except Exception as e:
+            print(f"[ERROR] - failed to generate intro title clip: {e}", flush=True)
 
     if COMMON["enable_subtitle"]:
         sub_title = TextClip(txt=f"{reciter.bangla_name}", font="kalpurush", fontsize=50, color=FONT_COLOR)\

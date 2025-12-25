@@ -21,52 +21,53 @@ import json
 
 
 def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio):
-    screen_size = get_resolution(False)
-    current_clips = []
-    audio_duration = full_audio.duration * 1000  # Convert to milliseconds
-    if gstart_ms < 0 or gstart_ms >= audio_duration:
-        raise ValueError(f"Invalid start time {gstart_ms} for Surah {surah.number}, Ayah {ayah}")
-    gend_ms = gend_ms if gend_ms <= audio_duration else audio_duration
-    # Calculate the ayah duration in seconds
-    duration = (gend_ms - gstart_ms) / 1000.0
-    
-    # Get the words for the ayah and build the full ayah text
-    words_dict = surah_data.get(surah.number, {}).get(ayah, {})
-    if not words_dict:
-        raise ValueError(f"No data for surah {surah} ayah {ayah}")
-
-    # Order words by their keys (word numbers)
-    sorted_word_nums = sorted(words_dict.keys())
-    full_ayah_text = " ".join(words_dict[w] for w in sorted_word_nums)
-    
-    background_clip = generate_background(None, duration, False)
-    current_clips.append(background_clip)
-    
-    # Create a base clip with the full ayah text (non-highlighted)
-    arabic_text_clip = generate_arabic_text_clip(full_ayah_text, False, duration)
-    current_clips.append(arabic_text_clip)
-
-    translation_text = translation_data[(surah.number, ayah)]
-    translation_clip = generate_translation_text_clip(translation_text, False, duration)
-    current_clips.append(translation_clip)
-    
-    if COMMON["enable_footer"]:
-        # Reciter name overlay
-        if COMMON["enable_reciter_info"]:
-            reciter_name_clip = generate_reciter_name_clip(f"{reciter.bangla_name}", is_short=False, duration=duration)
-            current_clips.append(reciter_name_clip)
-
-        if COMMON["enable_surah_info"]:
-            surah_name_clip = generate_surah_info_clip(surah.name_bangla, ayah, is_short=False, duration=duration)
-            current_clips.append(surah_name_clip)
-
-        # Verser number overlay
-        if COMMON["enable_channel_info"]:
-            brand_name_clip = generate_brand_clip("তাকওয়া বাংলা", is_short=False, duration=duration)
-            current_clips.append(brand_name_clip)
     try:
+        screen_size = get_resolution(False)
+        current_clips = []
+        audio_duration = full_audio.duration * 1000  # Convert to milliseconds
+        if gstart_ms < 0 or gstart_ms >= audio_duration:
+            raise ValueError(f"Invalid start time {gstart_ms} for Surah {surah.number}, Ayah {ayah}")
+        gend_ms = gend_ms if gend_ms <= audio_duration else audio_duration
+        # Calculate the ayah duration in seconds
+        duration = (gend_ms - gstart_ms) / 1000.0
+        
+        # Get the words for the ayah and build the full ayah text
+        words_dict = surah_data.get(surah.number, {}).get(ayah, {})
+        if not words_dict:
+            raise ValueError(f"No data for surah {surah} ayah {ayah}")
+
+        # Order words by their keys (word numbers)
+        sorted_word_nums = sorted(words_dict.keys())
+        full_ayah_text = " ".join(words_dict[w] for w in sorted_word_nums)
+        
+        background_clip = generate_background(None, duration, False)
+        current_clips.append(background_clip)
+        
+        # Create a base clip with the full ayah text (non-highlighted)
+        arabic_text_clip = generate_arabic_text_clip(full_ayah_text, False, duration)
+        current_clips.append(arabic_text_clip)
+
+        translation_text = translation_data[(surah.number, ayah)]
+        translation_clip = generate_translation_text_clip(translation_text, False, duration)
+        current_clips.append(translation_clip)
+        
+        if COMMON["enable_footer"]:
+            # Reciter name overlay
+            if COMMON["enable_reciter_info"]:
+                reciter_name_clip = generate_reciter_name_clip(f"{reciter.bangla_name}", is_short=False, duration=duration)
+                current_clips.append(reciter_name_clip)
+
+            if COMMON["enable_surah_info"]:
+                surah_name_clip = generate_surah_info_clip(surah.name_bangla, ayah, is_short=False, duration=duration)
+                current_clips.append(surah_name_clip)
+
+            # Verser number overlay
+            if COMMON["enable_channel_info"]:
+                brand_name_clip = generate_brand_clip("তাকওয়া বাংলা", is_short=False, duration=duration)
+                current_clips.append(brand_name_clip)
         composite = CompositeVideoClip(current_clips, size=screen_size).set_duration(duration)
     except Exception as e:
+        print(str(e), flush=True)
         print(f"[ERROR ] - Error creating composite video clip for ayah{ayah}: {e}", flush=True)
         raise e
     
@@ -81,15 +82,24 @@ def generate_surah(surah_number: int, reciter_tag: str):
     reciter = Reciter(reciter_tag)
     surah = Surah(surah_number)
     surah_url = read_surah_data(surah.number, reciter.database_name)
+    if not surah_url:
+        raise ValueError(f"Could not find audio URL for Surah {surah.number} and Reciter '{reciter.database_name}'. The reciter's database may be missing this surah.")
+    
     downloaded_surah_file = download_mp3_temp(surah_url)
+
     full_audio = AudioFileClip(downloaded_surah_file)
     
     surah_data = read_text_data(surah.number)
     translation_data = read_translation(surah.number)
     timestamp_data = read_timestamp_data(surah.number, reciter.database_name)
+    
+    if not timestamp_data:
+        raise ValueError(f"No timestamp data found for Surah {surah.number} and Reciter '{reciter.database_name}'. Cannot create video.")
+
     clips = []
     if COMMON["enable_intro"]:
         intro = generate_intro(surah=surah, reciter=reciter, background_image_url=None, is_short=False)
+        print(f"[INFO] - Intro generated", flush=True)
         clips.append(intro)
     print(f"[INFO] - Going inside the ayah loop", flush=True)
     for tdata in timestamp_data:

@@ -1,5 +1,8 @@
 import sqlite3
 import json
+import logging
+
+logger = logging.getLogger("uvicorn.error")
 
 RECITATION_DATABASE_BASEURL = "./databases/reciter/{}.sqlite"
 
