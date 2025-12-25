@@ -15,6 +15,11 @@ async def get_reciter_by_id(db: AsyncSession, reciter_id: int):
     result = await db.execute(select(Reciter).where(Reciter.id == reciter_id))
     return result.scalars().first()
 
+async def get_reciter_by_key(db: AsyncSession, reciter_key: str):
+    """Returns a single reciter by their key."""
+    result = await db.execute(select(Reciter).where(Reciter.reciter_key == reciter_key))
+    return result.scalars().first()
+
 async def create_reciter(db: AsyncSession, reciter_data: dict):
     """Creates a new reciter in the database."""
     new_reciter = Reciter(**reciter_data)
