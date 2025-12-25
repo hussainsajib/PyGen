@@ -1,0 +1,44 @@
+
+{% extends "base.html" %}
+
+{% block title %}Reciters{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Reciters</h1>
+    <a href="{{ url_for('reciter_new_form') }}" class="btn btn-primary">Add New Reciter</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Key</th>
+            <th>English Name</th>
+            <th>Bangla Name</th>
+            <th>Folder</th>
+            <th>Database Value</th>
+            <th>Style</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reciter in reciters %}
+        <tr>
+            <td>{{ reciter.reciter_key }}</td>
+            <td>{{ reciter.english_name }}</td>
+            <td>{{ reciter.bangla_name }}</td>
+            <td>{{ reciter.folder or 'N/A' }}</td>
+            <td>{{ reciter.database or 'N/A' }}</td>
+            <td>{{ reciter.style or 'N/A' }}</td>
+            <td>
+                <a href="{{ url_for('reciter_edit_form', reciter_id=reciter.id) }}" class="btn btn-secondary btn-sm">Edit</a>
+                <form method="post" action="{{ url_for('reciter_delete', reciter_id=reciter.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this reciter?');">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

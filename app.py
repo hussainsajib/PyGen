@@ -20,6 +20,7 @@ from db_ops.crud_jobs import (
     delete_single_job,
     retry_job
 )
+from db_ops import crud_reciters
 from config_manager import ConfigManager, config_manager, get_config_manager
 from processes.youtube_utils import (
     get_authenticated_service,
@@ -258,3 +259,50 @@ async def update_playlist_privacy_endpoint(
         logger.error(f"Failed to update playlist privacy: {e}")
         # Optionally, add a message to show the user something went wrong
     return RedirectResponse(url=request.url_for("playlists"), status_code=303)
+
+# --- Reciter CRUD Endpoints ---
+
+@app.get("/reciters", name="reciters_list", response_class=HTMLResponse)
+async def get_reciters_page(request: Request, db: AsyncSession = Depends(get_db)):
+    reciters = await crud_reciters.get_all_reciters(db)
+    return templates.TemplateResponse("reciters.html", {"request": request, "reciters": reciters})
+
+@app.get("/reciter/new", name="reciter_new_form", response_class=HTMLResponse)
+async def reciter_new_form(request: Request):
+    return templates.TemplateResponse(
+        "reciter_form.html",
+        {
+            "request": request,
+            "reciter": None,
+            "action_url": request.url_for("reciter_create")
+        }
+    )
+
+@app.post("/reciter/new", name="reciter_create")
+async def reciter_create(request: Request, db: AsyncSession = Depends(get_db)):
+    form_data = await request.form()
+    await crud_reciters.create_reciter(db, dict(form_data))
+    return RedirectResponse(url=request.url_for("reciters_list"), status_code=303)
+
+@app.get("/reciter/{reciter_id}/edit", name="reciter_edit_form", response_class=HTMLResponse)
+async def reciter_edit_form(request: Request, reciter_id: int, db: AsyncSession = Depends(get_db)):
+    reciter = await crud_reciters.get_reciter_by_id(db, reciter_id)
+    return templates.TemplateResponse(
+        "reciter_form.html",
+        {
+            "request": request,
+            "reciter": reciter,
+            "action_url": request.url_for("reciter_update", reciter_id=reciter_id)
+        }
+    )
+
+@app.post("/reciter/{reciter_id}/edit", name="reciter_update")
+async def reciter_update(request: Request, reciter_id: int, db: AsyncSession = Depends(get_db)):
+    form_data = await request.form()
+    await crud_reciters.update_reciter(db, reciter_id, dict(form_data))
+    return RedirectResponse(url=request.url_for("reciters_list"), status_code=303)
+
+@app.post("/reciter/{reciter_id}/delete", name="reciter_delete")
+async def reciter_delete(request: Request, reciter_id: int, db: AsyncSession = Depends(get_db)):
+    await crud_reciters.delete_reciter(db, reciter_id)
+    return RedirectResponse(url=request.url_for("reciters_list"), status_code=303)

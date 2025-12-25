@@ -1,0 +1,39 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit' if reciter else 'Add' }} Reciter{% endblock %}
+
+{% block content %}
+<h1>{{ 'Edit' if reciter else 'Add' }} Reciter</h1>
+
+<form method="post" action="{{ action_url }}">
+    <div class="mb-3">
+        <label for="reciter_key" class="form-label">Key</label>
+        <input type="text" class="form-control" id="reciter_key" name="reciter_key" value="{{ reciter.reciter_key if reciter else '' }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="english_name" class="form-label">English Name</label>
+        <input type="text" class="form-control" id="english_name" name="english_name" value="{{ reciter.english_name if reciter else '' }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="bangla_name" class="form-label">Bangla Name</label>
+        <input type="text" class="form-control" id="bangla_name" name="bangla_name" value="{{ reciter.bangla_name if reciter else '' }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="folder" class="form-label">Folder</label>
+        <input type="text" class="form-control" id="folder" name="folder" value="{{ reciter.folder if reciter else '' }}">
+    </div>
+    <div class="mb-3">
+        <label for="database" class="form-label">Database Value</label>
+        <input type="text" class="form-control" id="database" name="database" value="{{ reciter.database if reciter else '' }}">
+    </div>
+    <div class="mb-3">
+        <label for="style" class="form-label">Style</label>
+        <input type="text" class="form-control" id="style" name="style" value="{{ reciter.style if reciter else '' }}">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{{ url_for('reciters_list') }}" class="btn btn-secondary">Cancel</a>
+</form>
+
+{% endblock %}
