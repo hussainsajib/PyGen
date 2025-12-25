@@ -201,8 +201,8 @@ async def config_form(
                 })
     reciters.sort(key=lambda x: x["english_name"])
 
-    # Convert config dict to list of dicts for template
-    config_items = [{"key": k, "value": v} for k, v in config.get_all().items()]
+    # Get config items directly from the manager (already sorted)
+    config_items = config.get_all()
     
     return templates.TemplateResponse("config.html", {
         "request": request, 

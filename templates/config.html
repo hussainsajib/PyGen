@@ -1,34 +1,40 @@
 {% extends "base.html" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}App Configuration{% endblock %}
 
 {% block content %}
 
 <h1>App Configuration</h1>
 <h2>Create New Config</h2>
 <form method="post" action="/config/new">
-    <div>
-        <label for="key">Key:</label>
-        <input type="text" name="key" required>
-        <label for="value">Value:</label>
-        <input type="text" name="value" required>
-        <button type="submit" class="btn btn-primary btn-sm">Add Config</button>
+    <div class="d-flex align-items-end mb-3">
+        <div class="mb-0 me-2">
+            <label for="key" class="form-label">Key:</label>
+            <input type="text" name="key" id="key" class="form-control" required>
+        </div>
+        <div class="mb-0 me-2">
+            <label for="value" class="form-label">Value:</label>
+            <input type="text" name="value" id="value" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Config</button>
     </div>
 </form>
 <hr>
 
 <form method="post" action="/config">
-    <table>
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th>Key</th>
                 <th>Value</th>
                 <th>Actions</th>
             </tr>
+        </thead>
+        <tbody>
         {% for item in config %}
         <tr>
             <td>
-                <label>{{ item.key }}</label>
+                {{ item.key }}
             </td>
             <td>
                 {% if item.key == 'RECITER' %}
@@ -52,8 +58,9 @@
             </td>
         </tr>
         {% endfor %}
+        </tbody>
     </table>
-    <button type="submit" class="btn btn-success">Save</button>
+    <button type="submit" class="btn btn-success">Save All Changes</button>
 </form>
 
 {% endblock %}
