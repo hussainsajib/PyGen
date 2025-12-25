@@ -20,14 +20,13 @@ from db_ops.crud_jobs import (
     delete_single_job,
     retry_job
 )
-from db_ops.crud_config import get_all_config, set_config_value, reload_config
+from config_manager import ConfigManager, config_manager, get_config_manager
 from processes.youtube_utils import (
     get_authenticated_service,
     get_all_playlists,
     get_videos_from_playlist,
     update_video_privacy,
 )
-from config_store import config_values
 
 load_dotenv()
 IMAGEMAGICK_BINARY=os.getenv("IMAGEMAGICK_BINARY")
@@ -36,11 +35,9 @@ IMAGEMAGICK_BINARY=os.getenv("IMAGEMAGICK_BINARY")
 async def lifespan(app: FastAPI):
     await init_db()
     
-    # Load configuration values into memory
+    # Load configuration values into memory using the config manager
     async with async_session() as session:
-        config_items = await get_all_config(session)
-        for item in config_items:
-            config_values[item.key] = item.value
+        await config_manager.load_from_db(session)
     
     asyncio.create_task(job_worker())
     yield
@@ -88,7 +85,11 @@ async def read_root(request: Request):
     return templates.TemplateResponse("index.html", context)
 
 @app.get("/surah", name="surah", response_class=HTMLResponse)
-def create_surah(request: Request, background_tasks: BackgroundTasks):
+def create_surah(
+    request: Request, 
+    background_tasks: BackgroundTasks,
+    config: ConfigManager = Depends(get_config_manager)
+):
     surahs = []
     reciters = []
     with open("data/surah_data.json", "r", encoding="utf-8") as f:
@@ -111,7 +112,7 @@ def create_surah(request: Request, background_tasks: BackgroundTasks):
         "request": request, 
         "surahs": surahs, 
         "reciters": reciters, 
-        "c_reciter": config_values.get("RECITER", "ar.alafasy")
+        "c_reciter": config.get("RECITER", "ar.alafasy")
     }
     return templates.TemplateResponse("surah.html", context)
 
@@ -183,22 +184,33 @@ async def retry_job_endpoint(job_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @app.get("/config", response_class=HTMLResponse, name="config")
-async def config_form(request: Request, db: AsyncSession = Depends(get_db)):
-    config = await get_all_config(db)
-    return templates.TemplateResponse("config.html", {"request": request, "config": config})
+async def config_form(
+    request: Request,
+    config: ConfigManager = Depends(get_config_manager)
+):
+    # Convert dict to list of dicts for template
+    config_items = [{"key": k, "value": v} for k, v in config.get_all().items()]
+    return templates.TemplateResponse("config.html", {"request": request, "config": config_items})
 
 @app.post("/config")
-async def save_config(request: Request, db: AsyncSession = Depends(get_db)):
+async def save_config(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
+):
     form = await request.form()
     for key, value in form.items():
-        await set_config_value(db, key, value)
-    await reload_config()
+        await config.set(db, key, value)
     return RedirectResponse(url="/config", status_code=303)
 
 @app.post("/config/new")
-async def create_config(key: str = Form(...), value: str = Form(...), db: AsyncSession = Depends(get_db)):
-    await set_config_value(db, key, value)
-    await reload_config()
+async def create_config(
+    key: str = Form(...),
+    value: str = Form(...),
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
+):
+    await config.set(db, key, value)
     return RedirectResponse(url="/config", status_code=303)
 
 @app.get("/playlists", name="playlists", response_class=HTMLResponse)
