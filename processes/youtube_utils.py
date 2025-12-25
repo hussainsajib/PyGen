@@ -168,4 +168,54 @@ def upload_to_youtube(video_details: str):
             print(f"✅ Video added to playlist {playlist_id}: {video_id}")
     if success:    
         print(f"https://www.youtube.com/watch?v={video_id}")
+
+def get_all_playlists(youtube):
+    """Fetches all playlists for the authenticated user."""
+    playlists = []
+    next_page_token = None
+    while True:
+        request = youtube.playlists().list(
+            part="snippet,contentDetails",
+            mine=True,
+            maxResults=50,
+            pageToken=next_page_token
+        )
+        response = request.execute()
+        playlists.extend(response.get("items", []))
+        next_page_token = response.get("nextPageToken")
+        if not next_page_token:
+            break
+    return playlists
+
+def get_videos_from_playlist(youtube, playlist_id):
+    """Fetches all video IDs from a specific playlist."""
+    video_ids = []
+    next_page_token = None
+    while True:
+        request = youtube.playlistItems().list(
+            part="contentDetails",
+            playlistId=playlist_id,
+            maxResults=50,
+            pageToken=next_page_token
+        )
+        response = request.execute()
+        for item in response.get("items", []):
+            video_ids.append(item["contentDetails"]["videoId"])
+        next_page_token = response.get("nextPageToken")
+        if not next_page_token:
+            break
+    return video_ids
+
+def update_video_privacy(youtube, video_id, privacy_status):
+    """Updates the privacy status of a single video."""
+    request = youtube.videos().update(
+        part="status",
+        body={
+            "id": video_id,
+            "status": {
+                "privacyStatus": privacy_status
+            }
+        }
+    )
+    request.execute()
     

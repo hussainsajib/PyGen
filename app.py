@@ -1,10 +1,10 @@
 import os
 import json
 import asyncio
-
+from fastapi.concurrency import run_in_threadpool
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, BackgroundTasks, Request, Depends, Form
+from fastapi import FastAPI, BackgroundTasks, Request, Depends, Form, Header
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.database import init_db, get_db, async_session
 from processes.processes import create_and_post, create_surah_video
-from processes.background_worker import job_worker
+from processes.background_worker import job_worker, logger
 from db_ops.crud_jobs import (
     get_all_jobs, 
     enqueue_job, 
@@ -21,6 +21,12 @@ from db_ops.crud_jobs import (
     retry_job
 )
 from db_ops.crud_config import get_all_config, set_config_value, reload_config
+from processes.youtube_utils import (
+    get_authenticated_service,
+    get_all_playlists,
+    get_videos_from_playlist,
+    update_video_privacy,
+)
 from config_store import config_values
 
 load_dotenv()
@@ -194,3 +200,32 @@ async def create_config(key: str = Form(...), value: str = Form(...), db: AsyncS
     await set_config_value(db, key, value)
     await reload_config()
     return RedirectResponse(url="/config", status_code=303)
+
+@app.get("/playlists", name="playlists", response_class=HTMLResponse)
+async def view_playlists(request: Request):
+    try:
+        youtube = await run_in_threadpool(get_authenticated_service)
+        playlists = await run_in_threadpool(get_all_playlists, youtube)
+        return templates.TemplateResponse("playlists.html", {"request": request, "playlists": playlists})
+    except Exception as e:
+        logger.error(f"Could not fetch YouTube playlists: {e}")
+        # You might want to render an error page or a message
+        return templates.TemplateResponse("playlists.html", {"request": request, "playlists": [], "error": str(e)})
+
+@app.post("/update-playlist-privacy", name="update_playlist_privacy")
+async def update_playlist_privacy_endpoint(
+    request: Request,
+    playlist_id: str = Form(...),
+    privacy_status: str = Form(...)
+):
+    try:
+        youtube = await run_in_threadpool(get_authenticated_service)
+        video_ids = await run_in_threadpool(get_videos_from_playlist, youtube, playlist_id)
+        
+        for video_id in video_ids:
+            await run_in_threadpool(update_video_privacy, youtube, video_id, privacy_status)
+            logger.info(f"Updated video {video_id} in playlist {playlist_id} to {privacy_status}")
+    except Exception as e:
+        logger.error(f"Failed to update playlist privacy: {e}")
+        # Optionally, add a message to show the user something went wrong
+    return RedirectResponse(url=request.url_for("playlists"), status_code=303)

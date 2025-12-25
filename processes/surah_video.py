@@ -26,7 +26,7 @@ def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, s
     audio_duration = full_audio.duration * 1000  # Convert to milliseconds
     if gstart_ms < 0 or gstart_ms >= audio_duration:
         raise ValueError(f"Invalid start time {gstart_ms} for Surah {surah.number}, Ayah {ayah}")
-    gend_ms = gend_ms if gend_ms < audio_duration else audio_duration
+    gend_ms = gend_ms if gend_ms <= audio_duration else audio_duration
     # Calculate the ayah duration in seconds
     duration = (gend_ms - gstart_ms) / 1000.0
     
@@ -117,7 +117,11 @@ def generate_surah(surah_number: int, reciter_tag: str):
             output_path, 
             codec='libx264', 
             fps=24, 
-            audio_codec="aac"
+            audio_codec="aac",
+            preset="ultrafast",
+            threads=4,
+            write_logfile=True,
+            logger="bar"
         )
     except Exception as e:
         print(str(e), flush=True)
