@@ -188,9 +188,26 @@ async def config_form(
     request: Request,
     config: ConfigManager = Depends(get_config_manager)
 ):
-    # Convert dict to list of dicts for template
+    # Load reciters for the dropdown
+    reciters = []
+    with open("data/reciter_info.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+        for key, info in data.items():
+            if "database" in info:
+                reciters.append({
+                    "key": key,
+                    "english_name": info["english_name"]
+                })
+    reciters.sort(key=lambda x: x["english_name"])
+
+    # Convert config dict to list of dicts for template
     config_items = [{"key": k, "value": v} for k, v in config.get_all().items()]
-    return templates.TemplateResponse("config.html", {"request": request, "config": config_items})
+    
+    return templates.TemplateResponse("config.html", {
+        "request": request, 
+        "config": config_items,
+        "reciters": reciters
+    })
 
 @app.post("/config")
 async def save_config(

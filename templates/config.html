@@ -30,7 +30,17 @@
                 <label>{{ item.key }}</label>
             </td>
             <td>
-                <input type="text" name="{{ item.key }}" value="{{ item.value }}">
+                {% if item.key == 'RECITER' %}
+                    <select name="{{ item.key }}" class="form-control">
+                        {% for reciter in reciters %}
+                            <option value="{{ reciter.key }}" {% if reciter.key == item.value %}selected{% endif %}>
+                                {{ reciter.english_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="form-control">
+                {% endif %}
             </td>
         </tr>
         {% endfor %}
