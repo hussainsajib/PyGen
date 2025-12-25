@@ -45,6 +45,16 @@
                             </option>
                         {% endfor %}
                     </select>
+                {% elif item.key == 'FONT_COLOR' %}
+                    <div class="d-flex align-items-center">
+                        <input type="color" id="font_color_picker" class="form-control form-control-color me-2" value="#C9B59C">
+                        <input type="text" name="{{ item.key }}" id="font_color_value" value="{{ item.value }}" class="form-control">
+                    </div>
+                {% elif item.key == 'BACKGROUND_RGB' %}
+                    <div class="d-flex align-items-center">
+                        <input type="color" id="bg_color_picker" class="form-control form-control-color me-2" value="#EFE9E3">
+                        <input type="text" name="{{ item.key }}" id="bg_color_value" value="{{ item.value }}" class="form-control">
+                    </div>
                 {% else %}
                     <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="form-control">
                 {% endif %}
@@ -63,4 +73,87 @@
     <button type="submit" class="btn btn-success">Save All Changes</button>
 </form>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- Helper Functions ---
+    const hexToRgb = (hex) => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    };
+
+    const componentToHex = (c) => {
+        const hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+    };
+
+    const rgbToHex = (r, g, b) => {
+        return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+    };
+
+    const parseRgbString = (rgbStr) => {
+        const match = rgbStr.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (match) {
+            return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) };
+        }
+        return null;
+    };
+
+    const parseTupleString = (tupleStr) => {
+        const match = tupleStr.match(/\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (match) {
+            return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) };
+        }
+        return null;
+    };
+
+
+    // --- FONT_COLOR Picker ---
+    const fontColorPicker = document.getElementById('font_color_picker');
+    const fontColorValue = document.getElementById('font_color_value');
+
+    if (fontColorPicker && fontColorValue) {
+        // Initialize picker from text value
+        const initialFontRgb = parseRgbString(fontColorValue.value);
+        if (initialFontRgb) {
+            fontColorPicker.value = rgbToHex(initialFontRgb.r, initialFontRgb.g, initialFontRgb.b);
+        }
+
+        // Update text value from picker
+        fontColorPicker.addEventListener('change', function() {
+            const rgb = hexToRgb(this.value);
+            if (rgb) {
+                fontColorValue.value = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            }
+        });
+    }
+
+
+    // --- BACKGROUND_RGB Picker ---
+    const bgColorPicker = document.getElementById('bg_color_picker');
+    const bgColorValue = document.getElementById('bg_color_value');
+
+    if (bgColorPicker && bgColorValue) {
+        // Initialize picker from text value
+        const initialBgRgb = parseTupleString(bgColorValue.value);
+        if (initialBgRgb) {
+            bgColorPicker.value = rgbToHex(initialBgRgb.r, initialBgRgb.g, initialBgRgb.b);
+        }
+
+        // Update text value from picker
+        bgColorPicker.addEventListener('change', function() {
+            const rgb = hexToRgb(this.value);
+            if (rgb) {
+                bgColorValue.value = `(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
