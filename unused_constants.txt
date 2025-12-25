@@ -1,0 +1,4 @@
+IMAGE_API_URL = "https://api.unsplash.com/photos/random?query=universe&orientation=landscape&client_id=gvKXwU6tDDoZl6N3O1YWUIrT19yqZZW6CQLlSEGoxew"
+RECITER="ar.alafasy"
+TRANSLATION="rawai_al_bayan"
+INTRO_DURATION = 4

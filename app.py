@@ -231,6 +231,15 @@ async def create_config(
     await config.set(db, key, value)
     return RedirectResponse(url="/config", status_code=303)
 
+@app.post("/config/delete/{key}", name="config_delete")
+async def delete_config(
+    key: str,
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
+):
+    await config.delete(db, key)
+    return RedirectResponse(url="/config", status_code=303)
+
 @app.get("/playlists", name="playlists", response_class=HTMLResponse)
 async def view_playlists(request: Request):
     try:

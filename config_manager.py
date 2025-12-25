@@ -57,6 +57,21 @@ class ConfigManager:
         
         await db_session.commit()
 
+    async def delete(self, db_session: AsyncSession, key: str):
+        """Deletes a key from the cache and the database."""
+        # Remove from cache
+        if key in self._config:
+            del self._config[key]
+
+        # Remove from database
+        stmt = select(Config).where(Config.key == key)
+        result = await db_session.execute(stmt)
+        db_config_item = result.scalars().first()
+
+        if db_config_item:
+            await db_session.delete(db_config_item)
+            await db_session.commit()
+
 # Singleton instance
 config_manager = ConfigManager()
 

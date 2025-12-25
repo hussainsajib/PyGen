@@ -23,6 +23,7 @@
             <tr>
                 <th>Key</th>
                 <th>Value</th>
+                <th>Actions</th>
             </tr>
         {% for item in config %}
         <tr>
@@ -41,6 +42,13 @@
                 {% else %}
                     <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="form-control">
                 {% endif %}
+            </td>
+            <td>
+                <form method="post" action="{{ url_for('config_delete', key=item.key) }}" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
             </td>
         </tr>
         {% endfor %}
