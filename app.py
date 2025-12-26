@@ -499,3 +499,9 @@ async def reciter_update(request: Request, reciter_id: int, db: AsyncSession = D
 async def reciter_delete(request: Request, reciter_id: int, db: AsyncSession = Depends(get_db)):
     await crud_reciters.delete_reciter(db, reciter_id)
     return RedirectResponse(url=request.url_for("reciters_list"), status_code=303)
+
+
+def validate_wbw_exists(filename: str):
+    if not filename:
+        return True # Optional field
+    return os.path.exists(os.path.join("databases", "word-by-word", filename))
