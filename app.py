@@ -281,11 +281,22 @@ async def update_playlist_privacy_endpoint(
 # --- Reciter CRUD Endpoints ---
 
 from processes.video_utils import discover_assets
+from itertools import groupby
 
 @app.get("/manual-upload", name="manual_upload", response_class=HTMLResponse)
 async def manual_upload(request: Request, db: AsyncSession = Depends(get_db)):
-    videos = await run_in_threadpool(discover_assets)
-    return templates.TemplateResponse(request, "manual_upload.html", {"videos": videos})
+    reciters = await crud_reciters.get_all_reciters(db)
+    videos = await run_in_threadpool(discover_assets, reciters)
+    
+    # Sort videos by reciter for grouping
+    videos.sort(key=lambda x: x["reciter"])
+    
+    # Group videos by reciter
+    grouped_videos = {}
+    for reciter, group in groupby(videos, key=lambda x: x["reciter"]):
+        grouped_videos[reciter] = list(group)
+        
+    return templates.TemplateResponse(request, "manual_upload.html", {"grouped_videos": grouped_videos})
 
 
 @app.get("/reciters", name="reciters_list", response_class=HTMLResponse)
