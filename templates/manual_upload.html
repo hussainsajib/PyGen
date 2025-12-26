@@ -53,10 +53,16 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <button class="btn btn-outline-primary btn-sm" 
-                                            {% if not video.details_present or not video.playlist_id %}disabled{% endif %}>
-                                        <i class="fab fa-youtube"></i> Upload
-                                    </button>
+                                    <form action="{{ url_for('trigger_manual_upload') }}" method="post" class="d-inline">
+                                        <input type="hidden" name="video_filename" value="{{ video.filename }}">
+                                        <input type="hidden" name="reciter_key" value="{{ video.reciter_key }}">
+                                        <input type="hidden" name="playlist_id" value="{{ video.playlist_id or '' }}">
+                                        <input type="hidden" name="details_filename" value="{{ video.details_filename }}">
+                                        <button type="submit" class="btn btn-outline-primary btn-sm" 
+                                                {% if not video.details_present or not video.playlist_id or not video.reciter_key %}disabled{% endif %}>
+                                            <i class="fab fa-youtube"></i> Upload
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                             {% endfor %}

@@ -42,3 +42,20 @@ async def retry_job(session: AsyncSession, job_id: int):
         job.progress = 0.0
         job.retry_count = 0
         await session.commit()
+
+
+async def enqueue_manual_upload_job(session: AsyncSession, video_filename: str, reciter_key: str, playlist_id: str, details_filename: str):
+    import json
+    data = {
+        "video_filename": video_filename,
+        "playlist_id": playlist_id,
+        "details_filename": details_filename
+    }
+    job = Job(
+        surah_number=0, # Special marker for manual upload
+        surah_name=json.dumps(data),
+        reciter=reciter_key
+    )
+    session.add(job)
+    await session.commit()
+    return job

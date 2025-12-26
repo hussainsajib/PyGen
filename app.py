@@ -18,8 +18,10 @@ from db_ops.crud_jobs import (
     enqueue_job, 
     clear_completed_jobs,
     delete_single_job,
-    retry_job
+    retry_job,
+    enqueue_manual_upload_job
 )
+
 from db_ops import crud_reciters
 from config_manager import ConfigManager, config_manager, get_config_manager
 from processes.youtube_utils import (
@@ -297,6 +299,19 @@ async def manual_upload(request: Request, db: AsyncSession = Depends(get_db)):
         grouped_videos[reciter] = list(group)
         
     return templates.TemplateResponse(request, "manual_upload.html", {"grouped_videos": grouped_videos})
+
+
+@app.post("/trigger-manual-upload", name="trigger_manual_upload")
+async def trigger_manual_upload(
+    request: Request,
+    video_filename: str = Form(...),
+    reciter_key: str = Form(...),
+    playlist_id: str = Form(None),
+    details_filename: str = Form(...),
+    db: AsyncSession = Depends(get_db)
+):
+    await enqueue_manual_upload_job(db, video_filename, reciter_key, playlist_id, details_filename)
+    return RedirectResponse(url=request.url_for("jobs"), status_code=303)
 
 
 @app.get("/reciters", name="reciters_list", response_class=HTMLResponse)

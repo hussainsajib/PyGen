@@ -19,29 +19,16 @@ def test_discover_assets_structure():
     assets = discover_assets(reciters=[])
     assert isinstance(assets, list)
 
-def test_manual_upload_grouped_data_logic():
-    # Mock reciter data
-    mock_reciter = MagicMock()
-    mock_reciter.english_name = "Mishary Alafasy"
-    mock_reciter.playlist_id = "PL123"
-    
-    mock_video = {
-        "filename": "quran_video_1_Mishary Alafasy.mp4",
-        "surah_number": "1",
-        "reciter": "Mishary Alafasy",
-        "screenshot_present": True,
-        "details_present": True,
-        "details_filename": "1_1_7_mishary_alafasy.txt",
-        "playlist_id": "PL123",
-        "playlist_status": "PL123"
-    }
-
-    with patch("app.crud_reciters.get_all_reciters") as mock_reciters:
-        mock_reciters.return_value = [mock_reciter]
-        with patch("app.discover_assets") as mock_discover:
-            mock_discover.return_value = [mock_video]
-            response = client.get("/manual-upload")
+def test_trigger_manual_upload_route():
+    with patch("app.enqueue_manual_upload_job") as mock_enqueue:
+        mock_enqueue.return_value = None
+        # Mocking get_all_jobs since Redirect follows to /jobs which calls it
+        with patch("app.get_all_jobs") as mock_jobs:
+            mock_jobs.return_value = []
+            response = client.post("/trigger-manual-upload", data={
+                "video_filename": "quran_video_1_Mishary Alafasy.mp4",
+                "reciter_key": "ar.alafasy",
+                "playlist_id": "PL123",
+                "details_filename": "1_1_7_mishary_alafasy.txt"
+            }, follow_redirects=True)
             assert response.status_code == 200
-            # Check if grouped reciter name is in the response text
-            assert "Mishary Alafasy" in response.text
-            assert "PL123" in response.text

@@ -151,18 +151,21 @@ def discover_assets(reciters=None):
         # Identify reciter and playlist
         reciter_name = re.sub(r'[\d_]+', ' ', rest).strip()
         playlist_id = None
+        reciter_key = None
         
         # Try to find a better reciter name and playlist_id from the map
         for norm_name, r_info in reciter_map.items():
             if norm_name in normalized_rest:
                 reciter_name = r_info["english_name"]
                 playlist_id = r_info["playlist_id"]
+                reciter_key = r_info["reciter_key"]
                 break
 
         videos.append({
             "filename": video_file,
             "surah_number": surah_num,
             "reciter": reciter_name,
+            "reciter_key": reciter_key,
             "screenshot_present": screenshot_present,
             "details_present": details_present,
             "details_filename": details_filename,
