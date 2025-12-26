@@ -1,9 +1,9 @@
 # Implementation Plan: Manual Video Upload Dashboard
 
 ## Phase 1: Foundation and UI
-- [ ] Task: Create initial route and template for the manual upload dashboard
-    - [ ] Sub-task: Write failing test for the `/manual-upload` route
-    - [ ] Sub-task: Implement the FastAPI route and a basic Jinja2 template
+- [x] Task: Create initial route and template for the manual upload dashboard c266378
+    - [x] Sub-task: Write failing test for the `/manual-upload` route
+    - [x] Sub-task: Implement the FastAPI route and a basic Jinja2 template
 - [ ] Task: Implement asset discovery logic
     - [ ] Sub-task: Write failing test for scanning `exported_data` directories
     - [ ] Sub-task: Implement logic to list videos and match with screenshots/details
