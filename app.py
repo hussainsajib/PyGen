@@ -361,6 +361,49 @@ async def view_asset(asset_type: str, asset_id: int, db: AsyncSession = Depends(
     return HTMLResponse("File not found on disk", status_code=404)
 
 
+@app.post("/delete-media/{asset_id}", name="delete_media")
+async def delete_media(asset_id: int, db: AsyncSession = Depends(get_db)):
+    asset = await crud_media_assets.get_media_asset_by_id(db, asset_id)
+    if asset:
+        # Delete from disk
+        paths = [asset.video_path, asset.screenshot_path, asset.details_path]
+        for path in paths:
+            if path and os.path.exists(path):
+                try:
+                    os.remove(path)
+                except Exception as e:
+                    logger.error(f"Failed to delete {path}: {e}")
+        
+        # Delete from DB
+        await crud_media_assets.delete_media_asset(db, asset_id)
+        
+    return RedirectResponse(url="/manual-upload", status_code=303)
+
+
+@app.post("/delete-bulk-media", name="delete_bulk_media")
+async def delete_bulk_media(request: Request, db: AsyncSession = Depends(get_db)):
+    form = await request.form()
+    asset_ids = form.getlist("asset_ids")
+    
+    for asset_id_str in asset_ids:
+        asset_id = int(asset_id_str)
+        asset = await crud_media_assets.get_media_asset_by_id(db, asset_id)
+        if asset:
+            # Delete from disk
+            paths = [asset.video_path, asset.screenshot_path, asset.details_path]
+            for path in paths:
+                if path and os.path.exists(path):
+                    try:
+                        os.remove(path)
+                    except Exception as e:
+                        logger.error(f"Failed to delete {path}: {e}")
+            
+            # Delete from DB
+            await crud_media_assets.delete_media_asset(db, asset_id)
+            
+    return RedirectResponse(url="/manual-upload", status_code=303)
+
+
 @app.get("/reciters", name="reciters_list", response_class=HTMLResponse)
 async def get_reciters_page(request: Request, db: AsyncSession = Depends(get_db)):
     reciters = await crud_reciters.get_all_reciters(db)

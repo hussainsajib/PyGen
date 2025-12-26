@@ -9,87 +9,117 @@
     {% if not grouped_videos %}
     <div class="alert alert-info">No videos found in media_assets database</div>
     {% else %}
-        {% for reciter, videos in grouped_videos.items() %}
-        {% set reciter_id = reciter|replace(' ', '_')|replace('.', '_')|replace('-', '_') %}
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center" 
-                 style="cursor: pointer;" 
-                 data-bs-toggle="collapse" 
-                 data-bs-target="#collapse_{{ reciter_id }}" 
-                 aria-expanded="false" 
-                 aria-controls="collapse_{{ reciter_id }}">
-                <h3 class="mb-0">
-                    <i class="fas fa-chevron-down me-2"></i> {{ reciter }}
-                </h3>
-                <span class="badge bg-light text-primary">{{ videos|length }} Videos</span>
+        <form id="bulkDeleteForm" action="{{ url_for('delete_bulk_media') }}" method="post">
+            <div class="d-flex justify-content-end mb-3">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete all selected media assets and their files from disk?')">
+                    <i class="fas fa-trash-alt"></i> Delete Selected
+                </button>
             </div>
-            <div id="collapse_{{ reciter_id }}" class="collapse">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Video Filename</th>
-                                    <th>Details</th>
-                                    <th>Screenshot</th>
-                                    <th>Playlist ID</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for video in videos %}
-                                <tr>
-                                    <td>
-                                        <a href="{{ url_for('view_asset', asset_type='video', asset_id=video.id) }}" target="_blank" class="text-decoration-none">
-                                            <i class="fas fa-play-circle me-1"></i> {{ video.filename }}
-                                        </a>
-                                    </td>
-                                    <td>
-                                        {% if video.details_present %}
-                                        <a href="{{ url_for('view_asset', asset_type='details', asset_id=video.id) }}" target="_blank" class="badge bg-success text-decoration-none">
-                                            <i class="fas fa-file-alt"></i> Yes
-                                        </a>
-                                        {% else %}
-                                        <span class="badge bg-danger">No</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if video.screenshot_present %}
-                                        <a href="{{ url_for('view_asset', asset_type='screenshot', asset_id=video.id) }}" target="_blank" class="badge bg-success text-decoration-none">
-                                            <i class="fas fa-image"></i> Yes
-                                        </a>
-                                        {% else %}
-                                        <span class="badge bg-danger">No</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if video.playlist_id %}
-                                        <code>{{ video.playlist_id }}</code>
-                                        {% else %}
-                                        <span class="text-muted">No Playlist</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <form action="{{ url_for('trigger_manual_upload') }}" method="post" class="d-inline">
-                                            <input type="hidden" name="video_filename" value="{{ video.filename }}">
-                                            <input type="hidden" name="reciter_key" value="{{ video.reciter_key }}">
-                                            <input type="hidden" name="playlist_id" value="{{ video.playlist_id or '' }}">
-                                            <input type="hidden" name="details_filename" value="{{ video.details_filename }}">
-                                            <button type="submit" class="btn btn-outline-primary btn-sm" 
-                                                    {% if not video.details_present or not video.playlist_id or not video.reciter_key %}disabled{% endif %}>
-                                                <i class="fab fa-youtube"></i> Upload
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+
+            {% for reciter, videos in grouped_videos.items() %}
+            {% set reciter_id = reciter|replace(' ', '_')|replace('.', '_')|replace('-', '_') %}
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center" 
+                     style="cursor: pointer;" 
+                     data-bs-toggle="collapse" 
+                     data-bs-target="#collapse_{{ reciter_id }}" 
+                     aria-expanded="false" 
+                     aria-controls="collapse_{{ reciter_id }}">
+                    <h3 class="mb-0">
+                        <i class="fas fa-chevron-down me-2"></i> {{ reciter }}
+                    </h3>
+                    <span class="badge bg-light text-primary">{{ videos|length }} Videos</span>
+                </div>
+                <div id="collapse_{{ reciter_id }}" class="collapse">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;"><input type="checkbox" class="select-all" data-target="reciter_{{ reciter_id }}"></th>
+                                        <th>Video Filename</th>
+                                        <th>Details</th>
+                                        <th>Screenshot</th>
+                                        <th>Playlist ID</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reciter_{{ reciter_id }}">
+                                    {% for video in videos %}
+                                    <tr>
+                                        <td><input type="checkbox" name="asset_ids" value="{{ video.id }}" class="asset-checkbox"></td>
+                                        <td>
+                                            <a href="{{ url_for('view_asset', asset_type='video', asset_id=video.id) }}" target="_blank" class="text-decoration-none">
+                                                <i class="fas fa-play-circle me-1"></i> {{ video.filename }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            {% if video.details_present %}
+                                            <a href="{{ url_for('view_asset', asset_type='details', asset_id=video.id) }}" target="_blank" class="badge bg-success text-decoration-none">
+                                                <i class="fas fa-file-alt"></i> Yes
+                                            </a>
+                                            {% else %}
+                                            <span class="badge bg-danger">No</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if video.screenshot_present %}
+                                            <a href="{{ url_for('view_asset', asset_type='screenshot', asset_id=video.id) }}" target="_blank" class="badge bg-success text-decoration-none">
+                                                <i class="fas fa-image"></i> Yes
+                                            </a>
+                                            {% else %}
+                                            <span class="badge bg-danger">No</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if video.playlist_id %}
+                                            <code>{{ video.playlist_id }}</code>
+                                            {% else %}
+                                            <span class="text-muted">No Playlist</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <form action="{{ url_for('trigger_manual_upload') }}" method="post" class="d-inline">
+                                                    <input type="hidden" name="video_filename" value="{{ video.filename }}">
+                                                    <input type="hidden" name="reciter_key" value="{{ video.reciter_key }}">
+                                                    <input type="hidden" name="playlist_id" value="{{ video.playlist_id or '' }}">
+                                                    <input type="hidden" name="details_filename" value="{{ video.details_filename }}">
+                                                    <button type="submit" class="btn btn-outline-primary btn-sm" 
+                                                            {% if not video.details_present or not video.playlist_id or not video.reciter_key %}disabled{% endif %}>
+                                                        <i class="fab fa-youtube"></i> Upload
+                                                    </button>
+                                                </form>
+                                                <form action="{{ url_for('delete_media', asset_id=video.id) }}" method="post" class="d-inline ms-1">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete video and all related files from disk?')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        {% endfor %}
+            {% endfor %}
+        </form>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelectorAll('.select-all').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const targetId = this.getAttribute('data-target');
+            document.querySelectorAll(`#${targetId} .asset-checkbox`).forEach(cb => {
+                cb.checked = this.checked;
+            });
+        });
+    });
+</script>
 {% endblock %}
