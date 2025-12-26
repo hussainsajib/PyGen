@@ -4,9 +4,9 @@
 - [x] Task: Create initial route and template for the manual upload dashboard c266378
     - [x] Sub-task: Write failing test for the `/manual-upload` route
     - [x] Sub-task: Implement the FastAPI route and a basic Jinja2 template
-- [ ] Task: Implement asset discovery logic
-    - [ ] Sub-task: Write failing test for scanning `exported_data` directories
-    - [ ] Sub-task: Implement logic to list videos and match with screenshots/details
+- [x] Task: Implement asset discovery logic 44468eb
+    - [x] Sub-task: Write failing test for scanning `exported_data` directories
+    - [x] Sub-task: Implement logic to list videos and match with screenshots/details
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation and UI' (Protocol in workflow.md)
 
 ## Phase 2: Reciter and Playlist Integration
