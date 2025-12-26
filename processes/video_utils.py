@@ -77,3 +77,86 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
     
     return {"video": output_path, "info": info_file_path, "is_short": is_short, "reciter": reciter.tag}
 
+
+def discover_assets():
+    import os
+    import re
+    
+    video_dir = "exported_data/videos"
+    screenshot_dir = "exported_data/screenshots"
+    detail_dir = "exported_data/details"
+    
+    if not os.path.exists(video_dir):
+        return []
+        
+    videos = []
+    
+    # List all mp4 files in video_dir
+    video_files = [f for f in os.listdir(video_dir) if f.endswith(".mp4")]
+    
+    # Helper to normalize strings for matching
+    def normalize(s):
+        return re.sub(r'[^a-z0-9]', '', s.lower())
+
+    for video_file in video_files:
+        # Extract surah and other info from filename
+        # Pattern: quran_video_{surah}_{rest}.mp4
+        match = re.match(r'quran_video_(\d+)_(.+)\.mp4', video_file)
+        if not match:
+            continue
+            
+        surah_num = match.group(1)
+        rest = match.group(2)
+        
+        # Normalize rest (contains range and/or reciter)
+        normalized_rest = normalize(rest)
+        
+        # Check for screenshot
+        # Patterns: 
+        # screenshot_quran_video_{surah}_{rest}.png
+        # screenshot_quran_video_{surah}_{reciter}.png
+        screenshot_present = False
+        if os.path.exists(screenshot_dir):
+            screenshot_pattern = f"screenshot_quran_video_{surah_num}_{rest}.png"
+            if os.path.exists(os.path.join(screenshot_dir, screenshot_pattern)):
+                screenshot_present = True
+            else:
+                # Try normalized match if exact fails
+                for s_file in os.listdir(screenshot_dir):
+                    if s_file.startswith(f"screenshot_quran_video_{surah_num}_") and normalize(s_file) == normalize(f"screenshot_quran_video_{surah_num}_{rest}.png"):
+                        screenshot_present = True
+                        break
+
+        # Check for details
+        # Pattern: {surah}_{start}_{end}_{reciter}.txt or {surah}_{rest}.txt
+        details_present = False
+        details_filename = ""
+        if os.path.exists(detail_dir):
+            # Try to find a file that starts with surah_ and contains reciter parts
+            for d_file in os.listdir(detail_dir):
+                if d_file.startswith(f"{surah_num}_") and d_file.endswith(".txt"):
+                    # If the rest of the filename (normalized) is in the video rest (normalized) or vice versa
+                    d_base = d_file[:-4]
+                    if normalize(d_base) in normalized_rest or normalized_rest in normalize(d_base):
+                        details_present = True
+                        details_filename = d_file
+                        break
+        
+        # Try to infer reciter name from 'rest'
+        # This is a bit tricky, but let's take the non-numeric part of 'rest'
+        reciter_name = re.sub(r'[\d_]+', ' ', rest).strip()
+        if not reciter_name:
+            reciter_name = rest
+
+        videos.append({
+            "filename": video_file,
+            "surah_number": surah_num,
+            "reciter": reciter_name,
+            "screenshot_present": screenshot_present,
+            "details_present": details_present,
+            "details_filename": details_filename,
+            "playlist_status": "Unknown" # To be implemented in Phase 2
+        })
+        
+    return videos
+
