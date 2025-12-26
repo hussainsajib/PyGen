@@ -28,13 +28,13 @@
     - [x] Sub-task: Add modals or new-tab links for viewing videos, screenshots, and details text
 - [x] Task: Conductor - User Manual Verification 'Phase 3: UI Enhancements and Asset Viewers' (Protocol in workflow.md)
 
-## Phase 4: Atomic and Bulk File Management
-- [ ] Task: Implement Atomic Deletion
-    - [ ] Sub-task: Write failing test for deleting a record and its 3 associated files from disk
-    - [ ] Sub-task: Implement `/delete-media/{id}` endpoint with logic for disk cleanup and DB removal
-- [ ] Task: Implement Bulk Deletion
-    - [ ] Sub-task: Write failing test for bulk deletion logic
-    - [ ] Sub-task: Implement endpoint to handle multiple IDs and perform atomic deletion for each
-- [ ] Task: Update UI for Deletion Actions
-    - [ ] Sub-task: Add individual delete buttons and checkboxes for multi-select bulk actions in the dashboard
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Atomic and Bulk File Management' (Protocol in workflow.md)
+## Phase 4: Atomic and Bulk File Management [checkpoint: 538406f]
+- [x] Task: Implement Atomic Deletion
+    - [x] Sub-task: Write failing test for deleting a record and its 3 associated files from disk
+    - [x] Sub-task: Implement `/delete-media/{id}` endpoint with logic for disk cleanup and DB removal
+- [x] Task: Implement Bulk Deletion
+    - [x] Sub-task: Write failing test for bulk deletion logic
+    - [x] Sub-task: Implement endpoint to handle multiple IDs and perform atomic deletion for each
+- [x] Task: Update UI for Deletion Actions
+    - [x] Sub-task: Add individual delete buttons and checkboxes for multi-select bulk actions in the dashboard
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Atomic and Bulk File Management' (Protocol in workflow.md)
