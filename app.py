@@ -285,18 +285,38 @@ async def update_playlist_privacy_endpoint(
 from processes.video_utils import discover_assets
 from itertools import groupby
 
+from db_ops import crud_media_assets
+
 @app.get("/manual-upload", name="manual_upload", response_class=HTMLResponse)
 async def manual_upload(request: Request, db: AsyncSession = Depends(get_db)):
+    assets = await crud_media_assets.get_all_media_assets(db)
     reciters = await crud_reciters.get_all_reciters(db)
-    videos = await run_in_threadpool(discover_assets, reciters)
     
-    # Sort videos by reciter for grouping
-    videos.sort(key=lambda x: x["reciter"])
+    reciter_map = {r.reciter_key: r for r in reciters}
     
-    # Group videos by reciter
+    # Enrich assets with reciter info
+    enriched_assets = []
+    for asset in assets:
+        reciter = reciter_map.get(asset.reciter_key)
+        enriched_assets.append({
+            "id": asset.id,
+            "filename": asset.filename,
+            "reciter": reciter.english_name if reciter else asset.reciter_key,
+            "reciter_key": asset.reciter_key,
+            "screenshot_present": asset.screenshot_present,
+            "details_present": asset.details_present,
+            "details_filename": os.path.basename(asset.details_path) if asset.details_path else "",
+            "playlist_id": reciter.playlist_id if reciter else None,
+            "playlist_status": reciter.playlist_id if reciter and reciter.playlist_id else "No Playlist"
+        })
+    
+    # Sort enriched assets by reciter name for grouping
+    enriched_assets.sort(key=lambda x: x["reciter"])
+    
+    # Group by reciter
     grouped_videos = {}
-    for reciter, group in groupby(videos, key=lambda x: x["reciter"]):
-        grouped_videos[reciter] = list(group)
+    for reciter_name, group in groupby(enriched_assets, key=lambda x: x["reciter"]):
+        grouped_videos[reciter_name] = list(group)
         
     return templates.TemplateResponse(request, "manual_upload.html", {"grouped_videos": grouped_videos})
 
@@ -312,6 +332,33 @@ async def trigger_manual_upload(
 ):
     await enqueue_manual_upload_job(db, video_filename, reciter_key, playlist_id, details_filename)
     return RedirectResponse(url=request.url_for("jobs"), status_code=303)
+
+
+from fastapi.responses import FileResponse
+
+@app.get("/view-asset/{asset_type}/{asset_id}", name="view_asset")
+async def view_asset(asset_type: str, asset_id: int, db: AsyncSession = Depends(get_db)):
+    asset = await crud_media_assets.get_media_asset_by_id(db, asset_id)
+    if not asset:
+        return HTMLResponse("Asset not found", status_code=404)
+    
+    path = None
+    if asset_type == "video":
+        path = asset.video_path
+    elif asset_type == "screenshot":
+        path = asset.screenshot_path
+    elif asset_type == "details":
+        path = asset.details_path
+        # For details, we might want to return as text or wrap in HTML
+        if path and os.path.exists(path):
+            with open(path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            return HTMLResponse(f"<html><body><pre>{content}</pre></body></html>")
+    
+    if path and os.path.exists(path):
+        return FileResponse(path)
+    
+    return HTMLResponse("File not found on disk", status_code=404)
 
 
 @app.get("/reciters", name="reciters_list", response_class=HTMLResponse)

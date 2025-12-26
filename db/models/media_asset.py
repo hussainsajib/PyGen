@@ -25,3 +25,27 @@ class MediaAsset(Base):
 
     def __repr__(self):
         return f"<MediaAsset(id={self.id}, surah={self.surah_number}, reciter={self.reciter_key})>"
+
+    @property
+    def filename(self):
+        import os
+        return os.path.basename(self.video_path)
+    
+    @property
+    def reciter(self):
+        # This is for grouping in UI, we should probably fetch the actual reciter name from the DB 
+        # but for now let's return the key if it's all we have
+        return self.reciter_key
+
+    @property
+    def screenshot_present(self):
+        return self.screenshot_path is not None
+
+    @property
+    def details_present(self):
+        return self.details_path is not None
+    
+    @property
+    def playlist_id(self):
+        # This will be used in UI, we should probably link to Reciter model
+        return None 
