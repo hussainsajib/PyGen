@@ -10,9 +10,9 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation and UI' (Protocol in workflow.md)
 
 ## Phase 2: Reciter and Playlist Integration
-- [ ] Task: Map videos to Reciter database entities
-    - [ ] Sub-task: Write failing test for reciter mapping from filenames
-    - [ ] Sub-task: Implement reciter identification and metadata retrieval
+- [x] Task: Map videos to Reciter database entities d8064f5
+    - [x] Sub-task: Write failing test for reciter mapping from filenames
+    - [x] Sub-task: Implement reciter identification and metadata retrieval
 - [ ] Task: Verify YouTube playlist availability for reciters
     - [ ] Sub-task: Write failing test for checking playlists via YouTube API
     - [ ] Sub-task: Implement playlist check and display status in UI
