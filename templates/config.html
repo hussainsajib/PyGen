@@ -55,6 +55,11 @@
                         <input type="color" id="bg_color_picker" class="form-control form-control-color me-2" value="#EFE9E3">
                         <input type="text" name="{{ item.key }}" id="bg_color_value" value="{{ item.value }}" class="form-control">
                     </div>
+                {% elif item.key == 'UPLOAD_TO_YOUTUBE' %}
+                    <div class="form-check form-switch">
+                        <input type="checkbox" id="upload_to_youtube_checkbox" class="form-check-input" role="switch" {% if item.value == 'True' %}checked{% endif %}>
+                        <input type="hidden" name="{{ item.key }}" id="upload_to_youtube_value" value="{{ item.value }}">
+                    </div>
                 {% else %}
                     <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="form-control">
                 {% endif %}
@@ -152,6 +157,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (rgb) {
                 bgColorValue.value = `(${rgb.r}, ${rgb.g}, ${rgb.b})`;
             }
+        });
+    }
+
+    // --- UPLOAD_TO_YOUTUBE Checkbox ---
+    const uploadCheckbox = document.getElementById('upload_to_youtube_checkbox');
+    const uploadValue = document.getElementById('upload_to_youtube_value');
+
+    if (uploadCheckbox && uploadValue) {
+        uploadCheckbox.addEventListener('change', function() {
+            uploadValue.value = this.checked ? "True" : "False";
         });
     }
 });
