@@ -17,9 +17,9 @@
     - [x] Sub-task: Implement logic to calculate start/end times for each line based on aggregated individual word segments.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Core Segmentation Logic' (Protocol in workflow.md)
 
-## Phase 3: Video Engine Integration
-- [ ] Task: Implement Multi-Line Rendering in Clip Generation
-    - [ ] Sub-task: Write failing tests for generating an ayah clip with segmented WBW lines.
-    - [ ] Sub-task: Update `processes/surah_video.py` to handle the new line-based rendering workflow.
-    - [ ] Sub-task: Update `factories/single_clip.py` to support rendering grouped segments with configurable font sizes and layout.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Video Engine Integration' (Protocol in workflow.md)
+## Phase 3: Video Engine Integration [checkpoint: a0fc55f]
+- [x] Task: Implement Multi-Line Rendering in Clip Generation
+    - [x] Sub-task: Write failing tests for generating an ayah clip with segmented WBW lines.
+    - [x] Sub-task: Update `processes/surah_video.py` to handle the new line-based rendering workflow.
+    - [x] Sub-task: Update `factories/single_clip.py` to support rendering grouped segments with configurable font sizes and layout.
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Video Engine Integration' (Protocol in workflow.md)
