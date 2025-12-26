@@ -55,9 +55,15 @@ change_settings({"IMAGEMAGICK_BINARY": IMAGEMAGICK_BINARY})
 
 
 @app.get("/create-video")
-def create_video(request: Request, background_tasks: BackgroundTasks, 
-                 surah: int, start_verse: int, end_verse: int, reciter: str,
-                 is_short: bool = False):
+async def create_video(
+    request: Request, 
+    background_tasks: BackgroundTasks, 
+    surah: int, 
+    start_verse: int, 
+    end_verse: int, 
+    reciter: str,
+    is_short: bool = False
+):
     background_tasks.add_task(create_and_post, surah, start_verse, end_verse, reciter, is_short)
     return RedirectResponse(request.url_for("index"))
 

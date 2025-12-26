@@ -4,8 +4,6 @@ from processes.video_utils import generate_video
 from processes.youtube_utils import upload_to_youtube
 from processes.screenshot import extract_frame
 from processes.surah_video import generate_surah
-
-
 def create_and_post(surah: int, start_verse: int, end_verse:int, 
                     reciter: str, is_short:bool = False):
     video_details = generate_video(surah, start_verse, end_verse, reciter, is_short)

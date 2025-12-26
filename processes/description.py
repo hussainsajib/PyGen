@@ -2,7 +2,7 @@ import os
 
 from bangla import convert_english_digit_to_bangla_digit as e2b
 
-from processes.Classes import Surah, Reciter, Verse
+from processes.Classes import Surah, Reciter
 
 
 
