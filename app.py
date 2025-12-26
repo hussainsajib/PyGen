@@ -68,7 +68,7 @@ async def create_video(
     return RedirectResponse(request.url_for("index"))
 
 @app.get("/", name="index", response_class=HTMLResponse)
-async def read_root(request: Request):
+async def read_root(request: Request, db: AsyncSession = Depends(get_db)):
     surahs = []
     reciters = []
 
@@ -79,23 +79,25 @@ async def read_root(request: Request):
             surahs.append(surah)
     surahs.sort(key=lambda x: x["number"])
 
-    with open("data/reciter_info.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
-        for k, v in data.items():
-            if "folder" in v.keys():
-                reciters.append({
-                        "english_name": v["english_name"],
-                        "key": k
-                })
+    # Load reciters from database that have a 'database' entry
+    db_reciters = await crud_reciters.get_all_reciters(db)
+    for r in db_reciters:
+        if r.database:
+            reciters.append({
+                "english_name": r.english_name,
+                "key": r.reciter_key
+            })
     reciters.sort(key=lambda x: x["english_name"])
+    
     context = {"request": request, "surahs": surahs, "reciters": reciters}
     return templates.TemplateResponse("index.html", context)
 
 @app.get("/surah", name="surah", response_class=HTMLResponse)
-def create_surah(
+async def create_surah(
     request: Request, 
     background_tasks: BackgroundTasks,
-    config: ConfigManager = Depends(get_config_manager)
+    config: ConfigManager = Depends(get_config_manager),
+    db: AsyncSession = Depends(get_db)
 ):
     surahs = []
     reciters = []
@@ -106,15 +108,16 @@ def create_surah(
             surahs.append(surah_data)
     surahs.sort(key=lambda x: x["number"])
     
-    with open("data/reciter_info.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
-        for k, v in data.items():
-            if "database" in v.keys():
-                reciters.append({
-                        "english_name": v["english_name"],
-                        "key": k
-                })
+    # Load reciters from database that have a 'database' entry
+    db_reciters = await crud_reciters.get_all_reciters(db)
+    for r in db_reciters:
+        if r.database:
+            reciters.append({
+                "english_name": r.english_name,
+                "key": r.reciter_key
+            })
     reciters.sort(key=lambda x: x["english_name"])
+    
     context = {
         "request": request, 
         "surahs": surahs, 
