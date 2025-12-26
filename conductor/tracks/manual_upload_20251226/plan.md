@@ -22,7 +22,7 @@
 - [x] Task: Create background upload job e93fa6c
     - [x] Sub-task: Write failing test for triggering an upload job
     - [x] Sub-task: Implement the background task logic using existing YouTube utilities
-- [ ] Task: Add "Upload" button and progress feedback
-    - [ ] Sub-task: Write failing test for the upload button interaction
-    - [ ] Sub-task: Update UI with upload trigger and real-time status updates
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Background Upload Integration' (Protocol in workflow.md)
+- [x] Task: Add "Upload" button and progress feedback
+    - [x] Sub-task: Write failing test for the upload button interaction
+    - [x] Sub-task: Update UI with upload trigger and real-time status updates
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Background Upload Integration' (Protocol in workflow.md)
