@@ -3,54 +3,73 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<div>
-    <h1 style="margin-bottom: 20px;">Select Surah and Verse Range</h1>
-    <form action="/create-video" method="get">
-        <!-- Surah Selection -->
-        <div>
-            <label for="surah">Select Surah:</label>
-            <select id="surah" name="surah" onchange="updateVerseOptions()" required>
-                <option value="" disabled selected>Select Surah</option>
-                {% for surah in surahs %}
-                <option value="{{ surah.number }}">{{ surah.number }}. {{ surah.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <br/>
-        
-        <div>
-            <label for="start_verse">Starting Verse:</label>
-            <select id="start_verse" name="start_verse" onchange="updateEndVerseOptions()" required>
-                <!-- Options populated by JavaScript -->
-            </select>
-            
-            <label for="end_verse">Ending Verse:</label>
-            <select id="end_verse" name="end_verse" required>
-                <!-- Options populated by JavaScript -->
-            </select>
-        </div>
-        <br>
-        <div>
-            <label for="reciter">Select Reciter:</label>
-            <select id="reciter" name="reciter" required>
-                {% for r in reciters %}
-                <option value="{{r.key}}" {% if r.key=="ar.alafasy" %} selected="selected"{% endif %}>{{ r.english_name }}</option>
-                {% endfor %}
-                
-            </select>
-        </div>
-        <br>
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Create Verse Range Video</h3>
+            </div>
+            <div class="card-body">
+                <form action="/create-video" method="get">
+                    <!-- Surah Selection -->
+                    <div class="mb-3">
+                        <label for="surah" class="form-label">Select Surah:</label>
+                        <select id="surah" name="surah" class="form-select" onchange="updateVerseOptions()" required>
+                            <option value="" disabled selected>Select Surah</option>
+                            {% for surah in surahs %}
+                            <option value="{{ surah.number }}">{{ surah.number }}. {{ surah.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-        <div>
-        <label>Create short:</label>
-            <input type="radio" id="is_short" name="is_short" value="true">
-            <label for="short">Yes</label>
-            <input type="radio" id="is_short" name="is_short" value="false" checked>
-            <label for="regular">No</label>
+                    <!-- Verse Range -->
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="start_verse" class="form-label">Starting Verse:</label>
+                            <select id="start_verse" name="start_verse" class="form-select" onchange="updateEndVerseOptions()" required>
+                                <option value="" disabled selected>-</option>
+                                <!-- Options populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label for="end_verse" class="form-label">Ending Verse:</label>
+                            <select id="end_verse" name="end_verse" class="form-select" required>
+                                <option value="" disabled selected>-</option>
+                                <!-- Options populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Reciter Selection -->
+                    <div class="mb-3">
+                        <label for="reciter" class="form-label">Select Reciter:</label>
+                        <select id="reciter" name="reciter" class="form-select" required>
+                            {% for r in reciters %}
+                            <option value="{{r.key}}" {% if r.key=="ar.alafasy" %} selected="selected"{% endif %}>{{ r.english_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Short Toggle -->
+                    <div class="mb-4">
+                        <label class="form-label d-block">Create short:</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="is_short_true" name="is_short" value="true">
+                            <label class="form-check-label" for="is_short_true">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="is_short_false" name="is_short" value="false" checked>
+                            <label class="form-check-label" for="is_short_false">No</label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Generate Video</button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <br>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+    </div>
 </div>
 
 <script>
@@ -84,6 +103,8 @@
         const startVerse = parseInt(startVerseSelect.value, 10);
         const surahNumber = document.getElementById("surah").value;
         const selectedSurah = surahs.find(surah => surah.number == surahNumber);
+
+        if (!selectedSurah) return;
 
         // Clear current options in end_verse
         endVerseSelect.innerHTML = "";

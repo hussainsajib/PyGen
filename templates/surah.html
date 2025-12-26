@@ -1,65 +1,76 @@
 {% extends "base.html" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Surah Generation{% endblock %}
 
 {% block content %}
-<div>
-    <h1 style="margin-bottom: 20px;">Select Surah and Verse Range</h1>
-    <form method="get" id="surah-form" action="/create-surah-video">
-        <div class="d-flex gap-3" style="margin-bottom: 20px;">
-            <div>
-                <label for="surah">Select Surah:</label>
-                <select class="form-select" name="surah_number" id="surah-select">
-                    {% for surah in surahs %}
-                        <option value="{{ surah.number }}">
-                            {{ surah.number }} - {{ surah.name }}
-                        </option>
-                    {% endfor %}
-                </select>
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <!-- Single Surah Card -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Create Single Surah Video</h3>
             </div>
-            <br>
-            <div>
-                <label for="reciter1">Select Reciter:</label>
-                <select class="form-select" id="reciter1" name="reciter" required>
-                    {% for r in reciters %}
-                    <option value="{{r.key}}" {% if r.key == c_reciter %} selected="selected"{% endif %}>{{ r.english_name }}</option>
-                    {% endfor %}
-                    
-                </select>
+            <div class="card-body">
+                <form method="get" id="surah-form" action="/create-surah-video">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="surah-select" class="form-label">Select Surah:</label>
+                            <select class="form-select" name="surah_number" id="surah-select">
+                                {% for surah in surahs %}
+                                    <option value="{{ surah.number }}">
+                                        {{ surah.number }}. {{ surah.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="reciter1" class="form-label">Select Reciter:</label>
+                            <select class="form-select" id="reciter1" name="reciter" required>
+                                {% for r in reciters %}
+                                <option value="{{r.key}}" {% if r.key == c_reciter %} selected="selected"{% endif %}>{{ r.english_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Enqueue Job</button>
+                    </div>
+                </form>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary btn-lg">Generate</button>
-    </form>
 
-    <h1>Queue Video Jobs for All Surah</h1>
-    <form method="get" id="all-surah-form" action="/create-all-surah-videos">
-    <div>
-        <label for="reciter2">Select Reciter:</label>
-        <select class="form-select" id="reciter2" name="reciter" required>
-            {% for r in reciters %}
-                <option value="{{r.key}}" {% if r.key == c_reciter %} selected="selected"{% endif %}>{{ r.english_name }}</option>
-            {% endfor %}
-        </select>
+        <!-- All Surahs Card -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h3 class="mb-0">Queue Video Jobs for All Surahs</h3>
+            </div>
+            <div class="card-body">
+                <form method="get" id="all-surah-form" action="/create-all-surah-videos">
+                    <div class="mb-3">
+                        <label for="reciter2" class="form-label">Select Reciter:</label>
+                        <select class="form-select" id="reciter2" name="reciter" required>
+                            {% for r in reciters %}
+                                <option value="{{r.key}}" {% if r.key == c_reciter %} selected="selected"{% endif %}>{{ r.english_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="alert alert-warning">
+                        <strong>Note:</strong> This will create 114 separate video generation jobs.
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-dark btn-lg">Create 114 Jobs</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <button type="submit" class="btn btn-primary btn-lg">Create 114 Jobs</button>
-</form>
 </div>
 
 <script>
-    document.getElementById('surah-form').addEventListener('submit', function(e) {
-        e.preventDefault();  // prevent default form submit
-        const surahNumber = document.getElementById('surah-select').value;
-        const form = e.target;
-        form.action = `/create-surah-video`;
-        form.submit();  // now submit with updated action
-    });
-
-    document.getElementById('all-surah-form').addEventListener('submit', function(e) {
-        e.preventDefault();  // prevent default form submit
-        const form = e.target;
-        form.action = `/create-all-surah-videos`;
-        form.submit();  // now submit with updated action
-    });
+    // The forms already have the correct action attributes set in the HTML now, 
+    // but I'll keep the prevDefault if there was logic intended there.
+    // However, looking at the previous code, it was just setting the action which is already in HTML.
+    // I'll simplify the script.
 </script>
 
 {% endblock %}
