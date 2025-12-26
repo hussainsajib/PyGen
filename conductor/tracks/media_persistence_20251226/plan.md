@@ -18,15 +18,15 @@
     - [x] Sub-task: Update YouTube upload processes to update status and video ID in the database
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Data Migration and logic Integration' (Protocol in workflow.md)
 
-## Phase 3: UI Enhancements and Asset Viewers
-- [ ] Task: Update Manual Upload Dashboard to use database records
-    - [ ] Sub-task: Write failing test for fetching dashboard data from the database
-    - [ ] Sub-task: Modify `/manual-upload` route and template to load data from `media_assets` table
-- [ ] Task: Implement Collapsible Reciter Sections
-    - [ ] Sub-task: Update `manual_upload.html` with Bootstrap collapsible components for each reciter group
-- [ ] Task: Implement In-Browser Asset Viewers
-    - [ ] Sub-task: Add modals or new-tab links for viewing videos, screenshots, and details text
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: UI Enhancements and Asset Viewers' (Protocol in workflow.md)
+## Phase 3: UI Enhancements and Asset Viewers [checkpoint: b8da7cf]
+- [x] Task: Update Manual Upload Dashboard to use database records
+    - [x] Sub-task: Write failing test for fetching dashboard data from the database
+    - [x] Sub-task: Modify `/manual-upload` route and template to load data from `media_assets` table
+- [x] Task: Implement Collapsible Reciter Sections
+    - [x] Sub-task: Update `manual_upload.html` with Bootstrap collapsible components for each reciter group
+- [x] Task: Implement In-Browser Asset Viewers
+    - [x] Sub-task: Add modals or new-tab links for viewing videos, screenshots, and details text
+- [x] Task: Conductor - User Manual Verification 'Phase 3: UI Enhancements and Asset Viewers' (Protocol in workflow.md)
 
 ## Phase 4: Atomic and Bulk File Management
 - [ ] Task: Implement Atomic Deletion
