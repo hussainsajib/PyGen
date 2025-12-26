@@ -17,10 +17,10 @@
     - [x] Sub-task: Implement a validation utility to check if the file exists on disk
 - [x] Task: Conductor - User Manual Verification 'Phase 2: CRUD and Validation Logic' (Protocol in workflow.md)
 
-## Phase 3: UI and Form Integration
-- [ ] Task: Update Reciter Forms
-    - [ ] Sub-task: Modify `templates/reciter_form.html` to include the "WBW Database" text input field
-- [ ] Task: Update FastAPI Routes
-    - [ ] Sub-task: Write failing test for form submission with WBW validation (success and failure cases)
-    - [ ] Sub-task: Update `reciter_create` and `reciter_update` routes in `app.py` to handle the new field and display validation errors
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: UI and Form Integration' (Protocol in workflow.md)
+## Phase 3: UI and Form Integration [checkpoint: b0a3107]
+- [x] Task: Update Reciter Forms
+    - [x] Sub-task: Modify `templates/reciter_form.html` to include the "WBW Database" text input field
+- [x] Task: Update FastAPI Routes
+    - [x] Sub-task: Write failing test for form submission with WBW validation (success and failure cases)
+    - [x] Sub-task: Update `reciter_create` and `reciter_update` routes in `app.py` to handle the new field and display validation errors
+- [x] Task: Conductor - User Manual Verification 'Phase 3: UI and Form Integration' (Protocol in workflow.md)
