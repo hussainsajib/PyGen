@@ -63,6 +63,20 @@
                         </div>
                     </div>
 
+                    <div class="mb-4">
+                        <label class="form-label d-block">Background:</label>
+                        <div class="d-flex align-items-center mb-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#backgroundModal">
+                                <i class="fas fa-image me-1"></i> Select Background
+                            </button>
+                            <span id="selected_bg_name" class="ms-3 text-muted small">Default Color</span>
+                            <button type="button" id="clear_bg_btn" class="btn btn-link btn-sm text-danger d-none" onclick="clearBackground()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <input type="hidden" id="active_background" name="active_background">
+                    </div>
+
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary btn-lg">Generate Video</button>
                     </div>
@@ -116,6 +130,169 @@
             endOption.text = i;
             endVerseSelect.add(endOption);
         }
-    }
-</script>
-{% endblock %}
+        }
+    </script>
+    
+    <!-- Background Selection Modal -->
+    <div class="modal fade" id="backgroundModal" tabindex="-1" aria-labelledby="backgroundModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="backgroundModalLabel">Select Background</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Local Upload -->
+                    <div class="mb-4">
+                        <h6>Upload Local Image</h6>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="local_bg_input" accept="image/*">
+                            <button class="btn btn-primary" type="button" onclick="uploadLocalBackground()">Upload</button>
+                        </div>
+                    </div>
+    
+                    <hr>
+    
+                    <!-- Unsplash Search -->
+                    <div class="mb-3">
+                        <h6>Search Unsplash Stock Images</h6>
+                        <div class="input-group">
+                            <input type="text" id="unsplash_query" class="form-control" placeholder="Search keywords (e.g. nature, stars, desert)">
+                            <button class="btn btn-primary" type="button" onclick="searchUnsplash()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+    
+                    <!-- Unsplash Results Gallery -->
+                    <div id="unsplash_results" class="row g-2">
+                        <!-- Thumbnails populated by JS -->
+                    </div>
+                    <div id="search_loading" class="text-center d-none my-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function searchUnsplash() {
+            const query = document.getElementById('unsplash_query').value;
+            if (!query) return;
+    
+            const resultsDiv = document.getElementById('unsplash_results');
+            const loading = document.getElementById('search_loading');
+    
+            resultsDiv.innerHTML = '';
+            loading.classList.remove('d-none');
+    
+            try {
+                const response = await fetch(`/unsplash-search?query=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                loading.classList.add('d-none');
+                
+                if (data.length === 0) {
+                    resultsDiv.innerHTML = '<div class="col-12 text-center text-muted">No results found. Please check your API key in .env</div>';
+                    return;
+                }
+    
+                data.forEach(img => {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-3 col-sm-4 col-6';
+                    col.innerHTML = `
+                        <div class="card h-100 cursor-pointer border-0 shadow-sm" onclick="selectUnsplashImage('${img.urls.full}', '${img.id}.jpg')">
+                            <img src="${img.urls.thumb}" class="card-img-top rounded" alt="Unsplash image" style="height: 120px; object-fit: cover;">
+                        </div>
+                    `;
+                    resultsDiv.appendChild(col);
+                });
+            } catch (error) {
+                console.error('Search failed:', error);
+                loading.classList.add('d-none');
+                resultsDiv.innerHTML = '<div class="col-12 text-center text-danger">Search failed.</div>';
+            }
+        }
+    
+        async function selectUnsplashImage(url, filename) {
+            const btn = event.currentTarget;
+            btn.style.opacity = '0.5';
+            btn.style.pointerEvents = 'none';
+    
+            const formData = new FormData();
+            formData.append('url', url);
+            formData.append('filename', filename);
+    
+            try {
+                const response = await fetch('/download-unsplash', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateActiveBackground(data.path, filename);
+                    bootstrap.Modal.getInstance(document.getElementById('backgroundModal')).hide();
+                } else {
+                    alert('Failed to download image.');
+                }
+            } catch (error) {
+                console.error('Download failed:', error);
+            } finally {
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+            }
+        }
+    
+        async function uploadLocalBackground() {
+            const fileInput = document.getElementById('local_bg_input');
+            const file = fileInput.files[0];
+            if (!file) return;
+    
+            const formData = new FormData();
+            formData.append('file', file);
+    
+            try {
+                const response = await fetch('/upload-background', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.path) {
+                    updateActiveBackground(data.path, data.filename);
+                    bootstrap.Modal.getInstance(document.getElementById('backgroundModal')).hide();
+                }
+            } catch (error) {
+                console.error('Upload failed:', error);
+            }
+        }
+    
+        function updateActiveBackground(path, name) {
+            document.getElementById('active_background').value = path;
+            document.getElementById('selected_bg_name').innerText = name;
+            document.getElementById('selected_bg_name').classList.remove('text-muted');
+            document.getElementById('selected_bg_name').classList.add('text-primary', 'fw-bold');
+            document.getElementById('clear_bg_btn').classList.remove('d-none');
+            
+            // Also update backend state immediately so generation uses it
+            const formData = new FormData();
+            formData.append('path', path);
+            fetch('/set-active-background', { method: 'POST', body: formData });
+        }
+    
+        function clearBackground() {
+            document.getElementById('active_background').value = '';
+            document.getElementById('selected_bg_name').innerText = 'Default Color';
+            document.getElementById('selected_bg_name').classList.remove('text-primary', 'fw-bold');
+            document.getElementById('selected_bg_name').classList.add('text-muted');
+            document.getElementById('clear_bg_btn').classList.add('d-none');
+            
+            fetch('/clear-active-background', { method: 'POST' });
+        }
+    </script>
+    {% endblock %}
+    
