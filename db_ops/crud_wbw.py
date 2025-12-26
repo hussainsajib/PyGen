@@ -48,3 +48,36 @@ def get_wbw_timestamps(db_path: str, surah_number: int, start_ayah: int, end_aya
         return {}
     finally:
         conn.close()
+
+
+def get_wbw_text_for_ayah(db_path: str, surah_number: int, ayah_number: int):
+    """Fetches Arabic words for a specific ayah from the WBW text database."""
+    if not os.path.exists(db_path):
+        return []
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "SELECT text FROM words WHERE surah = ? AND ayah = ? ORDER BY word ASC",
+            (surah_number, ayah_number)
+        )
+        return [row[0] for row in cursor.fetchall()]
+    finally:
+        conn.close()
+
+def get_wbw_translation_for_ayah(db_path: str, surah_number: int, ayah_number: int):
+    """Fetches translations for a specific ayah from the WBW translation database."""
+    if not os.path.exists(db_path):
+        return []
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "SELECT text FROM word_translation WHERE surah_number = ? AND ayah_number = ? ORDER BY CAST(word_number AS INTEGER) ASC",
+            (surah_number, ayah_number)
+        )
+        return [row[0] for row in cursor.fetchall()]
+    finally:
+        conn.close()
