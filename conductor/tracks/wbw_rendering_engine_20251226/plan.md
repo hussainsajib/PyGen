@@ -8,14 +8,14 @@
     - [x] Sub-task: Add default `WBW_FONT_SIZE_REGULAR` and `WBW_FONT_SIZE_SHORT` entries to the configuration system via a script.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Database and Model Infrastructure' (Protocol in workflow.md)
 
-## Phase 2: Core Segmentation Logic
-- [ ] Task: Implement Word-to-Line Segmentation Utility
-    - [ ] Sub-task: Write failing tests for the segmentation logic (character count, soft limit, resolution awareness).
-    - [ ] Sub-task: Create `processes/wbw_utils.py` with `segment_words_into_lines` function.
-- [ ] Task: Integrate Timestamps with Segments
-    - [ ] Sub-task: Write failing tests for collective time aggregation (mapping word durations to line durations).
-    - [ ] Sub-task: Implement logic to calculate start/end times for each line based on aggregated individual word segments.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Segmentation Logic' (Protocol in workflow.md)
+## Phase 2: Core Segmentation Logic [checkpoint: 73b71ff]
+- [x] Task: Implement Word-to-Line Segmentation Utility
+    - [x] Sub-task: Write failing tests for the segmentation logic (character count, soft limit, resolution awareness).
+    - [x] Sub-task: Create `processes/wbw_utils.py` with `segment_words_into_lines` function.
+- [x] Task: Integrate Timestamps with Segments
+    - [x] Sub-task: Write failing tests for collective time aggregation (mapping word durations to line durations).
+    - [x] Sub-task: Implement logic to calculate start/end times for each line based on aggregated individual word segments.
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Core Segmentation Logic' (Protocol in workflow.md)
 
 ## Phase 3: Video Engine Integration
 - [ ] Task: Implement Multi-Line Rendering in Clip Generation
