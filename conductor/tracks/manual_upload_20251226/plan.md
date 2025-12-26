@@ -19,9 +19,9 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Reciter and Playlist Integration' (Protocol in workflow.md)
 
 ## Phase 3: Background Upload Integration
-- [ ] Task: Create background upload job
-    - [ ] Sub-task: Write failing test for triggering an upload job
-    - [ ] Sub-task: Implement the background task logic using existing YouTube utilities
+- [x] Task: Create background upload job e93fa6c
+    - [x] Sub-task: Write failing test for triggering an upload job
+    - [x] Sub-task: Implement the background task logic using existing YouTube utilities
 - [ ] Task: Add "Upload" button and progress feedback
     - [ ] Sub-task: Write failing test for the upload button interaction
     - [ ] Sub-task: Update UI with upload trigger and real-time status updates
