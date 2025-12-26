@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Manual Upload{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Manual Video Upload</h1>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Video Filename</th>
+                    <th>Reciter</th>
+                    <th>Details</th>
+                    <th>Screenshot</th>
+                    <th>Playlist</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for video in videos %}
+                <tr>
+                    <td>{{ video.filename }}</td>
+                    <td>{{ video.reciter }}</td>
+                    <td>
+                        {% if video.details_present %}
+                        <span class="badge bg-success">Yes</span>
+                        {% else %}
+                        <span class="badge bg-danger">No</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if video.screenshot_present %}
+                        <span class="badge bg-success">Yes</span>
+                        {% else %}
+                        <span class="badge bg-danger">No</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ video.playlist_status }}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm">Upload to YouTube</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">No videos found in exported_data/videos</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

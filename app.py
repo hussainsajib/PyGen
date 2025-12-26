@@ -280,6 +280,11 @@ async def update_playlist_privacy_endpoint(
 
 # --- Reciter CRUD Endpoints ---
 
+@app.get("/manual-upload", name="manual_upload", response_class=HTMLResponse)
+async def manual_upload(request: Request, db: AsyncSession = Depends(get_db)):
+    return templates.TemplateResponse(request, "manual_upload.html", {"videos": []})
+
+
 @app.get("/reciters", name="reciters_list", response_class=HTMLResponse)
 async def get_reciters_page(request: Request, db: AsyncSession = Depends(get_db)):
     reciters = await crud_reciters.get_all_reciters(db)
