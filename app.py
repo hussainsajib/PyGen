@@ -4,7 +4,7 @@ import asyncio
 from fastapi.concurrency import run_in_threadpool
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, BackgroundTasks, Request, Depends, Form, Header
+from fastapi import FastAPI, BackgroundTasks, Request, Depends, Form, Header, File, UploadFile
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -402,6 +402,57 @@ async def delete_bulk_media(request: Request, db: AsyncSession = Depends(get_db)
             await crud_media_assets.delete_media_asset(db, asset_id)
             
     return RedirectResponse(url="/manual-upload", status_code=303)
+
+
+@app.post("/upload-background")
+async def upload_background(file: UploadFile = File(...)):
+    background_dir = "background"
+    if not os.path.exists(background_dir):
+        os.makedirs(background_dir)
+    
+    file_path = os.path.join(background_dir, file.filename)
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
+    
+    return {"filename": file.filename, "path": file_path}
+
+
+from net_ops.unsplash import search_unsplash, download_unsplash_image
+
+@app.get("/unsplash-search")
+async def unsplash_search(query: str):
+    results = await run_in_threadpool(search_unsplash, query)
+    return results
+
+@app.post("/set-active-background")
+async def set_active_background(
+    path: str = Form(...),
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
+):
+    await config.set(db, "ACTIVE_BACKGROUND", path)
+    return {"status": "success", "active_background": path}
+
+@app.post("/clear-active-background")
+async def clear_active_background(
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
+):
+    await config.delete(db, "ACTIVE_BACKGROUND")
+    return {"status": "success"}
+
+@app.post("/download-unsplash")
+async def download_unsplash(
+    url: str = Form(...),
+    filename: str = Form(...),
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
+):
+    path = await run_in_threadpool(download_unsplash_image, url, filename)
+    if path:
+        await config.set(db, "ACTIVE_BACKGROUND", path)
+        return {"status": "success", "path": path}
+    return {"status": "error", "message": "Download failed"}
 
 
 @app.get("/reciters", name="reciters_list", response_class=HTMLResponse)
