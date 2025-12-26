@@ -12,6 +12,7 @@ class Reciter(Base):
     database = Column(String(100), nullable=True)
     style = Column(String(50), nullable=True)
     playlist_id = Column(String(100), nullable=True)
+    wbw_database = Column(String(100), nullable=True)
 
     def __repr__(self):
         return f"<Reciter(key={self.reciter_key}, name={self.english_name})>"
