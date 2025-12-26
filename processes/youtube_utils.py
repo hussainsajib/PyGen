@@ -168,6 +168,7 @@ def upload_to_youtube(video_details: str):
             print(f"✅ Video added to playlist {playlist_id}: {video_id}")
     if success:    
         print(f"https://www.youtube.com/watch?v={video_id}")
+    return video_id if success else None
 
 def get_all_playlists(youtube):
     """Fetches all playlists for the authenticated user."""

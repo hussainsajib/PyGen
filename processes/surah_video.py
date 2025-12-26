@@ -139,5 +139,17 @@ def generate_surah(surah_number: int, reciter_tag: str):
     info_file_path = generate_details(surah, reciter, True, 1, 1)
     print(f"[INFO] - Info file written to {info_file_path}", flush=True)
     
-    return {"video": output_path, "info": info_file_path, "is_short": False, "reciter": reciter.tag}
+    # Get total ayah count from surah_data or similar
+    # For now, let's assume we can get it from timestamp_data length or just return the info we have
+    total_ayahs = len(timestamp_data)
+
+    return {
+        "video": output_path, 
+        "info": info_file_path, 
+        "is_short": False, 
+        "reciter": reciter.tag,
+        "surah_number": surah_number,
+        "start_ayah": 1,
+        "end_ayah": total_ayahs
+    }
     

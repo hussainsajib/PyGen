@@ -75,7 +75,15 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
     
     info_file_path = generate_details(surah, reciter, True, start_verse, end_verse)
     
-    return {"video": output_path, "info": info_file_path, "is_short": is_short, "reciter": reciter.tag}
+    return {
+        "video": output_path, 
+        "info": info_file_path, 
+        "is_short": is_short, 
+        "reciter": reciter.tag,
+        "surah_number": surah_number,
+        "start_ayah": start_verse,
+        "end_ayah": end_verse
+    }
 
 
 def discover_assets(reciters=None):
