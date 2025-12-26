@@ -6,6 +6,12 @@
 {% block content %}
 <h1>{{ 'Edit' if reciter else 'Add' }} Reciter</h1>
 
+{% if error %}
+<div class="alert alert-danger" role="alert">
+    {{ error }}
+</div>
+{% endif %}
+
 <form method="post" action="{{ action_url }}">
     <div class="mb-3">
         <label for="reciter_key" class="form-label">Key</label>
@@ -34,6 +40,11 @@
     <div class="mb-3">
         <label for="playlist_id" class="form-label">Playlist ID</label>
         <input type="text" class="form-control" id="playlist_id" name="playlist_id" value="{{ reciter.playlist_id if reciter else '' }}">
+    </div>
+    <div class="mb-3">
+        <label for="wbw_database" class="form-label">WBW Database</label>
+        <input type="text" class="form-control" id="wbw_database" name="wbw_database" value="{{ reciter.wbw_database if reciter else '' }}">
+        <div class="form-text">Name of the file in databases/word-by-word/ (e.g. mishary_wbw.db)</div>
     </div>
 
     <button type="submit" class="btn btn-primary">Save</button>

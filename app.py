@@ -474,7 +474,22 @@ async def reciter_new_form(request: Request):
 @app.post("/reciter/new", name="reciter_create")
 async def reciter_create(request: Request, db: AsyncSession = Depends(get_db)):
     form_data = await request.form()
-    await crud_reciters.create_reciter(db, dict(form_data))
+    data = dict(form_data)
+    
+    # Validation
+    if not validate_wbw_exists(data.get("wbw_database")):
+        return templates.TemplateResponse(
+            request,
+            "reciter_form.html",
+            {
+                "request": request,
+                "reciter": data,
+                "action_url": request.url_for("reciter_create"),
+                "error": f"WBW Database file '{data.get('wbw_database')}' not found in databases/word-by-word/"
+            }
+        )
+        
+    await crud_reciters.create_reciter(db, data)
     return RedirectResponse(url=request.url_for("reciters_list"), status_code=303)
 
 @app.get("/reciter/{reciter_id}/edit", name="reciter_edit_form", response_class=HTMLResponse)
@@ -492,7 +507,24 @@ async def reciter_edit_form(request: Request, reciter_id: int, db: AsyncSession 
 @app.post("/reciter/{reciter_id}/edit", name="reciter_update")
 async def reciter_update(request: Request, reciter_id: int, db: AsyncSession = Depends(get_db)):
     form_data = await request.form()
-    await crud_reciters.update_reciter(db, reciter_id, dict(form_data))
+    data = dict(form_data)
+    
+    # Validation
+    if not validate_wbw_exists(data.get("wbw_database")):
+        reciter = await crud_reciters.get_reciter_by_id(db, reciter_id)
+        # We merge form data with existing reciter for the template
+        return templates.TemplateResponse(
+            request,
+            "reciter_form.html",
+            {
+                "request": request,
+                "reciter": {**reciter.__dict__, **data, "id": reciter_id},
+                "action_url": request.url_for("reciter_update", reciter_id=reciter_id),
+                "error": f"WBW Database file '{data.get('wbw_database')}' not found in databases/word-by-word/"
+            }
+        )
+        
+    await crud_reciters.update_reciter(db, reciter_id, data)
     return RedirectResponse(url=request.url_for("reciters_list"), status_code=303)
 
 @app.post("/reciter/{reciter_id}/delete", name="reciter_delete")
