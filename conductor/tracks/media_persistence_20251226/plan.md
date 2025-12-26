@@ -9,14 +9,14 @@
     - [x] Sub-task: Implement CRUD functions in `db_ops/crud_media_assets.py`
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Database Persistence Layer' (Protocol in workflow.md)
 
-## Phase 2: Data Migration and logic Integration
-- [ ] Task: Create and execute the one-time migration script
-    - [ ] Sub-task: Write failing test for the migration logic (scanning and mapping)
-    - [ ] Sub-task: Implement migration script to populate `media_assets` from current `exported_data/`
-- [ ] Task: Integrate Media Asset persistence into existing workflows
-    - [ ] Sub-task: Update video generation processes to record new assets in the database
-    - [ ] Sub-task: Update YouTube upload processes to update status and video ID in the database
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Data Migration and logic Integration' (Protocol in workflow.md)
+## Phase 2: Data Migration and logic Integration [checkpoint: 798806f]
+- [x] Task: Create and execute the one-time migration script
+    - [x] Sub-task: Write failing test for the migration logic (scanning and mapping)
+    - [x] Sub-task: Implement migration script to populate `media_assets` from current `exported_data/`
+- [x] Task: Integrate Media Asset persistence into existing workflows
+    - [x] Sub-task: Update video generation processes to record new assets in the database
+    - [x] Sub-task: Update YouTube upload processes to update status and video ID in the database
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Data Migration and logic Integration' (Protocol in workflow.md)
 
 ## Phase 3: UI Enhancements and Asset Viewers
 - [ ] Task: Update Manual Upload Dashboard to use database records
