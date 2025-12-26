@@ -30,7 +30,7 @@ def generate_arabic_text_clip(text: str, is_short: bool, duration: int) -> TextC
                         .set_duration(duration)
     return arabic_text_clip
 
-def generate_wbw_arabic_text_clip(words: list, ayah_num: int, is_short: bool, duration: float, segments: list) -> CompositeVideoClip:
+def generate_wbw_arabic_text_clip(words: list, ayah_num: int, is_short: bool, duration: float, segments: list) -> 'CompositeVideoClip':
     """
     Generates a clip with word-by-word highlighting.
     segments: list of [word_num, start_ms, end_ms]
@@ -93,6 +93,42 @@ def generate_wbw_arabic_text_clip(words: list, ayah_num: int, is_short: bool, du
     # Real highlighting requires more advanced logic or Pango markup.
     
     return generate_arabic_text_clip(" ".join(words), is_short, duration)
+
+def generate_wbw_advanced_arabic_text_clip(text: str, is_short: bool, duration: float, font_size: int) -> TextClip:
+    """
+    Generates a single line text clip for advanced WBW rendering.
+    """
+    if is_short:
+        size = (SHORT["width"] * 0.85, None)
+    else:
+        size = (LONG["width"] * 0.95, None)
+        
+    config = COMMON["arabic_textbox_config"].copy()
+    config["fontsize"] = font_size
+    config["size"] = size
+    
+    arabic_text_clip = TextClip(text, **config)
+    arabic_pos = COMMON["f_arabic_position"](is_short, arabic_text_clip.h)
+    
+    return arabic_text_clip.set_position(('center', arabic_pos)).set_duration(duration)
+
+def generate_wbw_advanced_translation_text_clip(text: str, is_short: bool, duration: float, font_size: int) -> TextClip:
+    """
+    Generates a single line translation clip for advanced WBW rendering.
+    """
+    if is_short:
+        size = (SHORT["width"] * 0.85, None)
+    else:
+        size = (LONG["width"] * 0.95, None)
+        
+    config = COMMON["translation_textbox_config"].copy()
+    config["fontsize"] = font_size
+    config["size"] = size
+    
+    translation_clip = TextClip(text, **config)
+    translation_pos = COMMON["f_translation_position"](is_short)
+    
+    return translation_clip.set_position(('center', translation_pos)).set_duration(duration)
 
 def generate_translation_text_clip(text: str, is_short: bool, duration: int) -> TextClip:
     translation_sizes = COMMON["f_translation_size"](is_short, text)

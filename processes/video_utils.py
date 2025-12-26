@@ -16,7 +16,7 @@ from db_ops.crud_wbw import get_wbw_timestamps
 from db_ops.crud_reciters import get_reciter_by_key
 from db.database import async_session
 from net_ops.download_file import download_mp3_temp
-from processes.surah_video import create_ayah_clip, create_wbw_ayah_clip # Import both
+from processes.surah_video import create_ayah_clip, create_wbw_ayah_clip, create_wbw_advanced_ayah_clip # Import all
 from factories.composite_clip import generate_intro, generate_outro
 
 def make_silence(duration, fps=44100):
@@ -47,12 +47,12 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
         raise ValueError(f"No timestamp data found for verses {start_verse}-{end_verse} in Surah {surah.number}.")
 
     # Fetch reciter from DB to check for WBW database
-    import asyncio
+    import anyio
     async def fetch_reciter():
         async with async_session() as session:
             return await get_reciter_by_key(session, reciter_key)
     
-    db_reciter = asyncio.run(fetch_reciter())
+    db_reciter = anyio.from_thread.run(fetch_reciter)
     wbw_data = {}
     if db_reciter and db_reciter.wbw_database:
         print(f"[INFO] - WBW database found: {db_reciter.wbw_database}", flush=True)
@@ -73,8 +73,8 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
         surah_num, ayah, gstart_ms, gend_ms, seg_str = tdata
         try:
             if ayah in wbw_data:
-                print(f"[INFO] - Creating WBW clip for Ayah {ayah}", flush=True)
-                clip = create_wbw_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, segments=wbw_data[ayah], background_image_path=active_background)
+                print(f"[INFO] - Creating Advanced WBW clip for Ayah {ayah}", flush=True)
+                clip = create_wbw_advanced_ayah_clip(surah, ayah, reciter, full_audio, is_short=is_short, segments=wbw_data[ayah], background_image_path=active_background)
             else:
                 clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background)
             clips.append(clip)

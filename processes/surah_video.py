@@ -7,12 +7,15 @@ from net_ops.download_file import download_mp3_temp, cleanup_temp_file
 from factories.single_clip import (
     generate_arabic_text_clip,
     generate_wbw_arabic_text_clip,
+    generate_wbw_advanced_arabic_text_clip,
+    generate_wbw_advanced_translation_text_clip,
     generate_translation_text_clip, 
     generate_reciter_name_clip,
     generate_surah_info_clip, 
     generate_brand_clip,
     generate_background
 )
+from processes.wbw_utils import segment_words_with_timestamps
 from factories.composite_clip import generate_intro, generate_outro
 from factories.video import get_resolution
 from processes.video_configs import COMMON
@@ -23,6 +26,7 @@ from config_manager import config_manager
 from moviepy.editor import *
 import tempfile
 import json
+import anyio
 
 
 def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short: bool, background_image_path: str = None):
@@ -130,6 +134,74 @@ def create_wbw_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_m
         raise e
 
 
+def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_audio, is_short: bool, segments: list, background_image_path: str = None):
+    """
+    Creates an ayah clip using advanced multi-line segmentation.
+    """
+    try:
+        screen_size = get_resolution(is_short)
+        
+        # 1. Fetch data from new WBW databases
+        text_db = "databases/text/qpc-hafs-word-by-word.db"
+        trans_db = "databases/translation/bangali-word-by-word-translation.sqlite"
+        
+        arabic_words = get_wbw_text_for_ayah(text_db, surah.number, ayah)
+        bengali_words = get_wbw_translation_for_ayah(trans_db, surah.number, ayah)
+        
+        # 2. Get config for font size and character limit
+        if is_short:
+            font_size = int(config_manager.get("WBW_FONT_SIZE_SHORT", 40))
+            char_limit = int(config_manager.get("WBW_CHAR_LIMIT_SHORT", 15))
+        else:
+            font_size = int(config_manager.get("WBW_FONT_SIZE_REGULAR", 60))
+            char_limit = int(config_manager.get("WBW_CHAR_LIMIT_REGULAR", 30))
+            
+        # 3. Segment words into lines
+        line_segments = segment_words_with_timestamps(arabic_words, bengali_words, segments, char_limit)
+        
+        ayah_clips = []
+        for line in line_segments:
+            line_duration = (line["end_ms"] - line["start_ms"]) / 1000.0
+            current_line_clips = []
+            
+            # Background
+            bg = generate_background(background_image_path, line_duration, is_short)
+            current_line_clips.append(bg)
+            
+            # Arabic line
+            arabic_clip = generate_wbw_advanced_arabic_text_clip(line["text"], is_short, line_duration, font_size)
+            current_line_clips.append(arabic_clip)
+            
+            # Bengali line
+            trans_clip = generate_wbw_advanced_translation_text_clip(line["translation_text"], is_short, line_duration, int(font_size * 0.8))
+            current_line_clips.append(trans_clip)
+            
+            # Footer
+            if COMMON["enable_footer"]:
+                if COMMON["enable_reciter_info"]:
+                    current_line_clips.append(generate_reciter_name_clip(reciter.bangla_name, is_short, line_duration))
+                if COMMON["enable_surah_info"]:
+                    current_line_clips.append(generate_surah_info_clip(surah.name_bangla, ayah, is_short, line_duration))
+                if COMMON["enable_channel_info"]:
+                    current_line_clips.append(generate_brand_clip("তাকওয়া বাংলা", is_short, line_duration))
+            
+            line_composite = CompositeVideoClip(current_line_clips, size=screen_size).set_duration(line_duration)
+            ayah_clips.append(line_composite)
+            
+        # 4. Concatenate line clips for this ayah
+        final_ayah_clip = concatenate_videoclips(ayah_clips)
+        
+        # 5. Attach audio
+        ayah_audio = full_audio.subclip(segments[0][1] / 1000.0, segments[-1][2] / 1000.0)
+        final_ayah_clip = final_ayah_clip.set_audio(ayah_audio)
+        
+        return final_ayah_clip
+        
+    except Exception as e:
+        print(f"[ERROR] - Error creating Advanced WBW clip for ayah {ayah}: {e}")
+        raise e
+
+
 def generate_surah(surah_number: int, reciter_tag: str):
     reciter = Reciter(reciter_tag)
     surah = Surah(surah_number)
@@ -153,7 +225,7 @@ def generate_surah(surah_number: int, reciter_tag: str):
         async with async_session() as session:
             return await get_reciter_by_key(session, reciter_tag)
     
-    db_reciter = asyncio.run(fetch_reciter())
+    db_reciter = anyio.from_thread.run(fetch_reciter)
     wbw_data = {}
     if db_reciter and db_reciter.wbw_database:
         print(f"[INFO] - WBW database found: {db_reciter.wbw_database}", flush=True)
@@ -171,10 +243,10 @@ def generate_surah(surah_number: int, reciter_tag: str):
     for tdata in timestamp_data:
         surah_number, ayah, gstart_ms, gend_ms, seg_str = tdata
         try:
-            # Use WBW clip if data exists for this ayah
+            # Use Advanced WBW clip if data exists for this ayah
             if ayah in wbw_data:
-                print(f"[INFO] - Creating WBW clip for Ayah {ayah}", flush=True)
-                clip = create_wbw_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, segments=wbw_data[ayah], background_image_path=active_background)
+                print(f"[INFO] - Creating Advanced WBW clip for Ayah {ayah}", flush=True)
+                clip = create_wbw_advanced_ayah_clip(surah, ayah, reciter, full_audio, is_short=False, segments=wbw_data[ayah], background_image_path=active_background)
             else:
                 clip = create_ayah_clip(surah, ayah, reciter,gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, background_image_path=active_background)
         except Exception as e:
