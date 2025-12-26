@@ -13,10 +13,10 @@
 - [x] Task: Map videos to Reciter database entities d8064f5
     - [x] Sub-task: Write failing test for reciter mapping from filenames
     - [x] Sub-task: Implement reciter identification and metadata retrieval
-- [ ] Task: Verify YouTube playlist availability for reciters
-    - [ ] Sub-task: Write failing test for checking playlists via YouTube API
-    - [ ] Sub-task: Implement playlist check and display status in UI
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Reciter and Playlist Integration' (Protocol in workflow.md)
+- [x] Task: Verify YouTube playlist availability for reciters
+    - [x] Sub-task: Write failing test for checking playlists via YouTube API
+    - [x] Sub-task: Implement playlist check and display status in UI
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Reciter and Playlist Integration' (Protocol in workflow.md)
 
 ## Phase 3: Background Upload Integration
 - [ ] Task: Create background upload job
