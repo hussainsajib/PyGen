@@ -7,6 +7,7 @@ from processes.logger import logger
 from processes.Classes import Surah, Reciter
 from processes.video_configs import *
 from processes.description import generate_details
+from config_manager import config_manager
 from factories.file import *
 
 from db_ops.crud_surah import read_surah_data, read_timestamp_data
@@ -42,18 +43,20 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
     if not verse_range_timestamps:
         raise ValueError(f"No timestamp data found for verses {start_verse}-{end_verse} in Surah {surah.number}.")
 
+    active_background = config_manager.get("ACTIVE_BACKGROUND")
+    
     clips = []
     
     # 3. Conditionally create Intro
     if not is_short and COMMON["enable_intro"]:
-        intro = generate_intro(surah, reciter, None, is_short)
+        intro = generate_intro(surah, reciter, active_background, is_short)
         clips.append(intro)
     
     # 4. Loop through the filtered timestamps and create a clip for each ayah
     for tdata in verse_range_timestamps:
         surah_num, ayah, gstart_ms, gend_ms, seg_str = tdata
         try:
-            clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short)
+            clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background)
             clips.append(clip)
         except Exception as e:
             logger.error(f"Error creating clip for Surah {surah_num}, Ayah {ayah}: {e}")

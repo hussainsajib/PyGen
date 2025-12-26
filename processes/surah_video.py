@@ -14,13 +14,14 @@ from factories.video import get_resolution
 from processes.video_configs import COMMON
 from processes.Classes import Reciter, Surah
 from processes.description import generate_details
+from config_manager import config_manager
 
 from moviepy.editor import *
 import tempfile
 import json
 
 
-def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short: bool):
+def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short: bool, background_image_path: str = None):
     try:
         screen_size = get_resolution(is_short)
         current_clips = []
@@ -40,7 +41,7 @@ def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, s
         sorted_word_nums = sorted(words_dict.keys())
         full_ayah_text = " ".join(words_dict[w] for w in sorted_word_nums)
         
-        background_clip = generate_background(None, duration, is_short)
+        background_clip = generate_background(background_image_path, duration, is_short)
         current_clips.append(background_clip)
         
         # Create a base clip with the full ayah text (non-highlighted)
@@ -96,16 +97,18 @@ def generate_surah(surah_number: int, reciter_tag: str):
     if not timestamp_data:
         raise ValueError(f"No timestamp data found for Surah {surah.number} and Reciter '{reciter.database_name}'. Cannot create video.")
 
+    active_background = config_manager.get("ACTIVE_BACKGROUND")
+    
     clips = []
     if COMMON["enable_intro"]:
-        intro = generate_intro(surah=surah, reciter=reciter, background_image_url=None, is_short=False)
+        intro = generate_intro(surah=surah, reciter=reciter, background_image_url=active_background, is_short=False)
         print(f"[INFO] - Intro generated", flush=True)
         clips.append(intro)
     print(f"[INFO] - Going inside the ayah loop", flush=True)
     for tdata in timestamp_data:
         surah_number, ayah, gstart_ms, gend_ms, seg_str = tdata
         try:
-            clip = create_ayah_clip(surah, ayah, reciter,gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False)
+            clip = create_ayah_clip(surah, ayah, reciter,gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, background_image_path=active_background)
         except Exception as e:
             print(f"[ERROR ] - Error creating clip for Surah {surah_number}, Ayah {ayah}: {e}", flush=True)
             raise e
