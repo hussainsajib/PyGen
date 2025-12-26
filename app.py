@@ -94,6 +94,31 @@ async def read_root(request: Request, db: AsyncSession = Depends(get_db)):
     context = {"request": request, "surahs": surahs, "reciters": reciters}
     return templates.TemplateResponse("index.html", context)
 
+@app.get("/word-by-word", name="wbw", response_class=HTMLResponse)
+async def wbw_interface(request: Request, db: AsyncSession = Depends(get_db)):
+    surahs = []
+    reciters = []
+
+    with open("data/surah_data.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+        for k, v in data.items():
+            surah = {"number": int(v["serial"]), "name": v["english_name"], "total_verses": v["total_ayah"]}
+            surahs.append(surah)
+    surahs.sort(key=lambda x: x["number"])
+
+    # Load reciters who have a 'wbw_database' entry
+    db_reciters = await crud_reciters.get_all_reciters(db)
+    for r in db_reciters:
+        if r.wbw_database: # Filter for WBW support
+            reciters.append({
+                "english_name": r.english_name,
+                "key": r.reciter_key
+            })
+    reciters.sort(key=lambda x: x["english_name"])
+    
+    context = {"request": request, "surahs": surahs, "reciters": reciters}
+    return templates.TemplateResponse("wbw.html", context)
+
 @app.get("/surah", name="surah", response_class=HTMLResponse)
 async def create_surah(
     request: Request, 

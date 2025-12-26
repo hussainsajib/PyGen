@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Word-by-Word{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Create Word-by-Word Video</h3>
+            </div>
+            <div class="card-body">
+                <form action="/create-video" method="get">
+                    <!-- Surah Selection -->
+                    <div class="mb-3">
+                        <label for="surah" class="form-label">Select Surah:</label>
+                        <select id="surah" name="surah" class="form-select" onchange="updateVerseOptions()" required>
+                            <option value="" disabled selected>Select Surah</option>
+                            {% for surah in surahs %}
+                            <option value="{{ surah.number }}">{{ surah.number }}. {{ surah.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Verse Range -->
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="start_verse" class="form-label">Starting Verse:</label>
+                            <select id="start_verse" name="start_verse" class="form-select" onchange="updateEndVerseOptions()" required>
+                                <option value="" disabled selected>-</option>
+                                <!-- Options populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label for="end_verse" class="form-label">Ending Verse:</label>
+                            <select id="end_verse" name="end_verse" class="form-select" required>
+                                <option value="" disabled selected>-</option>
+                                <!-- Options populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Reciter Selection -->
+                    <div class="mb-3">
+                        <label for="reciter" class="form-label">Select Reciter:</label>
+                        <select id="reciter" name="reciter" class="form-select" required>
+                            {% for r in reciters %}
+                            <option value="{{r.key}}" {% if r.key=="ar.alafasy" %} selected="selected"{% endif %}>{{ r.english_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Short Toggle -->
+                    <div class="mb-4">
+                        <label class="form-label d-block">Create short:</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="is_short_true" name="is_short" value="true" checked>
+                            <label class="form-check-label" for="is_short_true">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="is_short_false" name="is_short" value="false">
+                            <label class="form-check-label" for="is_short_false">No</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label d-block">Background:</label>
+                        <div class="d-flex align-items-center mb-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#backgroundModal">
+                                <i class="fas fa-image me-1"></i> Select Background
+                            </button>
+                            <span id="selected_bg_name" class="ms-3 text-muted small">Default Color</span>
+                            <button type="button" id="clear_bg_btn" class="btn btn-link btn-sm text-danger d-none" onclick="clearBackground()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <input type="hidden" id="active_background" name="active_background">
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Generate Video</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const surahs = {{ surahs | tojson }};
+    const startVerseSelect = document.getElementById("start_verse");
+    const endVerseSelect = document.getElementById("end_verse");
+
+    // Populate verse options when a surah is selected
+    function updateVerseOptions() {
+        const surahNumber = document.getElementById("surah").value;
+        const selectedSurah = surahs.find(surah => surah.number == surahNumber);
+        
+        // Clear existing options
+        startVerseSelect.innerHTML = "";
+        endVerseSelect.innerHTML = "";
+
+        // Populate start and end verse options with the full range of verses
+        for (let i = 1; i <= selectedSurah.total_verses; i++) {
+            const startOption = document.createElement("option");
+            startOption.value = i;
+            startOption.text = i;
+            startVerseSelect.add(startOption);
+        }
+
+        // Initially populate end_verse with the full range of verses
+        updateEndVerseOptions();
+    }
+
+    // Adjust end_verse options based on selected start_verse
+    function updateEndVerseOptions() {
+        const startVerse = parseInt(startVerseSelect.value, 10);
+        const surahNumber = document.getElementById("surah").value;
+        const selectedSurah = surahs.find(surah => surah.number == surahNumber);
+
+        if (!selectedSurah) return;
+
+        // Clear current options in end_verse
+        endVerseSelect.innerHTML = "";
+
+        // Populate end_verse dropdown with values starting from start_verse to total verses
+        for (let i = startVerse; i <= selectedSurah.total_verses; i++) {
+            const endOption = document.createElement("option");
+            endOption.value = i;
+            endOption.text = i;
+            endVerseSelect.add(endOption);
+        }
+        }
+    </script>
+    
+    <!-- Background Selection Modal -->
+    <div class="modal fade" id="backgroundModal" tabindex="-1" aria-labelledby="backgroundModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="backgroundModalLabel">Select Background</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Local Upload -->
+                    <div class="mb-4">
+                        <h6>Upload Local Image</h6>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="local_bg_input" accept="image/*">
+                            <button class="btn btn-primary" type="button" onclick="uploadLocalBackground()">Upload</button>
+                        </div>
+                    </div>
+    
+                    <hr>
+    
+                    <!-- Unsplash Search -->
+                    <div class="mb-3">
+                        <h6>Search Unsplash Stock Images</h6>
+                        <div class="input-group">
+                            <input type="text" id="unsplash_query" class="form-control" placeholder="Search keywords (e.g. nature, stars, desert)">
+                            <button class="btn btn-primary" type="button" onclick="searchUnsplash()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+    
+                    <!-- Unsplash Results Gallery -->
+                    <div id="unsplash_results" class="row g-2">
+                        <!-- Thumbnails populated by JS -->
+                    </div>
+                    <div id="search_loading" class="text-center d-none my-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function searchUnsplash() {
+            const query = document.getElementById('unsplash_query').value;
+            if (!query) return;
+    
+            const resultsDiv = document.getElementById('unsplash_results');
+            const loading = document.getElementById('search_loading');
+    
+            resultsDiv.innerHTML = '';
+            loading.classList.remove('d-none');
+    
+            try {
+                const response = await fetch(`/unsplash-search?query=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                loading.classList.add('d-none');
+                
+                if (data.length === 0) {
+                    resultsDiv.innerHTML = '<div class="col-12 text-center text-muted">No results found. Please check your API key in .env</div>';
+                    return;
+                }
+    
+                data.forEach(img => {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-3 col-sm-4 col-6';
+                    col.innerHTML = `
+                        <div class="card h-100 cursor-pointer border-0 shadow-sm" onclick="selectUnsplashImage('${img.urls.full}', '${img.id}.jpg')">
+                            <img src="${img.urls.thumb}" class="card-img-top rounded" alt="Unsplash image" style="height: 120px; object-fit: cover;">
+                        </div>
+                    `;
+                    resultsDiv.appendChild(col);
+                });
+            } catch (error) {
+                console.error('Search failed:', error);
+                loading.classList.add('d-none');
+                resultsDiv.innerHTML = '<div class="col-12 text-center text-danger">Search failed.</div>';
+            }
+        }
+    
+        async function selectUnsplashImage(url, filename) {
+            const btn = event.currentTarget;
+            btn.style.opacity = '0.5';
+            btn.style.pointerEvents = 'none';
+    
+            const formData = new FormData();
+            formData.append('url', url);
+            formData.append('filename', filename);
+    
+            try {
+                const response = await fetch('/download-unsplash', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateActiveBackground(data.path, filename);
+                    bootstrap.Modal.getInstance(document.getElementById('backgroundModal')).hide();
+                } else {
+                    alert('Failed to download image.');
+                }
+            } catch (error) {
+                console.error('Download failed:', error);
+            } finally {
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+            }
+        }
+    
+        async function uploadLocalBackground() {
+            const fileInput = document.getElementById('local_bg_input');
+            const file = fileInput.files[0];
+            if (!file) return;
+    
+            const formData = new FormData();
+            formData.append('file', file);
+    
+            try {
+                const response = await fetch('/upload-background', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.path) {
+                    updateActiveBackground(data.path, data.filename);
+                    bootstrap.Modal.getInstance(document.getElementById('backgroundModal')).hide();
+                }
+            } catch (error) {
+                console.error('Upload failed:', error);
+            }
+        }
+    
+        function updateActiveBackground(path, name) {
+            document.getElementById('active_background').value = path;
+            document.getElementById('selected_bg_name').innerText = name;
+            document.getElementById('selected_bg_name').classList.remove('text-muted');
+            document.getElementById('selected_bg_name').classList.add('text-primary', 'fw-bold');
+            document.getElementById('clear_bg_btn').classList.remove('d-none');
+            
+            // Also update backend state immediately so generation uses it
+            const formData = new FormData();
+            formData.append('path', path);
+            fetch('/set-active-background', { method: 'POST', body: formData });
+        }
+    
+        function clearBackground() {
+            document.getElementById('active_background').value = '';
+            document.getElementById('selected_bg_name').innerText = 'Default Color';
+            document.getElementById('selected_bg_name').classList.remove('text-primary', 'fw-bold');
+            document.getElementById('selected_bg_name').classList.add('text-muted');
+            document.getElementById('clear_bg_btn').classList.add('d-none');
+            
+            fetch('/clear-active-background', { method: 'POST' });
+        }
+    </script>
+{% endblock %}
