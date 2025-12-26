@@ -8,14 +8,14 @@
     - [x] Sub-task: Execute SQL command to add `wbw_database` column to the `reciters` table in PostgreSQL
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Model and Schema Migration' (Protocol in workflow.md)
 
-## Phase 2: CRUD and Validation Logic
-- [ ] Task: Update Reciter CRUD Operations
-    - [ ] Sub-task: Write failing tests for CRUD operations including the `wbw_database` field
-    - [ ] Sub-task: Update create and update functions in `db_ops/crud_reciters.py`
-- [ ] Task: Implement WBW File Validation
-    - [ ] Sub-task: Write failing test for the `databases/word-by-word` file existence check
-    - [ ] Sub-task: Implement a validation utility to check if the file exists on disk
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: CRUD and Validation Logic' (Protocol in workflow.md)
+## Phase 2: CRUD and Validation Logic [checkpoint: 86cd72b]
+- [x] Task: Update Reciter CRUD Operations
+    - [x] Sub-task: Write failing tests for CRUD operations including the `wbw_database` field
+    - [x] Sub-task: Update create and update functions in `db_ops/crud_reciters.py`
+- [x] Task: Implement WBW File Validation
+    - [x] Sub-task: Write failing test for the `databases/word-by-word` file existence check
+    - [x] Sub-task: Implement a validation utility to check if the file exists on disk
+- [x] Task: Conductor - User Manual Verification 'Phase 2: CRUD and Validation Logic' (Protocol in workflow.md)
 
 ## Phase 3: UI and Form Integration
 - [ ] Task: Update Reciter Forms
