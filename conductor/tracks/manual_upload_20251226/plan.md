@@ -1,13 +1,13 @@
 # Implementation Plan: Manual Video Upload Dashboard
 
-## Phase 1: Foundation and UI
+## Phase 1: Foundation and UI [checkpoint: 41aa5ae]
 - [x] Task: Create initial route and template for the manual upload dashboard c266378
     - [x] Sub-task: Write failing test for the `/manual-upload` route
     - [x] Sub-task: Implement the FastAPI route and a basic Jinja2 template
 - [x] Task: Implement asset discovery logic 44468eb
     - [x] Sub-task: Write failing test for scanning `exported_data` directories
     - [x] Sub-task: Implement logic to list videos and match with screenshots/details
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation and UI' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation and UI' (Protocol in workflow.md)
 
 ## Phase 2: Reciter and Playlist Integration
 - [ ] Task: Map videos to Reciter database entities
