@@ -12,8 +12,11 @@ from factories.file import *
 
 from db_ops.crud_surah import read_surah_data, read_timestamp_data
 from db_ops.crud_text import read_text_data, read_translation
+from db_ops.crud_wbw import get_wbw_timestamps
+from db_ops.crud_reciters import get_reciter_by_key
+from db.database import async_session
 from net_ops.download_file import download_mp3_temp
-from processes.surah_video import create_ayah_clip # Re-use the clip creation logic
+from processes.surah_video import create_ayah_clip, create_wbw_ayah_clip # Import both
 from factories.composite_clip import generate_intro, generate_outro
 
 def make_silence(duration, fps=44100):
@@ -43,6 +46,19 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
     if not verse_range_timestamps:
         raise ValueError(f"No timestamp data found for verses {start_verse}-{end_verse} in Surah {surah.number}.")
 
+    # Fetch reciter from DB to check for WBW database
+    import asyncio
+    async def fetch_reciter():
+        async with async_session() as session:
+            return await get_reciter_by_key(session, reciter_key)
+    
+    db_reciter = asyncio.run(fetch_reciter())
+    wbw_data = {}
+    if db_reciter and db_reciter.wbw_database:
+        print(f"[INFO] - WBW database found: {db_reciter.wbw_database}", flush=True)
+        db_path = os.path.join("databases", "word-by-word", db_reciter.wbw_database)
+        wbw_data = get_wbw_timestamps(db_path, surah_number, start_verse, end_verse)
+
     active_background = config_manager.get("ACTIVE_BACKGROUND")
     
     clips = []
@@ -56,7 +72,11 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
     for tdata in verse_range_timestamps:
         surah_num, ayah, gstart_ms, gend_ms, seg_str = tdata
         try:
-            clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background)
+            if ayah in wbw_data:
+                print(f"[INFO] - Creating WBW clip for Ayah {ayah}", flush=True)
+                clip = create_wbw_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, segments=wbw_data[ayah], background_image_path=active_background)
+            else:
+                clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background)
             clips.append(clip)
         except Exception as e:
             logger.error(f"Error creating clip for Surah {surah_num}, Ayah {ayah}: {e}")
