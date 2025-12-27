@@ -95,7 +95,7 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
     final_video = concatenate_videoclips(clips)
     output_path = get_filename(surah_number, start_verse, end_verse, reciter.eng_name, is_short)
     
-    final_video.write_videofile(output_path, codec='libx264', fps=24, audio_codec="aac")
+    final_video.write_videofile(output_path, codec='libx264', fps=24, audio_codec="aac", threads=VIDEO_ENCODING_THREADS)
     
     info_file_path = generate_details(surah, reciter, True, start_verse, end_verse)
     
