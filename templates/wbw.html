@@ -92,7 +92,8 @@
                             <div id="playlist_section">
                                 <label for="playlist_id" class="form-label small fw-bold">Target Playlist:</label>
                                 <select id="playlist_id" name="playlist_id" class="form-select form-select-sm">
-                                    <option value="" selected>Use Reciter's Default Playlist</option>
+                                    <option value="none" selected>None (Upload Only)</option>
+                                    <option value="default">Use Reciter's Default Playlist</option>
                                     {% for playlist in playlists %}
                                     <option value="{{ playlist.id }}">{{ playlist.name }}</option>
                                     {% endfor %}
