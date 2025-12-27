@@ -22,13 +22,13 @@
     - [x] Sub-task: Update `factories/single_clip.py` to use this configuration value when rendering the overlay.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Rendering Engine Enhancements' [5b65ae9] (Protocol in workflow.md)
 
-## Phase 3: YouTube Integration Backend
+## Phase 3: YouTube Integration Backend [checkpoint: fab6ab2]
 - [x] Task: Update Job Management for WBW Uploads
     - [x] Sub-task: Update the `enqueue_job` function and the job model to store YouTube upload preferences (auto-upload and playlist ID).
     - [x] Sub-task: Modify `processes/processes.py` and the `job_worker` in `processes/background_worker.py` to trigger the YouTube upload specifically for WBW jobs when requested.
 - [x] Task: Integration Test for WBW YouTube Upload
     - [x] Sub-task: Write failing integration tests to verify that a WBW job with the upload flag correctly initiates the YouTube upload to the specified playlist.
-- [~] Task: Conductor - User Manual Verification 'Phase 3: YouTube Integration Backend' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: YouTube Integration Backend' [fab6ab2] (Protocol in workflow.md)
 
 ## Phase 4: Final Integration & Verification
 - [ ] Task: End-to-end verification of the enhanced WBW flow
