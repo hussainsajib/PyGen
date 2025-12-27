@@ -7,7 +7,8 @@ IMAGE_API_URL = "https://api.unsplash.com/photos/random?query=universe&orientati
 
 # Dynamic Threading for Video Encoding
 # Use N-1 cores to keep system responsive, but at least 1 core.
-VIDEO_ENCODING_THREADS = max(1, (os.cpu_count() or 1) - 1)
+# Cap at 6 threads to avoid potential audio/encoding issues on some systems.
+VIDEO_ENCODING_THREADS = min(6, max(1, (os.cpu_count() or 1) - 1))
 
 RECITER="ar.alafasy"
 TRANSLATION="rawai_al_bayan"
