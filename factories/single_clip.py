@@ -1,11 +1,10 @@
 from factories.video import get_resolution
 from factories.image import edit_image
-from moviepy.editor import ImageClip, ColorClip, TextClip
+from moviepy.editor import ImageClip, ColorClip, TextClip, CompositeVideoClip
 from moviepy.video.fx.resize import resize
 from convert_numbers import english_to_arabic as e2a
 from bangla import convert_english_digit_to_bangla_digit as e2b
 from processes.video_configs import BACKGROUND_OPACITY, BACKGROUND_RGB, COMMON, FOOTER_CONFIG, SHORT, LONG
-from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 
 def generate_image_background(background_image_url: str, duration: int, is_short: bool):
@@ -132,123 +131,118 @@ def generate_wbw_advanced_translation_text_clip(text: str, is_short: bool, durat
     
     return translation_clip.set_position(('center', translation_pos)).set_duration(duration)
 
-def generate_wbw_interlinear_text_clip(words: list, translations: list, is_short: bool, duration: float, arabic_font_size: int, translation_font_size: int) -> ImageClip:
+def generate_wbw_interlinear_text_clip(words: list, translations: list, is_short: bool, duration: float, arabic_font_size: int, translation_font_size: int) -> CompositeVideoClip:
     """
-    Generates a clip where translations are rendered directly below each Arabic word.
+    Generates a CompositeVideoClip where translations are rendered directly below each Arabic word.
     Every Arabic word is underlined.
+    Uses MoviePy TextClips for correct font rendering.
     """
-    if is_short:
-        canvas_width = int(SHORT["width"] * 0.9)
-    else:
-        canvas_width = int(LONG["width"] * 0.95)
-        
-    # Standard height for the line block (Arabic + gap + Underline + Translation)
-    # We estimate based on font sizes
-    canvas_height = int(arabic_font_size + translation_font_size + 40)
+    space_width = 15
     
-    # Create transparent image
-    img = Image.new("RGBA", (canvas_width, canvas_height), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
+    # Common configs for TextClip
+    arabic_config = COMMON["arabic_textbox_config"].copy()
+    arabic_config["fontsize"] = arabic_font_size
+    # Remove fixed size/method to allow autosizing
+    arabic_config.pop("size", None)
+    arabic_config.pop("method", None)
     
-    # Try to load fonts
-    try:
-        arabic_font = ImageFont.truetype(COMMON["arabic_textbox_config"]["font"], arabic_font_size)
-    except:
-        arabic_font = ImageFont.load_default()
-        
-    try:
-        trans_font = ImageFont.truetype(COMMON["translation_textbox_config"]["font"], translation_font_size)
-    except:
-        trans_font = ImageFont.load_default()
-        
-    color = COMMON["font_color"]
+    trans_config = COMMON["translation_textbox_config"].copy()
+    trans_config["fontsize"] = translation_font_size
+    trans_config.pop("size", None)
+    trans_config.pop("method", None)
     
-    # Calculate blocks
-    blocks = []
+    # 1. Create all sub-clips and calculate dimensions
+    processed_blocks = []
     total_width = 0
-    space_width = 15 # Horizontal space between blocks
-    
-    # Since it's RTL Arabic, we might want to process words in reverse or handle RTL?
-    # Usually WBW timestamps are given in the order words are spoken.
-    # If the user wants them rendered in reading order (RTL), we process words.
     
     for i in range(len(words)):
         word = words[i]
         trans = translations[i] if i < len(translations) else ""
         
-        # Measure widths
-        a_bbox = arabic_font.getbbox(word)
-        a_w = a_bbox[2] - a_bbox[0]
-        a_h = a_bbox[3] - a_bbox[1]
+        # Arabic Clip
+        ac = TextClip(word, **arabic_config)
         
-        t_bbox = trans_font.getbbox(trans)
-        t_w = t_bbox[2] - t_bbox[0]
-        t_h = t_bbox[3] - t_bbox[1]
+        # Translation Clip
+        tc = TextClip(trans, **trans_config)
         
-        block_w = max(a_w, t_w)
-        blocks.append({
-            "word": word,
-            "trans": trans,
-            "a_w": a_w,
-            "a_h": a_h,
-            "t_w": t_w,
-            "t_h": t_h,
+        block_w = max(ac.w, tc.w)
+        
+        # Underline Clip (width of Arabic word)
+        # ColorClip needs RGB tuple or string. COMMON["font_color"] is usually a string like 'white' or RGB tuple?
+        # Check config: "font_color": "white" or "rgb(201, 181, 156)"
+        # ColorClip expects RGB tuple (0-255) or color name string. 
+        # If "rgb(...)", we might need to parse. But let's assume MoviePy handles it or use BACKGROUND_RGB if needed.
+        # Actually FONT_COLOR is "rgb(201, 181, 156)". ColorClip supports this format usually? 
+        # ColorClip documentation says "color: (r,g,b)". Strings might work if installed colors.
+        # Let's check VIDEO_CONFIGS.
+        
+        # Safe fallback: use a fixed color or parse. 
+        # BUT COMMON["arabic_textbox_config"]["color"] is used for TextClip.
+        color = COMMON["arabic_textbox_config"]["color"]
+        
+        uc = ColorClip(size=(ac.w, 3), color=color)
+        
+        processed_blocks.append({
+            "ac": ac,
+            "tc": tc,
+            "uc": uc,
             "block_w": block_w
         })
+        
         total_width += block_w
         if i < len(words) - 1:
             total_width += space_width
             
-    # Center the whole line on the canvas
-    start_x = (canvas_width - total_width) // 2
-    curr_x = start_x
+    # 2. Calculate positions and compose
+    # Height: max Arabic + gap + underline + gap + max Trans
+    max_ah = max(b["ac"].h for b in processed_blocks) if processed_blocks else 0
+    max_th = max(b["tc"].h for b in processed_blocks) if processed_blocks else 0
+    line_height = max_ah + 5 + 3 + 5 + max_th
     
-    # Draw blocks (Simple LTR arrangement of vertical blocks for now, 
-    # but we can reverse words if they are meant to be RTL)
-    # The words list is usually given in recitation order (which is reading order).
-    # For Arabic, reading order is RTL. So first word should be on the right?
-    # BUT if the words list is [Word1, Word2, Word3] where Word1 is the first spoken,
-    # then Word1 is the rightmost word in the Arabic text.
+    final_clips = []
     
-    # Let's assume words list is in recitation order. We'll render from right to left.
-    # Actually, many WBW players render spoken order from left to right for easier eye tracking
-    # if it's mixed with translations. But for Quran, RTL is standard.
+    # Render from Right to Left (RTL) assuming 'words' list is in recitation order
+    curr_x = total_width
     
-    # If we want standard RTL:
-    # reverse the loop or adjust start_x and decrement curr_x?
-    
-    # Let's stick to standard RTL layout for now.
-    curr_x = start_x + total_width
-    
-    for block in blocks:
-        # Move curr_x to the left edge of this block
-        curr_x -= block["block_w"]
+    for block in processed_blocks:
+        ac = block["ac"]
+        tc = block["tc"]
+        uc = block["uc"]
+        block_w = block["block_w"]
         
-        # 1. Arabic word (centered in block)
-        a_x = curr_x + (block["block_w"] - block["a_w"]) // 2
-        draw.text((a_x, 0), block["word"], font=arabic_font, fill=color)
+        # Move to left edge of this block
+        curr_x -= block_w
         
-        # 2. Underline (Full width of Arabic word)
-        underline_y = int(arabic_font_size * 0.9)
-        draw.line([(a_x, underline_y), (a_x + block["a_w"], underline_y)], fill=color, width=2)
+        # Arabic: Centered in block, Top aligned relative to max_ah?
+        # Align baselines? Simple top alignment is easier.
+        ax = curr_x + (block_w - ac.w) // 2
+        ay = 0 
+        ac = ac.set_position((ax, ay))
+        final_clips.append(ac)
         
-        # 3. Translation (centered in block)
-        t_x = curr_x + (block["block_w"] - block["t_w"]) // 2
-        t_y = arabic_font_size + 10 # 10px gap
-        draw.text((t_x, t_y), block["trans"], font=trans_font, fill=color)
+        # Underline: Under Arabic
+        ux = ax
+        uy = ay + ac.h + 2
+        uc = uc.set_position((ux, uy))
+        final_clips.append(uc)
         
-        # Subtract space for next word (moving left)
+        # Translation: Centered in block, below underline
+        tx = curr_x + (block_w - tc.w) // 2
+        ty = uy + 3 + 5
+        tc = tc.set_position((tx, ty))
+        final_clips.append(tc)
+        
         curr_x -= space_width
-
-    # Convert to MoviePy ImageClip
-    # ImageClip needs a path or a numpy array
-    img_array = np.array(img)
-    text_clip = ImageClip(img_array).set_duration(duration)
+        
+    # Create Composite
+    # Use transparent bg? CompositeVideoClip default is transparent if no bg provided?
+    # Actually size argument creates a transparent canvas.
+    line_composite = CompositeVideoClip(final_clips, size=(total_width, line_height)).set_duration(duration)
     
-    # Position on screen
-    arabic_pos = COMMON["f_arabic_position"](is_short, arabic_font_size)
+    # Position on main screen
+    arabic_pos_y = COMMON["f_arabic_position"](is_short, line_height)
     
-    return text_clip.set_position(('center', arabic_pos))
+    return line_composite.set_position(('center', arabic_pos_y))
 
 def generate_translation_text_clip(text: str, is_short: bool, duration: int) -> TextClip:
     translation_sizes = COMMON["f_translation_size"](is_short, text)
