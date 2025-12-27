@@ -252,7 +252,7 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
         raise e
 
 
-def generate_surah(surah_number: int, reciter_tag: str):
+def generate_surah(surah_number: int, reciter_tag: str, custom_title: str = None):
     reciter = Reciter(reciter_tag)
     surah = Surah(surah_number)
     surah_url = read_surah_data(surah.number, reciter.database_name)
@@ -333,7 +333,7 @@ def generate_surah(surah_number: int, reciter_tag: str):
     except Exception as e:
         print(str(e), flush=True)
     print(f"[INFO] - Final video written to {output_path}", flush=True)
-    info_file_path = generate_details(surah, reciter, True, 1, 1)
+    info_file_path = generate_details(surah, reciter, True, 1, 1, custom_title=custom_title)
     print(f"[INFO] - Info file written to {info_file_path}", flush=True)
     
     # Get total ayah count from surah_data or similar

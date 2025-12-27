@@ -20,7 +20,7 @@ from net_ops.download_file import download_mp3_temp
 from processes.surah_video import create_ayah_clip, create_wbw_ayah_clip, create_wbw_advanced_ayah_clip # Import all
 from factories.composite_clip import generate_intro, generate_outro
 
-def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_key: str, is_short: bool):
+def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_key: str, is_short: bool, custom_title: str = None):
     surah = Surah(surah_number)
     reciter = Reciter(reciter_key)
     
@@ -97,7 +97,7 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
     
     final_video.write_videofile(output_path, codec='libx264', fps=24, audio_codec="aac", threads=VIDEO_ENCODING_THREADS)
     
-    info_file_path = generate_details(surah, reciter, True, start_verse, end_verse)
+    info_file_path = generate_details(surah, reciter, True, start_verse, end_verse, is_short=is_short, custom_title=custom_title)
     
     return {
         "video": output_path, 

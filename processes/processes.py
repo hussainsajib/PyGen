@@ -40,8 +40,8 @@ async def update_media_asset_upload(video_path: str, video_id: str):
             await session.commit()
 
 def create_and_post(surah: int, start_verse: int, end_verse:int, 
-                    reciter: str, is_short:bool = False):
-    video_details = generate_video(surah, start_verse, end_verse, reciter, is_short)
+                    reciter: str, is_short:bool = False, custom_title: str = None):
+    video_details = generate_video(surah, start_verse, end_verse, reciter, is_short, custom_title=custom_title)
     
     if not video_details:
         raise Exception("Error generating video")
@@ -61,8 +61,8 @@ def create_and_post(surah: int, start_verse: int, end_verse:int,
         except Exception as e:
             print(f"YouTube upload failed: {e}")
         
-def create_surah_video(surah: int, reciter: str):
-    video_details = generate_surah(surah, reciter)
+def create_surah_video(surah: int, reciter: str, custom_title: str = None):
+    video_details = generate_surah(surah, reciter, custom_title=custom_title)
     if not video_details:
         raise Exception("Error generating video")
     
@@ -84,9 +84,10 @@ def create_surah_video(surah: int, reciter: str):
 def create_wbw_video_job(surah: int, start_verse: int, end_verse:int, 
                         reciter: str, is_short:bool = False, 
                         upload_after_generation: bool = False,
-                        playlist_id: str = None):
+                        playlist_id: str = None,
+                        custom_title: str = None):
     """Generates a WBW video and optionally uploads it to YouTube."""
-    video_details = generate_video(surah, start_verse, end_verse, reciter, is_short)
+    video_details = generate_video(surah, start_verse, end_verse, reciter, is_short, custom_title=custom_title)
     
     if not video_details:
         raise Exception("Error generating video")

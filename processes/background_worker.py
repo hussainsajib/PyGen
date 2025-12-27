@@ -44,11 +44,12 @@ async def job_worker():
                             reciter=job.reciter,
                             is_short=bool(job.is_short),
                             upload_after_generation=bool(job.upload_after_generation),
-                            playlist_id=job.playlist_id
+                            playlist_id=job.playlist_id,
+                            custom_title=job.custom_title
                         )
                     else:
                         # Standard full surah generation job
-                        await run_in_threadpool(create_surah_video, job.surah_number, job.reciter)
+                        await run_in_threadpool(create_surah_video, job.surah_number, job.reciter, custom_title=job.custom_title)
 
                     job.progress = 100.0
                     job.status = JobStatus.done

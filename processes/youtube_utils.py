@@ -36,8 +36,23 @@ def get_video_details(info_file_path: str):
     with open(info_file_path, 'r', encoding='utf-8') as file:
         lines = file.readlines()
         title = lines[0].strip()
-        description = ''.join(lines[1:]).strip()
-        return title, description
+        
+        # Description is everything between title and TAGS:
+        description_lines = []
+        tags = ["tag1", "tag2"]
+        
+        found_tags = False
+        for line in lines[1:]:
+            if line.startswith("TAGS:"):
+                tags_str = line.replace("TAGS:", "").strip()
+                tags = [t.strip() for t in tags_str.split(",")]
+                found_tags = True
+                continue
+            if not found_tags:
+                description_lines.append(line)
+        
+        description = ''.join(description_lines).strip()
+        return title, description, tags
 
 def read_last_upload_time():
     try:
@@ -75,28 +90,9 @@ def get_authenticated_service():
     return googleapiclient.discovery.build(api_service_name, api_version, credentials=credentials)
 
 def initialize_upload_request(youtube, video_details: dict):
-    title, description = get_video_details(video_details["info"])
+    title, description, tags = get_video_details(video_details["info"])
     relase_date = get_release_date()
     
-    is_short = video_details.get("is_short", False)
-    tags = ["tag1", "tag2"]
-    
-    if is_short:
-        try:
-            with VideoFileClip(video_details["video"]) as clip:
-                duration = clip.duration
-                if duration <= 180: # 3 minutes
-                    if "#Shorts" not in title:
-                        title = f"{title} #Shorts"
-                    if "#Shorts" not in description:
-                        description = f"{description}\n\n#Shorts"
-                    if "Shorts" not in tags:
-                        tags.append("Shorts")
-                else:
-                    print(f"Video marked as short but duration is {duration}s (> 180s). Uploading as regular video.")
-        except Exception as e:
-            print(f"Could not determine video duration: {e}")
-
     return youtube.videos().insert(
         part="snippet,status",
         body={
