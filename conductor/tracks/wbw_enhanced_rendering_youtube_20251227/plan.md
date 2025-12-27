@@ -30,7 +30,7 @@
     - [x] Sub-task: Write failing integration tests to verify that a WBW job with the upload flag correctly initiates the YouTube upload to the specified playlist.
 - [x] Task: Conductor - User Manual Verification 'Phase 3: YouTube Integration Backend' [fab6ab2] (Protocol in workflow.md)
 
-## Phase 4: Final Integration & Verification
+## Phase 4: Final Integration & Verification [checkpoint: 96b48b7]
 - [x] Task: End-to-end verification of the enhanced WBW flow
     - [x] Sub-task: Generate a WBW video with full translation enabled and automatic YouTube upload selected, then verify the final output and the upload status.
-- [x] Task: Conductor - User Manual Verification 'Phase 4: Final Integration & Verification' [checkpoint: pending] (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Final Integration & Verification' [96b48b7] (Protocol in workflow.md)
