@@ -4,5 +4,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Implement Manual Video Upload Dashboard and YouTube Integration
-*Link: [./conductor/tracks/manual_upload_20251226/](./conductor/tracks/manual_upload_20251226/)*
+## [~] Track: create a config that can be used to add a small delay between clips of two ayah for word-by-word video generation; endpoint: /word-by-word
+*Link: [./conductor/tracks/wbw_delay_20251226/](./conductor/tracks/wbw_delay_20251226/)*
+
+---
+
+## [~] Track: Dynamic and Standardized Threading for Video Encoding
+*Link: [./conductor/tracks/dynamic_threading_20251226/](./conductor/tracks/dynamic_threading_20251226/)*
