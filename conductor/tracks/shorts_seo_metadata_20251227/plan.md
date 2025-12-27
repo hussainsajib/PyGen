@@ -19,13 +19,13 @@
     - [x] Sub-task: Update `generate_details` to include the optimized Shorts metadata in the exported `.txt` files.
 - [~] Task: Conductor - User Manual Verification 'Phase 2: Metadata and SEO Logic implementation' (Protocol in workflow.md)
 
-## Phase 3: YouTube Upload Integration
+## Phase 3: YouTube Upload Integration [checkpoint: e959396]
 - [x] Task: Update YouTube Upload logic
     - [x] Sub-task: Write failing tests for `upload_to_youtube` to ensure it correctly applies optimized metadata for Shorts while leaving regular videos untouched.
     - [x] Sub-task: Modify `processes/youtube_utils.py` to incorporate the enhanced title, description, and dynamic tags during the initialization of the upload request.
 - [x] Task: Propagate Title through Job Worker
     - [x] Sub-task: Update `processes/processes.py` and the job worker to ensure the `custom_title` is passed correctly to the generation and upload functions.
-- [~] Task: Conductor - User Manual Verification 'Phase 3: YouTube Upload Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: YouTube Upload Integration' [e959396] (Protocol in workflow.md)
 
 ## Phase 4: Final Integration and Verification
 - [ ] Task: End-to-end verification
