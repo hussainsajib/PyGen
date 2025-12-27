@@ -8,10 +8,12 @@
 ## Data Management
 - **Primary Database:** PostgreSQL (Advanced relational database)
 - **ORM/Database Toolkit:** SQLAlchemy (Using `asyncpg` for asynchronous PostgreSQL access)
+- **Word-by-Word Databases:** SQLite (Local storage for synchronized word-level timestamps, Arabic text, and translations)
 - **Secondary Storage:** TinyDB (Used for lightweight, document-based storage where applicable)
 
 ## Media Processing
 - **Video Composition:** MoviePy (Script-based video editing)
+- **Resource Management:** Dynamic CPU-aware threading for optimized video encoding.
 - **Computer Vision:** OpenCV (Used for image manipulation and analysis)
 - **Image Processing:** Pillow (PIL Fork - Comprehensive image library)
 
@@ -25,3 +27,4 @@
     - YouTube Data API v3 (For automated uploads and playlist management)
     - Google Auth/OAuth 2.0 (For secure API authorization)
     - Google Cloud Storage (For media asset persistence)
+- **Unsplash API:** For searching and downloading high-quality stock images for video backgrounds.

@@ -16,12 +16,17 @@ PyGen is an automated video generation platform designed specifically for creati
 
 ## Key Features
 - **Automated Video Assembly:** Intelligent blending of audio recitations with synchronized text translations and background visuals.
+- **Word-by-Word Synchronization:** Advanced video generation engine that renders synchronized Arabic words and translations using multi-line segmentation and configurable typography.
+    - **Configurable Pacing:** Support for adjustable delays between verses to improve recitation flow.
 - **Job Management System:** A robust backend that queues video generation tasks, allowing for bulk processing.
 - **Visual Customization:** User-defined themes, including font choices, color palettes, and background styles.
+- **Dynamic Background Management:** Integrated stock image search (Unsplash) and local file upload system to customize video backgrounds per-job.
+- **Reciter Management:** Support for detailed reciter metadata, including optional links to word-by-word (WBW) segmentation databases with automated file-existence validation.
+- **Media Asset Persistence:** A dedicated database (`media_assets`) to track all generated content, its metadata, and disk locations.
 - **YouTube Ecosystem Integration:** 
     - Automatic uploading of new videos based on configuration flags.
     - Manual management and upload interface for existing media.
     - Integration with YouTube playlists organized by reciter.
 
 ## User Experience
-The web interface provides a centralized dashboard for managing the entire content lifecycle: from the initial configuration of a surah and reciter to tracking the final upload status on YouTube.
+The web interface provides a centralized dashboard for managing the entire content lifecycle. It features a specialized "Word-by-Word" creation interface for synchronized content, and users can dynamically select video backgrounds from a searchable Unsplash gallery or upload local files. It also includes an enhanced "Manual Upload" dashboard where users can view generated assets in-browser, manage files with atomic/bulk deletion, and track upload statuses through reciter-grouped collapsible sections.

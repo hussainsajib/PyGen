@@ -7,6 +7,9 @@ logger = logging.getLogger("uvicorn.error")
 RECITATION_DATABASE_BASEURL = "./databases/reciter/{}.sqlite"
 
 def read_surah_data(surah_number: int, reciter_db_name: str):
+    if not reciter_db_name:
+        raise ValueError("Reciter database name is not configured.")
+        
     database = RECITATION_DATABASE_BASEURL.format(reciter_db_name)
     with sqlite3.connect(database) as conn:
         cursor = conn.cursor()

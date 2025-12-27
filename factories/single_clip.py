@@ -159,15 +159,23 @@ def generate_wbw_interlinear_text_clip(words: list, translations: list, is_short
         word = words[i]
         trans = translations[i] if i < len(translations) else ""
         
-        # Arabic Clip
+        # 1. Arabic Clip (Auto-sized)
         ac = TextClip(word, **arabic_config)
         
-        # Translation Clip
-        tc = TextClip(trans, **trans_config)
+        # 2. Translation Clip (Wrapped to Arabic width + margin)
+        # We use a 40px margin ("a little bit more")
+        target_tw = ac.w + 40
+        
+        # Create wrapped translation clip
+        wrapped_trans_config = trans_config.copy()
+        wrapped_trans_config["size"] = (target_tw, None)
+        wrapped_trans_config["method"] = "caption"
+        
+        tc = TextClip(trans, **wrapped_trans_config)
         
         block_w = max(ac.w, tc.w)
         
-        # Underline Clip (width of Arabic word)
+        # 3. Underline Clip (width of Arabic word)
         # ColorClip needs RGB tuple or string. COMMON["font_color"] is usually a string like 'white' or RGB tuple?
         # Check config: "font_color": "white" or "rgb(201, 181, 156)"
         # ColorClip expects RGB tuple (0-255) or color name string. 

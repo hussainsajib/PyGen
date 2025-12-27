@@ -1,5 +1,6 @@
 import os
 import asyncio
+import anyio
 from processes.video_utils import generate_video
 from processes.youtube_utils import upload_to_youtube
 from processes.screenshot import extract_frame
@@ -49,14 +50,14 @@ def create_and_post(surah: int, start_verse: int, end_verse:int,
     video_details["screenshot"] = screenshot_path
     
     # Persist to database
-    asyncio.run(record_media_asset(video_details))
+    anyio.from_thread.run(record_media_asset, video_details)
     
     # Upload to YouTube if enabled in config
     if config_manager.get("UPLOAD_TO_YOUTUBE") == "True":
         try:
             video_id = upload_to_youtube(video_details)
             if video_id:
-                asyncio.run(update_media_asset_upload(video_details["video"], video_id))
+                anyio.from_thread.run(update_media_asset_upload, video_details["video"], video_id)
         except Exception as e:
             print(f"YouTube upload failed: {e}")
         
@@ -69,14 +70,14 @@ def create_surah_video(surah: int, reciter: str):
     video_details["screenshot"] = screenshot_path
     
     # Persist to database
-    asyncio.run(record_media_asset(video_details))
+    anyio.from_thread.run(record_media_asset, video_details)
     
     # Upload to YouTube if enabled in config
     if config_manager.get("UPLOAD_TO_YOUTUBE") == "True":
         try:
             video_id = upload_to_youtube(video_details)
             if video_id:
-                asyncio.run(update_media_asset_upload(video_details["video"], video_id))
+                anyio.from_thread.run(update_media_asset_upload, video_details["video"], video_id)
         except Exception as e:
             print(f"YouTube upload failed: {e}")
 
@@ -122,6 +123,6 @@ def manual_upload_to_youtube(video_filename: str, reciter_key: str, playlist_id:
     try:
         video_id = upload_to_youtube(video_details)
         if video_id:
-            asyncio.run(update_media_asset_upload(video_path, video_id))
+            anyio.from_thread.run(update_media_asset_upload, video_path, video_id)
     finally:
         youtube_utils.playlist = original_playlist

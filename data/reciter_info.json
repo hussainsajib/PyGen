@@ -76,7 +76,8 @@
     "ar.mahermuaiqly": {
         "english_name": "Maher Al Muaiqly",
         "bangla_name": "মাহের আল মুয়াইকলি",
-        "folder": "maher_al_muaiqly"
+        "folder": "maher_al_muaiqly",
+        "database": "maher-al-muaiqly"
     },
     "ar.minshawi": {
         "english_name": "Muhammad Siddiq Al Minshawi",
