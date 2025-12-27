@@ -10,6 +10,7 @@ from factories.single_clip import (
     generate_wbw_arabic_text_clip,
     generate_wbw_advanced_arabic_text_clip,
     generate_wbw_advanced_translation_text_clip,
+    generate_wbw_interlinear_text_clip,
     generate_translation_text_clip, 
     generate_reciter_name_clip,
     generate_surah_info_clip, 
@@ -150,6 +151,9 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
         bengali_words = get_wbw_translation_for_ayah(trans_db, surah.number, ayah)
         
         # 2. Get config for font size and character limit
+        interlinear_enabled = config_manager.get("WBW_INTERLINEAR_ENABLED", "False") == "True"
+        interlinear_trans_font_size = int(config_manager.get("WBW_TRANSLATION_FONT_SIZE", 20))
+
         if is_short:
             font_size = int(config_manager.get("WBW_FONT_SIZE_SHORT", 40))
             char_limit = int(config_manager.get("WBW_CHAR_LIMIT_SHORT", 15))
@@ -158,7 +162,12 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
             char_limit = int(config_manager.get("WBW_CHAR_LIMIT_REGULAR", 30))
             
         # 3. Segment words into lines
-        line_segments = segment_words_with_timestamps(arabic_words, bengali_words, segments, char_limit)
+        # In interlinear mode, we use a ratio to estimate width
+        ratio = interlinear_trans_font_size / font_size if font_size > 0 else 0.5
+        line_segments = segment_words_with_timestamps(
+            arabic_words, bengali_words, segments, char_limit, 
+            interlinear=interlinear_enabled, translation_ratio=ratio
+        )
         
         ayah_clips = []
         for line in line_segments:
@@ -169,13 +178,22 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
             bg = generate_background(background_image_path, line_duration, is_short)
             current_line_clips.append(bg)
             
-            # Arabic line
-            arabic_clip = generate_wbw_advanced_arabic_text_clip(line["text"], is_short, line_duration, font_size)
-            current_line_clips.append(arabic_clip)
-            
-            # Bengali line
-            trans_clip = generate_wbw_advanced_translation_text_clip(line["translation_text"], is_short, line_duration, int(font_size * 0.8))
-            current_line_clips.append(trans_clip)
+            if interlinear_enabled:
+                # Interlinear rendering
+                interlinear_clip = generate_wbw_interlinear_text_clip(
+                    line["words"], line["translations"], is_short, line_duration,
+                    font_size, interlinear_trans_font_size
+                )
+                current_line_clips.append(interlinear_clip)
+            else:
+                # Standard separate Arabic/Bengali lines
+                # Arabic line
+                arabic_clip = generate_wbw_advanced_arabic_text_clip(line["text"], is_short, line_duration, font_size)
+                current_line_clips.append(arabic_clip)
+                
+                # Bengali line
+                trans_clip = generate_wbw_advanced_translation_text_clip(line["translation_text"], is_short, line_duration, int(font_size * 0.8))
+                current_line_clips.append(trans_clip)
             
             # Footer
             if COMMON["enable_footer"]:
