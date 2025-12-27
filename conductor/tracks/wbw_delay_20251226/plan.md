@@ -13,7 +13,7 @@
     - [x] Sub-task: Update `create_wbw_advanced_ayah_clip` in `processes/surah_video.py` to fetch the delay and append the silent/extended-frame segment.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Engine Implementation' (Protocol in workflow.md)
 
-## Phase 3: Integration and Testing
+## Phase 3: Integration and Testing [checkpoint: 9ecf503]
 - [x] Task: Full-Surah Generation Test
     - [x] Sub-task: Write failing test for `generate_surah` ensuring total duration includes the aggregated delays.
     - [x] Sub-task: Verify WBW video generation includes the pauses while standard generation remains the same.
