@@ -1,10 +1,10 @@
 # Implementation Plan: Word-by-Word Interlinear Rendering
 
-## Phase 1: Configuration Infrastructure
+## Phase 1: Configuration Infrastructure [checkpoint: 888bd7a]
 - [x] Task: Add configuration settings for interlinear rendering [04af142]
     - [x] Sub-task: Create a migration script to add `WBW_INTERLINEAR_ENABLED` (default: false) and `WBW_TRANSLATION_FONT_SIZE` (default: 20) to the `config` table.
     - [x] Sub-task: Verify the new settings appear and are editable in the `/config` dashboard.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Configuration Infrastructure' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Configuration Infrastructure' (Protocol in workflow.md)
 
 ## Phase 2: Engine Logic & Segmentation
 - [ ] Task: Update word segmentation to account for interlinear widths
