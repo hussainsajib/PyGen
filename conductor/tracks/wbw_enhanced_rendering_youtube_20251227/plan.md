@@ -31,6 +31,6 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 3: YouTube Integration Backend' [fab6ab2] (Protocol in workflow.md)
 
 ## Phase 4: Final Integration & Verification
-- [ ] Task: End-to-end verification of the enhanced WBW flow
-    - [ ] Sub-task: Generate a WBW video with full translation enabled and automatic YouTube upload selected, then verify the final output and the upload status.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Final Integration & Verification' (Protocol in workflow.md)
+- [x] Task: End-to-end verification of the enhanced WBW flow
+    - [x] Sub-task: Generate a WBW video with full translation enabled and automatic YouTube upload selected, then verify the final output and the upload status.
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Final Integration & Verification' [checkpoint: pending] (Protocol in workflow.md)
