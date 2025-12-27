@@ -20,13 +20,11 @@ class ConfigManager:
             cls._instance = super(ConfigManager, cls).__new__(cls)
         return cls._instance
 
-    async def load_from_db(self, db_session: AsyncSession):
+    async def load_from_db(self, db_session: AsyncSession, reload: bool = False):
         """Loads all configuration key-value pairs from the database."""
         async with self._lock:
             # Check if config is already loaded (or if we need to reload due to changes)
-            # For this simple case, we'll just check if it's empty.
-            # A more robust solution might involve a version counter or last-updated timestamp.
-            if not self._config: 
+            if not self._config or reload: 
                 print("Loading configuration from database...")
                 stmt = select(Config).order_by(Config.id) # Order by ID here
                 result = await db_session.execute(stmt)

@@ -30,6 +30,7 @@ from processes.youtube_utils import (
     get_videos_from_playlist,
     update_video_privacy,
 )
+from net_ops.unsplash import search_unsplash, download_unsplash_image
 
 load_dotenv()
 IMAGEMAGICK_BINARY=os.getenv("IMAGEMAGICK_BINARY")
@@ -442,7 +443,8 @@ async def upload_background(file: UploadFile = File(...)):
     return {"filename": file.filename, "path": file_path}
 
 
-from net_ops.unsplash import search_unsplash, download_unsplash_image
+    return RedirectResponse(url="/manual-upload", status_code=303)
+
 
 @app.get("/unsplash-search")
 async def unsplash_search(query: str):
