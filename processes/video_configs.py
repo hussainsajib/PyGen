@@ -87,8 +87,8 @@ def get_translation_textbox_size(is_short: bool, text: str):
 
 def get_full_ayah_translation_position(is_short: bool):
     if is_short:
-        return (SHORT["height"] * 0.80) - 150
-    return (LONG["height"] * 0.85)
+        return (SHORT["height"] * 0.80) - 200
+    return (LONG["height"] * 0.85) - 50
 
 COMMON = {
     "long_side": 1920,
