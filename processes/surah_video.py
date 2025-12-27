@@ -1,9 +1,10 @@
 from db_ops.crud_surah import read_surah_data, read_timestamp_data
 from db_ops.crud_text import read_text_data, read_translation
-from db_ops.crud_wbw import get_wbw_timestamps
+from db_ops.crud_wbw import get_wbw_timestamps, get_wbw_text_for_ayah, get_wbw_translation_for_ayah
 from db_ops.crud_reciters import get_reciter_by_key
 from db.database import async_session
 from net_ops.download_file import download_mp3_temp, cleanup_temp_file
+from factories.video import get_resolution, make_silence # Import both
 from factories.single_clip import (
     generate_arabic_text_clip,
     generate_wbw_arabic_text_clip,
@@ -188,12 +189,30 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
             line_composite = CompositeVideoClip(current_line_clips, size=screen_size).set_duration(line_duration)
             ayah_clips.append(line_composite)
             
-        # 4. Concatenate line clips for this ayah
+        if not ayah_clips:
+            print(f"[WARNING] - No clips generated for ayah {ayah}. Check WBW data.")
+            return None
+
+        # 4. Append delay if configured
+        delay_sec = float(config_manager.get("WBW_DELAY_BETWEEN_AYAH", 0.5))
+        if delay_sec > 0:
+            last_clip = ayah_clips[-1]
+            # Create a clip from the last frame of the last line
+            last_frame_clip = last_clip.to_ImageClip(t=last_clip.duration - 0.01).set_duration(delay_sec)
+            # Add silence
+            last_frame_clip = last_frame_clip.set_audio(make_silence(delay_sec))
+            ayah_clips.append(last_frame_clip)
+
+        # 5. Concatenate line clips for this ayah
         final_ayah_clip = concatenate_videoclips(ayah_clips)
         
-        # 5. Attach audio
+        # 6. Attach audio (the segments cover the recitation part)
         ayah_audio = full_audio.subclip(segments[0][1] / 1000.0, segments[-1][2] / 1000.0)
-        final_ayah_clip = final_ayah_clip.set_audio(ayah_audio)
+        
+        # We don't overwrite the audio here because concatenation already handled it?
+        # Actually concatenate_videoclips combines audios. 
+        # But we want to ensure the recitation part matches the recitation clips.
+        # The delay clip has silence.
         
         return final_ayah_clip
         
@@ -247,6 +266,10 @@ def generate_surah(surah_number: int, reciter_tag: str):
             if ayah in wbw_data:
                 print(f"[INFO] - Creating Advanced WBW clip for Ayah {ayah}", flush=True)
                 clip = create_wbw_advanced_ayah_clip(surah, ayah, reciter, full_audio, is_short=False, segments=wbw_data[ayah], background_image_path=active_background)
+                if clip is None:
+                    # Fallback to standard clip if WBW fails
+                    print(f"[INFO] - Falling back to standard clip for Ayah {ayah}", flush=True)
+                    clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, background_image_path=active_background)
             else:
                 clip = create_ayah_clip(surah, ayah, reciter,gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, background_image_path=active_background)
         except Exception as e:

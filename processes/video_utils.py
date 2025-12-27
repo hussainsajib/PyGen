@@ -9,6 +9,7 @@ from processes.video_configs import *
 from processes.description import generate_details
 from config_manager import config_manager
 from factories.file import *
+from factories.video import make_silence # Import from factories.video
 
 from db_ops.crud_surah import read_surah_data, read_timestamp_data
 from db_ops.crud_text import read_text_data, read_translation
@@ -18,9 +19,6 @@ from db.database import async_session
 from net_ops.download_file import download_mp3_temp
 from processes.surah_video import create_ayah_clip, create_wbw_ayah_clip, create_wbw_advanced_ayah_clip # Import all
 from factories.composite_clip import generate_intro, generate_outro
-
-def make_silence(duration, fps=44100):
-    return AudioClip(make_frame=lambda t: np.zeros((1,)), duration=duration, fps=fps)
 
 def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_key: str, is_short: bool):
     surah = Surah(surah_number)
@@ -75,6 +73,9 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
             if ayah in wbw_data:
                 print(f"[INFO] - Creating Advanced WBW clip for Ayah {ayah}", flush=True)
                 clip = create_wbw_advanced_ayah_clip(surah, ayah, reciter, full_audio, is_short=is_short, segments=wbw_data[ayah], background_image_path=active_background)
+                if clip is None:
+                    print(f"[INFO] - Falling back to standard clip for Ayah {ayah}", flush=True)
+                    clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background)
             else:
                 clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background)
             clips.append(clip)
