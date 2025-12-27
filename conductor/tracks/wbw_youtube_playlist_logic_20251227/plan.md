@@ -1,10 +1,10 @@
 # Implementation Plan: Refined WBW YouTube Playlist Logic
 
-## Phase 1: Frontend UI Updates
+## Phase 1: Frontend UI Updates [checkpoint: c413c53]
 - [x] Task: Update playlist dropdown in WBW interface
     - [x] Sub-task: Modify `templates/wbw.html` to set "None (Upload Only)" as the default option with value `none`.
     - [x] Sub-task: Add "Reciter's Default Playlist" as an explicit option with value `default`.
-- [~] Task: Conductor - User Manual Verification 'Phase 1: Frontend UI Updates' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Frontend UI Updates' [c413c53] (Protocol in workflow.md)
 
 ## Phase 2: Backend Logic Implementation
 - [ ] Task: Update WBW video job processing logic
