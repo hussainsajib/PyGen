@@ -6,9 +6,9 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Configuration Infrastructure' (Protocol in workflow.md)
 
 ## Phase 2: Engine Refactoring
-- [ ] Task: Refactor Surah Video Generation
-    - [ ] Sub-task: Write a test to verify `generate_surah` uses the configured thread count (mocking `write_videofile`).
-    - [ ] Sub-task: Update `processes/surah_video.py` to use `VIDEO_ENCODING_THREADS`.
+- [x] Task: Refactor Surah Video Generation [f6193ee]
+    - [x] Sub-task: Write a test to verify `generate_surah` uses the configured thread count (mocking `write_videofile`).
+    - [x] Sub-task: Update `processes/surah_video.py` to use `VIDEO_ENCODING_THREADS`.
 - [ ] Task: Refactor Word-by-Word Video Generation
     - [ ] Sub-task: Write a test to verify `generate_video` uses the configured thread count (mocking `write_videofile`).
     - [ ] Sub-task: Update `processes/video_utils.py` to use `VIDEO_ENCODING_THREADS`.
