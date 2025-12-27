@@ -7,6 +7,7 @@ import googleapiclient.errors
 from googleapiclient.http import MediaFileUpload
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+from moviepy.editor import VideoFileClip
 
 RELEASE_INCREMENT = 1  # Increment the release date by this many days
 TIMESTAMP_FILE = "video_release_date.txt"
@@ -76,13 +77,33 @@ def get_authenticated_service():
 def initialize_upload_request(youtube, video_details: dict):
     title, description = get_video_details(video_details["info"])
     relase_date = get_release_date()
+    
+    is_short = video_details.get("is_short", False)
+    tags = ["tag1", "tag2"]
+    
+    if is_short:
+        try:
+            with VideoFileClip(video_details["video"]) as clip:
+                duration = clip.duration
+                if duration <= 180: # 3 minutes
+                    if "#Shorts" not in title:
+                        title = f"{title} #Shorts"
+                    if "#Shorts" not in description:
+                        description = f"{description}\n\n#Shorts"
+                    if "Shorts" not in tags:
+                        tags.append("Shorts")
+                else:
+                    print(f"Video marked as short but duration is {duration}s (> 180s). Uploading as regular video.")
+        except Exception as e:
+            print(f"Could not determine video duration: {e}")
+
     return youtube.videos().insert(
         part="snippet,status",
         body={
             "snippet": {
                 "title": title,
                 "description": description,
-                "tags": ["tag1", "tag2"],
+                "tags": tags,
                 "categoryId": "22"  # Category ID (e.g., 22 for People & Blogs)
             },
             "status": {
