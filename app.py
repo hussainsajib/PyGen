@@ -93,6 +93,8 @@ async def create_video(
         upload_after_generation=final_upload,
         playlist_id=playlist_id
     )
+    if job_type == "wbw":
+        return RedirectResponse(request.url_for("wbw"))
     return RedirectResponse(request.url_for("index"))
 
 @app.get("/", name="index", response_class=HTMLResponse)
@@ -162,7 +164,9 @@ async def wbw_interface(
         "surahs": surahs, 
         "reciters": reciters,
         "upload_to_youtube": upload_to_youtube,
-        "playlists": playlists
+        "playlists": playlists,
+        "bg_rgb": config.get("BACKGROUND_RGB", "(239, 233, 227)"),
+        "font_color": config.get("FONT_COLOR", "rgb(201, 181, 156)")
     }
     return templates.TemplateResponse("wbw.html", context)
 
@@ -511,7 +515,7 @@ async def clear_active_background(
     db: AsyncSession = Depends(get_db),
     config: ConfigManager = Depends(get_config_manager)
 ):
-    await config.delete(db, "ACTIVE_BACKGROUND")
+    await config.set(db, "ACTIVE_BACKGROUND", "")
     return {"status": "success"}
 
 @app.post("/download-unsplash")

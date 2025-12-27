@@ -67,10 +67,13 @@
                     <div class="mb-4">
                         <label class="form-label d-block">Background:</label>
                         <div class="d-flex align-items-center mb-2">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#backgroundModal">
+                            <button type="button" class="btn btn-outline-secondary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#backgroundModal">
                                 <i class="fas fa-image me-1"></i> Select Background
                             </button>
-                            <span id="selected_bg_name" class="ms-3 text-muted small">Default Color</span>
+                            <button type="button" id="default_color_btn" class="btn btn-sm fw-bold border" style="background-color: {% if bg_rgb.startswith('rgb') %}{{ bg_rgb }}{% else %}rgb{{ bg_rgb }}{% endif %}; color: {{ font_color }};" onclick="clearBackground()">
+                                Default Color
+                            </button>
+                            <span id="selected_bg_name" class="ms-3 text-primary fw-bold small"></span>
                             <button type="button" id="clear_bg_btn" class="btn btn-link btn-sm text-danger d-none" onclick="clearBackground()">
                                 <i class="fas fa-times"></i>
                             </button>
@@ -309,7 +312,7 @@
     
         function clearBackground() {
             document.getElementById('active_background').value = '';
-            document.getElementById('selected_bg_name').innerText = 'Default Color';
+            document.getElementById('selected_bg_name').innerText = '';
             document.getElementById('selected_bg_name').classList.remove('text-primary', 'fw-bold');
             document.getElementById('selected_bg_name').classList.add('text-muted');
             document.getElementById('clear_bg_btn').classList.add('d-none');
