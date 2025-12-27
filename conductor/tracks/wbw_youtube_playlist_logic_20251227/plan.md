@@ -13,8 +13,8 @@
     - [x] Sub-task: Update `create_wbw_video_job` to interpret `playlist_id='default'` (or empty string if previously used) as a instruction to use the reciter's default playlist from the database.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Backend Logic Implementation' [6ba24bd] (Protocol in workflow.md)
 
-## Phase 3: Integration and Final Verification
-- [ ] Task: End-to-end verification of WBW upload behavior
-    - [ ] Sub-task: Verify that selecting "None (Upload Only)" results in a video upload without a playlist.
-    - [ ] Sub-task: Verify that selecting "Reciter's Default Playlist" results in an upload to the reciter's playlist.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Integration and Final Verification' (Protocol in workflow.md)
+## Phase 3: Integration and Final Verification [checkpoint: pending]
+- [x] Task: End-to-end verification of WBW upload behavior
+    - [x] Sub-task: Verify that selecting "None (Upload Only)" results in a video upload without a playlist.
+    - [x] Sub-task: Verify that selecting "Reciter's Default Playlist" results in an upload to the reciter's playlist.
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Integration and Final Verification' (Protocol in workflow.md)
