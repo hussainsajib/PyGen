@@ -1,11 +1,11 @@
 # Implementation Plan: Word-by-Word UX and Layout Refinements
 
-## Phase 1: Engine and Positioning Adjustments
-- [ ] Task: Shift full translation overlay upward
-    - [ ] Sub-task: Update `get_full_ayah_translation_position` in `processes/video_configs.py` to move the Y position up by an additional 50 pixels for both short and long videos.
-- [ ] Task: Update redirect logic for WBW jobs
-    - [ ] Sub-task: Modify the `create_video` endpoint in `app.py` to check if `job_type` is 'wbw' and redirect the user back to the `/word-by-word` page instead of the index.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Engine and Positioning Adjustments' (Protocol in workflow.md)
+## Phase 1: Engine and Positioning Adjustments [checkpoint: 9becc06]
+- [x] Task: Shift full translation overlay upward
+    - [x] Sub-task: Update `get_full_ayah_translation_position` in `processes/video_configs.py` to move the Y position up by an additional 50 pixels for both short and long videos.
+- [x] Task: Update redirect logic for WBW jobs
+    - [x] Sub-task: Modify the `create_video` endpoint in `app.py` to check if `job_type` is 'wbw' and redirect the user back to the `/word-by-word` page instead of the index.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Engine and Positioning Adjustments' [9becc06] (Protocol in workflow.md)
 
 ## Phase 2: Frontend UI Enhancements [checkpoint: 5394fae]
 - [x] Task: Expose default color configurations to WBW template
