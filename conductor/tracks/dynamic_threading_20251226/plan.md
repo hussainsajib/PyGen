@@ -15,7 +15,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Engine Refactoring' (Protocol in workflow.md)
 
 ## Phase 3: Integration and Verification
-- [ ] Task: Verification
-    - [ ] Sub-task: Run all tests to ensure no regressions in video generation.
-    - [ ] Sub-task: Manually trigger a short video generation to confirm it completes successfully.
+- [x] Task: Verification
+    - [x] Sub-task: Run all tests to ensure no regressions in video generation.
+    - [x] Sub-task: Manually trigger a short video generation to confirm it completes successfully.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Integration and Verification' (Protocol in workflow.md)
