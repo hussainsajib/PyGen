@@ -1,6 +1,6 @@
 # Implementation Plan: Enhanced WBW Rendering and YouTube Integration
 
-## Phase 1: Configuration & UI Infrastructure
+## Phase 1: Configuration & UI Infrastructure [checkpoint: 2d77e60]
 - [x] Task: Add configuration settings for full ayah translation
     - [x] Sub-task: Create a migration script to add `WBW_FULL_TRANSLATION_ENABLED` (default: false) and `WBW_FULL_TRANSLATION_SOURCE` (default: 'rawai_al_bayan') to the `config` table.
 - [x] Task: Update Word-by-Word Interface for YouTube Settings
@@ -8,7 +8,7 @@
     - [x] Sub-task: Modify `templates/wbw.html` to include a "YouTube Settings" section with a checkbox for automatic upload and a dropdown for playlist selection.
 - [x] Task: Convert WBW booleans to switches in Config UI
     - [x] Sub-task: Update `templates/config.html` to render `WBW_FULL_TRANSLATION_ENABLED` and `WBW_INTERLINEAR_ENABLED` as toggle switches instead of text inputs.
-- [~] Task: Conductor - User Manual Verification 'Phase 1: Configuration & UI Infrastructure' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Configuration & UI Infrastructure' [2d77e60] (Protocol in workflow.md)
 
 ## Phase 2: Rendering Engine Enhancements
 - [ ] Task: Adjust top-level metadata positioning
