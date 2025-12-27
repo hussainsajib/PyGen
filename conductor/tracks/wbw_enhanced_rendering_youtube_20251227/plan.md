@@ -10,7 +10,7 @@
     - [x] Sub-task: Update `templates/config.html` to render `WBW_FULL_TRANSLATION_ENABLED` and `WBW_INTERLINEAR_ENABLED` as toggle switches instead of text inputs.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Configuration & UI Infrastructure' [2d77e60] (Protocol in workflow.md)
 
-## Phase 2: Rendering Engine Enhancements
+## Phase 2: Rendering Engine Enhancements [checkpoint: 5b65ae9]
 - [x] Task: Adjust top-level metadata positioning
     - [x] Sub-task: Update the rendering logic in `processes/surah_video.py` (or `factories/single_clip.py` as appropriate) to move the Reciter, Surah, and Brand info clips down by 50 pixels.
 - [x] Task: Implement full ayah translation overlay
@@ -19,7 +19,7 @@
 - [x] Task: Make full translation font size configurable
     - [x] Sub-task: Add `WBW_FULL_TRANSLATION_FONT_SIZE` (default: 30) to the `config` table.
     - [x] Sub-task: Update `factories/single_clip.py` to use this configuration value when rendering the overlay.
-- [~] Task: Conductor - User Manual Verification 'Phase 2: Rendering Engine Enhancements' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Rendering Engine Enhancements' [5b65ae9] (Protocol in workflow.md)
 
 ## Phase 3: YouTube Integration Backend
 - [ ] Task: Update Job Management for WBW Uploads
