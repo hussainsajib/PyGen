@@ -209,10 +209,11 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
         # 6. Attach audio (the segments cover the recitation part)
         ayah_audio = full_audio.subclip(segments[0][1] / 1000.0, segments[-1][2] / 1000.0)
         
-        # We don't overwrite the audio here because concatenation already handled it?
-        # Actually concatenate_videoclips combines audios. 
-        # But we want to ensure the recitation part matches the recitation clips.
-        # The delay clip has silence.
+        if delay_sec > 0:
+            final_audio = concatenate_audioclips([ayah_audio, make_silence(delay_sec)])
+            final_ayah_clip = final_ayah_clip.set_audio(final_audio)
+        else:
+            final_ayah_clip = final_ayah_clip.set_audio(ayah_audio)
         
         return final_ayah_clip
         
