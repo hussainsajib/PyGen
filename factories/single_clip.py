@@ -178,7 +178,17 @@ def generate_wbw_interlinear_text_clip(words: list, translations: list, is_short
         
         # Safe fallback: use a fixed color or parse. 
         # BUT COMMON["arabic_textbox_config"]["color"] is used for TextClip.
-        color = COMMON["arabic_textbox_config"]["color"]
+        color_str = COMMON["arabic_textbox_config"]["color"]
+        
+        # Parse "rgb(r, g, b)" to tuple if necessary
+        if isinstance(color_str, str) and color_str.startswith("rgb("):
+            try:
+                # Extract numbers
+                color = tuple(map(int, color_str.replace("rgb(", "").replace(")", "").split(",")))
+            except:
+                color = (255, 255, 255) # Fallback white
+        else:
+            color = color_str
         
         uc = ColorClip(size=(ac.w, 3), color=color)
         
