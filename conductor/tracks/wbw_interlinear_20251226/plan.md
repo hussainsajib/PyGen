@@ -13,11 +13,11 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Engine Logic & Segmentation' (Protocol in workflow.md)
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Engine Logic & Segmentation' (Protocol in workflow.md)
 
-## Phase 3: Rendering Implementation
+## Phase 3: Rendering Implementation [checkpoint: d3e6d72]
 - [x] Task: Implement interlinear text clip generation [239dd97]
     - [x] Sub-task: Write failing tests for the interlinear rendering (validating correct centering and the presence of an underline).
     - [x] Sub-task: Update `factories/single_clip.py` to implement `generate_wbw_interlinear_text_clip`. This will use Pillow to draw the Arabic word, a solid underline, and the translation text centered directly below.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Rendering Implementation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Rendering Implementation' (Protocol in workflow.md)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Rendering Implementation' (Protocol in workflow.md)
 
 ## Phase 4: Integration and Verification
