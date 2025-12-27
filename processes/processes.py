@@ -81,6 +81,44 @@ def create_surah_video(surah: int, reciter: str):
         except Exception as e:
             print(f"YouTube upload failed: {e}")
 
+def create_wbw_video_job(surah: int, start_verse: int, end_verse:int, 
+                        reciter: str, is_short:bool = False, 
+                        upload_after_generation: bool = False,
+                        playlist_id: str = None):
+    """Generates a WBW video and optionally uploads it to YouTube."""
+    video_details = generate_video(surah, start_verse, end_verse, reciter, is_short)
+    
+    if not video_details:
+        raise Exception("Error generating video")
+    
+    screenshot_path = extract_frame(video_path=video_details["video"])
+    video_details["screenshot"] = screenshot_path
+    
+    # Persist to database
+    anyio.from_thread.run(record_media_asset, video_details)
+    
+    # Upload to YouTube if requested
+    if upload_after_generation:
+        from processes import youtube_utils
+        # Temporarily override playlist for this reciter if provided
+        original_playlist = youtube_utils.playlist.get(reciter)
+        if playlist_id:
+            youtube_utils.playlist[reciter] = playlist_id
+            
+        try:
+            video_id = upload_to_youtube(video_details)
+            if video_id:
+                anyio.from_thread.run(update_media_asset_upload, video_details["video"], video_id)
+        except Exception as e:
+            print(f"YouTube upload failed: {e}")
+        finally:
+            # Restore original playlist if it was overridden
+            if playlist_id:
+                if original_playlist:
+                    youtube_utils.playlist[reciter] = original_playlist
+                else:
+                    del youtube_utils.playlist[reciter]
+
 def manual_upload_to_youtube(video_filename: str, reciter_key: str, playlist_id: str, details_filename: str):
     import os
     import re

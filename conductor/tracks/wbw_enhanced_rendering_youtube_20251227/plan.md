@@ -6,8 +6,9 @@
 - [x] Task: Update Word-by-Word Interface for YouTube Settings
     - [x] Sub-task: Update the `/word-by-word` route in `app.py` to inject the global `UPLOAD_TO_YOUTUBE` flag and the list of available playlists (from the database) into the template context.
     - [x] Sub-task: Modify `templates/wbw.html` to include a "YouTube Settings" section with a checkbox for automatic upload and a dropdown for playlist selection.
-- [x] Task: Convert WBW booleans to switches in Config UI
-    - [x] Sub-task: Update `templates/config.html` to render `WBW_FULL_TRANSLATION_ENABLED` and `WBW_INTERLINEAR_ENABLED` as toggle switches instead of text inputs.
+- [x] Task: Remove redundant upload toggle from WBW UI
+    - [x] Sub-task: Update `templates/wbw.html` to show playlist selection directly without the extra toggle.
+    - [x] Sub-task: Update `app.py` to implicitly set upload preference based on global config.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Configuration & UI Infrastructure' [2d77e60] (Protocol in workflow.md)
 
 ## Phase 2: Rendering Engine Enhancements [checkpoint: 5b65ae9]
@@ -22,12 +23,12 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Rendering Engine Enhancements' [5b65ae9] (Protocol in workflow.md)
 
 ## Phase 3: YouTube Integration Backend
-- [ ] Task: Update Job Management for WBW Uploads
-    - [ ] Sub-task: Update the `enqueue_job` function and the job model to store YouTube upload preferences (auto-upload and playlist ID).
-    - [ ] Sub-task: Modify `processes/processes.py` and the `job_worker` in `processes/background_worker.py` to trigger the YouTube upload specifically for WBW jobs when requested.
-- [ ] Task: Integration Test for WBW YouTube Upload
-    - [ ] Sub-task: Write failing integration tests to verify that a WBW job with the upload flag correctly initiates the YouTube upload to the specified playlist.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: YouTube Integration Backend' (Protocol in workflow.md)
+- [x] Task: Update Job Management for WBW Uploads
+    - [x] Sub-task: Update the `enqueue_job` function and the job model to store YouTube upload preferences (auto-upload and playlist ID).
+    - [x] Sub-task: Modify `processes/processes.py` and the `job_worker` in `processes/background_worker.py` to trigger the YouTube upload specifically for WBW jobs when requested.
+- [x] Task: Integration Test for WBW YouTube Upload
+    - [x] Sub-task: Write failing integration tests to verify that a WBW job with the upload flag correctly initiates the YouTube upload to the specified playlist.
+- [~] Task: Conductor - User Manual Verification 'Phase 3: YouTube Integration Backend' (Protocol in workflow.md)
 
 ## Phase 4: Final Integration & Verification
 - [ ] Task: End-to-end verification of the enhanced WBW flow

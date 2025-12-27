@@ -24,3 +24,11 @@ class Job(Base):
     progress = Column(Float, default=0.0)
     retry_count = Column(Integer, default=0)
     max_retries = Column(Integer, default=3)
+    
+    # New fields for YouTube integration and WBW
+    job_type = Column(String(50), default="standard") # standard, wbw, manual_upload
+    upload_after_generation = Column(Integer, default=0) # 0 for false, 1 for true
+    playlist_id = Column(String(100), nullable=True)
+    start_verse = Column(Integer, nullable=True)
+    end_verse = Column(Integer, nullable=True)
+    is_short = Column(Integer, default=0) # 0 for false, 1 for true

@@ -4,7 +4,7 @@ from db.database import async_session
 import asyncio
 import logging
 import json
-from processes.processes import create_surah_video, manual_upload_to_youtube
+from processes.processes import create_surah_video, manual_upload_to_youtube, create_wbw_video_job
 from fastapi.concurrency import run_in_threadpool
 
 logger = logging.getLogger(__name__)
@@ -19,13 +19,13 @@ async def job_worker():
             job: Job = result.scalar_one_or_none()
 
             if job:
-                logger.info(f"Processing job: {job.id} for Surah {job.surah_number} by {job.reciter}")
+                logger.info(f"Processing job: {job.id} (Type: {job.job_type}) for Surah {job.surah_number} by {job.reciter}")
                 job.status = JobStatus.processing
                 await session.commit()
 
                 try:
-                    if job.surah_number == 0:
-                        # Manual upload job
+                    if job.job_type == "manual_upload" or (job.surah_number == 0 and job.job_type == "standard"):
+                        # Manual upload job (checking both for backward compatibility)
                         data = json.loads(job.surah_name)
                         await run_in_threadpool(
                             manual_upload_to_youtube,
@@ -34,8 +34,20 @@ async def job_worker():
                             playlist_id=data["playlist_id"],
                             details_filename=data["details_filename"]
                         )
+                    elif job.job_type == "wbw":
+                        # Word-by-word video generation job
+                        await run_in_threadpool(
+                            create_wbw_video_job,
+                            surah=job.surah_number,
+                            start_verse=job.start_verse,
+                            end_verse=job.end_verse,
+                            reciter=job.reciter,
+                            is_short=bool(job.is_short),
+                            upload_after_generation=bool(job.upload_after_generation),
+                            playlist_id=job.playlist_id
+                        )
                     else:
-                        # Standard video generation job
+                        # Standard full surah generation job
                         await run_in_threadpool(create_surah_video, job.surah_number, job.reciter)
 
                     job.progress = 100.0
@@ -43,6 +55,7 @@ async def job_worker():
                     await session.commit()
 
                 except Exception as e:
+                    logger.error(f"Job {job.id} failed: {e}")
                     job.retry_count += 1
                     if job.retry_count >= job.max_retries:
                         job.status = JobStatus.failed
@@ -51,5 +64,6 @@ async def job_worker():
                     await session.commit()
 
             else:
-                await asyncio.sleep(10)
+                await asyncio.sleep(5) # Reduced sleep for better responsiveness
+
  

@@ -11,6 +11,7 @@
             </div>
             <div class="card-body">
                 <form action="/create-video" method="get">
+                    <input type="hidden" name="job_type" value="wbw">
                     <!-- Surah Selection -->
                     <div class="mb-3">
                         <label for="surah" class="form-label">Select Surah:</label>
@@ -84,32 +85,19 @@
                             <h6 class="mb-0"><i class="fab fa-youtube me-2"></i>YouTube Settings</h6>
                         </div>
                         <div class="card-body py-3">
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="upload_after_generation" name="upload_after_generation">
-                                <label class="form-check-label" for="upload_after_generation">Upload automatically after generation</label>
-                            </div>
-                            
-                            <div id="playlist_section" class="d-none">
-                                <label for="playlist_id" class="form-label small">Select Playlist:</label>
+                            <p class="small text-muted mb-2">Automatic upload is enabled globally. Select an override playlist below if desired.</p>
+                            <div id="playlist_section">
+                                <label for="playlist_id" class="form-label small fw-bold">Target Playlist:</label>
                                 <select id="playlist_id" name="playlist_id" class="form-select form-select-sm">
-                                    <option value="" selected>No specific playlist (Default)</option>
+                                    <option value="" selected>Use Reciter's Default Playlist</option>
                                     {% for playlist in playlists %}
                                     <option value="{{ playlist.id }}">{{ playlist.name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
+                            <input type="hidden" name="upload_after_generation" value="true">
                         </div>
                     </div>
-                    <script>
-                        document.getElementById('upload_after_generation').addEventListener('change', function() {
-                            const playlistSection = document.getElementById('playlist_section');
-                            if (this.checked) {
-                                playlistSection.classList.remove('d-none');
-                            } else {
-                                playlistSection.classList.add('d-none');
-                            }
-                        });
-                    </script>
                     {% endif %}
 
                     <div class="d-grid">

@@ -60,14 +60,39 @@ change_settings({"IMAGEMAGICK_BINARY": IMAGEMAGICK_BINARY})
 @app.get("/create-video")
 async def create_video(
     request: Request, 
-    background_tasks: BackgroundTasks, 
     surah: int, 
     start_verse: int, 
     end_verse: int, 
     reciter: str,
-    is_short: bool = False
+    is_short: bool = False,
+    job_type: str = "standard",
+    upload_after_generation: bool = False,
+    playlist_id: str = None,
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
 ):
-    background_tasks.add_task(create_and_post, surah, start_verse, end_verse, reciter, is_short)
+    with open("data/surah_data.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+        surah_name = data[str(surah)]["english_name"]
+        
+    # If global upload is on, and it's a WBW job, we default to upload unless specifically overridden
+    # For now, if UPLOAD_TO_YOUTUBE is true, we set it to true for the job.
+    final_upload = upload_after_generation
+    if job_type == "wbw" and config.get("UPLOAD_TO_YOUTUBE") == "True":
+        final_upload = True
+
+    await enqueue_job(
+        db, 
+        surah, 
+        surah_name=surah_name, 
+        reciter=reciter,
+        job_type=job_type,
+        start_verse=start_verse,
+        end_verse=end_verse,
+        is_short=is_short,
+        upload_after_generation=final_upload,
+        playlist_id=playlist_id
+    )
     return RedirectResponse(request.url_for("index"))
 
 @app.get("/", name="index", response_class=HTMLResponse)
