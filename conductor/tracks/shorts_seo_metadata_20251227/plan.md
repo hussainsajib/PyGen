@@ -28,6 +28,6 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 3: YouTube Upload Integration' [e959396] (Protocol in workflow.md)
 
 ## Phase 4: Final Integration and Verification
-- [ ] Task: End-to-end verification
-    - [ ] Sub-task: Generate a Short WBW video with a custom title and verify that the resulting YouTube metadata includes the optimized SEO tags, CTAs, and formatted title.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Final Integration and Verification' (Protocol in workflow.md)
+- [x] Task: End-to-end verification
+    - [x] Sub-task: Generate a Short WBW video with a custom title and verify that the resulting YouTube metadata includes the optimized SEO tags, CTAs, and formatted title.
+- [~] Task: Conductor - User Manual Verification 'Phase 4: Final Integration and Verification' (Protocol in workflow.md)
