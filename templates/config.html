@@ -60,6 +60,11 @@
                         <input type="checkbox" id="upload_to_youtube_checkbox" class="form-check-input" role="switch" {% if item.value == 'True' %}checked{% endif %}>
                         <input type="hidden" name="{{ item.key }}" id="upload_to_youtube_value" value="{{ item.value }}">
                     </div>
+                {% elif item.key == 'WBW_FULL_TRANSLATION_ENABLED' or item.key == 'WBW_INTERLINEAR_ENABLED' %}
+                    <div class="form-check form-switch">
+                        <input type="checkbox" id="{{ item.key }}_checkbox" class="form-check-input dynamic-switch" role="switch" data-target="{{ item.key }}_value" {% if item.value == 'True' %}checked{% endif %}>
+                        <input type="hidden" name="{{ item.key }}" id="{{ item.key }}_value" value="{{ item.value }}">
+                    </div>
                 {% else %}
                     <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="form-control">
                 {% endif %}
@@ -169,6 +174,17 @@ document.addEventListener('DOMContentLoaded', function() {
             uploadValue.value = this.checked ? "True" : "False";
         });
     }
+
+    // --- Dynamic Switches (WBW Settings) ---
+    document.querySelectorAll('.dynamic-switch').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const targetId = this.getAttribute('data-target');
+            const targetInput = document.getElementById(targetId);
+            if (targetInput) {
+                targetInput.value = this.checked ? "True" : "False";
+            }
+        });
+    });
 });
 </script>
 {% endblock %}

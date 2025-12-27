@@ -96,7 +96,11 @@ async def read_root(request: Request, db: AsyncSession = Depends(get_db)):
     return templates.TemplateResponse("index.html", context)
 
 @app.get("/word-by-word", name="wbw", response_class=HTMLResponse)
-async def wbw_interface(request: Request, db: AsyncSession = Depends(get_db)):
+async def wbw_interface(
+    request: Request, 
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
+):
     surahs = []
     reciters = []
 
@@ -109,6 +113,15 @@ async def wbw_interface(request: Request, db: AsyncSession = Depends(get_db)):
 
     # Load reciters who have a 'wbw_database' entry
     db_reciters = await crud_reciters.get_all_reciters(db)
+    
+    # Extract unique playlists from reciters
+    playlists = []
+    seen_playlists = set()
+    for r in db_reciters:
+        if r.playlist_id and r.playlist_id not in seen_playlists:
+            playlists.append({"id": r.playlist_id, "name": f"Playlist {r.playlist_id} ({r.english_name})"})
+            seen_playlists.add(r.playlist_id)
+            
     for r in db_reciters:
         if r.wbw_database: # Filter for WBW support
             reciters.append({
@@ -117,7 +130,15 @@ async def wbw_interface(request: Request, db: AsyncSession = Depends(get_db)):
             })
     reciters.sort(key=lambda x: x["english_name"])
     
-    context = {"request": request, "surahs": surahs, "reciters": reciters}
+    upload_to_youtube = config.get("UPLOAD_TO_YOUTUBE", "False") == "True"
+    
+    context = {
+        "request": request, 
+        "surahs": surahs, 
+        "reciters": reciters,
+        "upload_to_youtube": upload_to_youtube,
+        "playlists": playlists
+    }
     return templates.TemplateResponse("wbw.html", context)
 
 @app.get("/surah", name="surah", response_class=HTMLResponse)
