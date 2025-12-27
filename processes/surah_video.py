@@ -1,5 +1,5 @@
 from db_ops.crud_surah import read_surah_data, read_timestamp_data
-from db_ops.crud_text import read_text_data, read_translation
+from db_ops.crud_text import read_text_data, read_translation, get_full_translation_for_ayah
 from db_ops.crud_wbw import get_wbw_timestamps, get_wbw_text_for_ayah, get_wbw_translation_for_ayah
 from db_ops.crud_reciters import get_reciter_by_key
 from db.database import async_session
@@ -12,6 +12,7 @@ from factories.single_clip import (
     generate_wbw_advanced_translation_text_clip,
     generate_wbw_interlinear_text_clip,
     generate_translation_text_clip, 
+    generate_full_ayah_translation_clip,
     generate_reciter_name_clip,
     generate_surah_info_clip, 
     generate_brand_clip,
@@ -153,6 +154,12 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
         # 2. Get config for font size and character limit
         interlinear_enabled = config_manager.get("WBW_INTERLINEAR_ENABLED", "False") == "True"
         interlinear_trans_font_size = int(config_manager.get("WBW_TRANSLATION_FONT_SIZE", 20))
+        
+        full_trans_enabled = config_manager.get("WBW_FULL_TRANSLATION_ENABLED", "False") == "True"
+        full_trans_source = config_manager.get("WBW_FULL_TRANSLATION_SOURCE", "rawai_al_bayan")
+        full_ayah_translation = ""
+        if full_trans_enabled:
+            full_ayah_translation = get_full_translation_for_ayah(surah.number, ayah, full_trans_source)
 
         if is_short:
             font_size = int(config_manager.get("WBW_FONT_SIZE_SHORT", 40))
@@ -195,6 +202,11 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
                 trans_clip = generate_wbw_advanced_translation_text_clip(line["translation_text"], is_short, line_duration, int(font_size * 0.8))
                 current_line_clips.append(trans_clip)
             
+            # Full Ayah Translation Overlay at bottom
+            if full_trans_enabled and full_ayah_translation:
+                full_trans_clip = generate_full_ayah_translation_clip(full_ayah_translation, is_short, line_duration)
+                current_line_clips.append(full_trans_clip)
+
             # Footer
             if COMMON["enable_footer"]:
                 if COMMON["enable_reciter_info"]:

@@ -38,17 +38,17 @@ def get_translation_text_position(is_short: bool):
 
 def get_reciter_info_position(is_short: bool, clip_width: int):
     if is_short:
-        return ((SHORT["width"] - clip_width) / (SHORT["width"] * 2), 0.05)
+        return ((SHORT["width"] - clip_width) / (SHORT["width"] * 2), 0.10)
     return (0.05, 0.92)
 
 def get_surah_info_position(is_short: bool, clip_width: int):
     if is_short:
-        return ((SHORT["width"] - clip_width) / (SHORT["width"] * 2), 0.07)
+        return ((SHORT["width"] - clip_width) / (SHORT["width"] * 2), 0.12)
     return ((LONG["width"] - clip_width) / (LONG["width"] * 2), 0.92)
 
 def get_channel_info_position(is_short: bool, clip_width: int):
     if is_short:
-        return ((SHORT["width"] - clip_width) / (SHORT["width"] * 2), 0.09)
+        return ((SHORT["width"] - clip_width) / (SHORT["width"] * 2), 0.14)
     return (0.85, 0.92)
 
 def get_arabic_textbox_size(is_short: bool, text: str):
@@ -85,6 +85,11 @@ def get_translation_textbox_size(is_short: bool, text: str):
         "fontsize": v_size
     }
 
+def get_full_ayah_translation_position(is_short: bool):
+    if is_short:
+        return (SHORT["height"] * 0.80)
+    return (LONG["height"] * 0.85)
+
 COMMON = {
     "long_side": 1920,
     "short_side": 1080,
@@ -101,6 +106,7 @@ COMMON = {
     "enable_channel_info": True,
     "f_arabic_position": get_arabic_text_position,
     "f_translation_position": get_translation_text_position,
+    "f_full_ayah_translation_position": get_full_ayah_translation_position,
     "f_reciter_info_position": get_reciter_info_position,
     "f_surah_info_position": get_surah_info_position,
     "f_channel_info_position": get_channel_info_position,

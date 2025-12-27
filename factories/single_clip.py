@@ -5,6 +5,7 @@ from moviepy.video.fx.resize import resize
 from convert_numbers import english_to_arabic as e2a
 from bangla import convert_english_digit_to_bangla_digit as e2b
 from processes.video_configs import BACKGROUND_OPACITY, BACKGROUND_RGB, COMMON, FOOTER_CONFIG, SHORT, LONG
+from config_manager import config_manager
 import numpy as np
 
 def generate_image_background(background_image_url: str, duration: int, is_short: bool):
@@ -266,6 +267,20 @@ def generate_translation_text_clip(text: str, is_short: bool, duration: int) -> 
     translation_sizes = COMMON["f_translation_size"](is_short, text)
     translation_clip = TextClip(text, **translation_sizes, **COMMON["translation_textbox_config"])
     translation_pos = COMMON["f_translation_position"](is_short)
+    translation_clip = translation_clip.set_position(('center', translation_pos))\
+                        .set_duration(duration)
+    return translation_clip
+
+def generate_full_ayah_translation_clip(text: str, is_short: bool, duration: int) -> TextClip:
+    translation_sizes = COMMON["f_translation_size"](is_short, text)
+    # Use configurable font size, fallback to 30
+    font_size = int(config_manager.get("WBW_FULL_TRANSLATION_FONT_SIZE", 30))
+    
+    config = COMMON["translation_textbox_config"].copy()
+    config["fontsize"] = font_size
+    
+    translation_clip = TextClip(text, size=translation_sizes["size"], **config)
+    translation_pos = COMMON["f_full_ayah_translation_position"](is_short)
     translation_clip = translation_clip.set_position(('center', translation_pos))\
                         .set_duration(duration)
     return translation_clip
