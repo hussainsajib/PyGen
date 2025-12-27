@@ -19,7 +19,7 @@ from factories.single_clip import (
 from processes.wbw_utils import segment_words_with_timestamps
 from factories.composite_clip import generate_intro, generate_outro
 from factories.video import get_resolution
-from processes.video_configs import COMMON
+from processes.video_configs import COMMON, VIDEO_ENCODING_THREADS
 from processes.Classes import Reciter, Surah
 from processes.description import generate_details
 from config_manager import config_manager
@@ -295,7 +295,7 @@ def generate_surah(surah_number: int, reciter_tag: str):
             fps=24, 
             audio_codec="aac",
             preset="ultrafast",
-            threads=4,
+            threads=VIDEO_ENCODING_THREADS,
             write_logfile=True,
             logger="bar"
         )
