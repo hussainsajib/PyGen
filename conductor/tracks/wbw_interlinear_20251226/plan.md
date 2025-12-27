@@ -7,9 +7,10 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Configuration Infrastructure' (Protocol in workflow.md)
 
 ## Phase 2: Engine Logic & Segmentation
-- [ ] Task: Update word segmentation to account for interlinear widths
-    - [ ] Sub-task: Write failing tests for word width calculation that considers both the Arabic word and its translation.
-    - [ ] Sub-task: Modify `processes/wbw_utils.py` to calculate block widths based on the wider of the two elements (Arabic word or translation).
+- [x] Task: Update word segmentation to account for interlinear widths [a521093]
+    - [x] Sub-task: Write failing tests for word width calculation that considers both the Arabic word and its translation.
+    - [x] Sub-task: Modify `processes/wbw_utils.py` to calculate block widths based on the wider of the two elements (Arabic word or translation).
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: Engine Logic & Segmentation' (Protocol in workflow.md)
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Engine Logic & Segmentation' (Protocol in workflow.md)
 
 ## Phase 3: Rendering Implementation
