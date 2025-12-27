@@ -30,7 +30,10 @@
                                 <option value="{{r.key}}" {% if r.key == c_reciter %} selected="selected"{% endif %}>{{ r.english_name }}</option>
                                 {% endfor %}
                             </select>
-                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="custom_title" class="form-label">Video Title (Prefix):</label>
+                        <input type="text" id="custom_title" name="custom_title" class="form-control" placeholder="Optional title prefix">
                     </div>
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary btn-lg">Enqueue Job</button>

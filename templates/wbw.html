@@ -52,16 +52,22 @@
                     </div>
 
                     <!-- Short Toggle -->
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label class="form-label d-block">Create short:</label>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" id="is_short_true" name="is_short" value="true" checked>
+                            <input class="form-check-input" type="radio" id="is_short_true" name="is_short" value="true" checked onclick="toggleTitleInput()">
                             <label class="form-check-label" for="is_short_true">Yes</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" id="is_short_false" name="is_short" value="false">
+                            <input class="form-check-input" type="radio" id="is_short_false" name="is_short" value="false" onclick="toggleTitleInput()">
                             <label class="form-check-label" for="is_short_false">No</label>
                         </div>
+                    </div>
+
+                    <!-- Video Title (Conditional) -->
+                    <div id="title_input_group" class="mb-3">
+                        <label for="custom_title" class="form-label">Video Title (Prefix):</label>
+                        <input type="text" id="custom_title" name="custom_title" class="form-control" placeholder="Optional title prefix">
                     </div>
 
                     <div class="mb-4">
@@ -158,6 +164,16 @@
             endVerseSelect.add(endOption);
         }
         }
+
+    function toggleTitleInput() {
+        const isShort = document.getElementById("is_short_true").checked;
+        const titleGroup = document.getElementById("title_input_group");
+        if (isShort) {
+            titleGroup.classList.remove("d-none");
+        } else {
+            titleGroup.classList.add("d-none");
+        }
+    }
     </script>
     
     <!-- Background Selection Modal -->

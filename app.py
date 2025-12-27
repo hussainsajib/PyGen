@@ -68,6 +68,7 @@ async def create_video(
     job_type: str = "standard",
     upload_after_generation: bool = False,
     playlist_id: str = None,
+    custom_title: str = None,
     db: AsyncSession = Depends(get_db),
     config: ConfigManager = Depends(get_config_manager)
 ):
@@ -91,7 +92,8 @@ async def create_video(
         end_verse=end_verse,
         is_short=is_short,
         upload_after_generation=final_upload,
-        playlist_id=playlist_id
+        playlist_id=playlist_id,
+        custom_title=custom_title
     )
     if job_type == "wbw":
         return RedirectResponse(request.url_for("wbw"))
@@ -208,12 +210,13 @@ async def create_surah(
 async def create_surah(request: Request, 
                  surah_number: int, 
                  reciter: str,
+                 custom_title: str = None,
                  db: AsyncSession = Depends(get_db)
     ):
     with open("data/surah_data.json", "r", encoding="utf-8") as f:
         data = json.load(f)
         surah_name = data[str(surah_number)]["english_name"]
-    await enqueue_job(db, surah_number, surah_name=surah_name, reciter=reciter)
+    await enqueue_job(db, surah_number, surah_name=surah_name, reciter=reciter, custom_title=custom_title)
     #background_tasks.add_task(create_surah_video, surah_number, reciter)
     return RedirectResponse(request.url_for("surah"))
 

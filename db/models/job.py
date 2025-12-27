@@ -32,3 +32,4 @@ class Job(Base):
     start_verse = Column(Integer, nullable=True)
     end_verse = Column(Integer, nullable=True)
     is_short = Column(Integer, default=0) # 0 for false, 1 for true
+    custom_title = Column(String(100), nullable=True)
