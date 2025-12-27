@@ -1,6 +1,6 @@
 # Implementation Plan: Enhanced YouTube Metadata and SEO for Shorts
 
-## Phase 1: Database and UI Infrastructure
+## Phase 1: Database and UI Infrastructure [checkpoint: c99b0b5]
 - [x] Task: Update Job model and Database Schema
     - [x] Sub-task: Add `custom_title` column to the `Job` model in `db/models/job.py`.
     - [x] Sub-task: Create and run a migration script to add the `custom_title` column to the `jobs` table in PostgreSQL.
@@ -9,7 +9,7 @@
     - [x] Sub-task: Implement JavaScript logic in both templates to show/hide the "Video Title" field only when "Short" is selected.
 - [x] Task: Update Web Routes
     - [x] Sub-task: Modify the `/create-video` and `/create-surah-video` routes in `app.py` to capture and store the `custom_title` when enqueuing jobs.
-- [~] Task: Conductor - User Manual Verification 'Phase 1: Database and UI Infrastructure' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Database and UI Infrastructure' [c99b0b5] (Protocol in workflow.md)
 
 ## Phase 2: Metadata and SEO Logic implementation
 - [ ] Task: Implement SEO-optimized description and tag generation
