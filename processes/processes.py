@@ -31,9 +31,9 @@ async def update_media_asset_upload(video_path: str, video_id: str):
         from sqlalchemy import select
         from db.models import MediaAsset
         result = await session.execute(
-            select(MediaAsset).where(MediaAsset.video_path == video_path)
+            select(MediaAsset).where(MediaAsset.video_path == video_path).order_by(MediaAsset.created_at.desc())
         )
-        asset = result.scalar_one_or_none()
+        asset = result.scalars().first()
         if asset:
             asset.youtube_upload_status = "uploaded"
             asset.youtube_video_id = video_id
@@ -100,10 +100,27 @@ def create_wbw_video_job(surah: int, start_verse: int, end_verse:int,
     # Upload to YouTube if requested
     if upload_after_generation:
         from processes import youtube_utils
-        # Temporarily override playlist for this reciter if provided
+        
+        # Determine the target playlist behavior
+        # 'none'    => Upload without playlist
+        # 'default' => Use reciter's default from DB (if any)
+        # ID        => Use specific override ID
+        
         original_playlist = youtube_utils.playlist.get(reciter)
-        if playlist_id:
+        override_applied = False
+        
+        if playlist_id == "none":
+            # Temporarily clear the playlist for this reciter if it exists
+            if reciter in youtube_utils.playlist:
+                del youtube_utils.playlist[reciter]
+            override_applied = True
+        elif playlist_id == "default":
+            # 'default' means we don't apply an override, use what's in youtube_utils.playlist
+            pass
+        elif playlist_id:
+            # Apply specific override ID
             youtube_utils.playlist[reciter] = playlist_id
+            override_applied = True
             
         try:
             video_id = upload_to_youtube(video_details)
@@ -112,12 +129,13 @@ def create_wbw_video_job(surah: int, start_verse: int, end_verse:int,
         except Exception as e:
             print(f"YouTube upload failed: {e}")
         finally:
-            # Restore original playlist if it was overridden
-            if playlist_id:
+            # Restore original state if we applied an override
+            if override_applied:
                 if original_playlist:
                     youtube_utils.playlist[reciter] = original_playlist
                 else:
-                    del youtube_utils.playlist[reciter]
+                    if reciter in youtube_utils.playlist:
+                        del youtube_utils.playlist[reciter]
 
 def manual_upload_to_youtube(video_filename: str, reciter_key: str, playlist_id: str, details_filename: str):
     import os

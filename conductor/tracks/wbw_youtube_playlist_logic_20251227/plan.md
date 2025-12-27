@@ -6,12 +6,12 @@
     - [x] Sub-task: Add "Reciter's Default Playlist" as an explicit option with value `default`.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Frontend UI Updates' [c413c53] (Protocol in workflow.md)
 
-## Phase 2: Backend Logic Implementation
-- [ ] Task: Update WBW video job processing logic
-    - [ ] Sub-task: Write failing tests for `create_wbw_video_job` handling `none` and `default` playlist options.
-    - [ ] Sub-task: Update `create_wbw_video_job` in `processes/processes.py` to interpret `playlist_id='none'` as a instruction to skip playlist assignment.
-    - [ ] Sub-task: Update `create_wbw_video_job` to interpret `playlist_id='default'` (or empty string if previously used) as a instruction to use the reciter's default playlist from the database.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Backend Logic Implementation' (Protocol in workflow.md)
+## Phase 2: Backend Logic Implementation [checkpoint: pending]
+- [x] Task: Update WBW video job processing logic
+    - [x] Sub-task: Write failing tests for `create_wbw_video_job` handling `none` and `default` playlist options.
+    - [x] Sub-task: Update `create_wbw_video_job` in `processes/processes.py` to interpret `playlist_id='none'` as a instruction to skip playlist assignment.
+    - [x] Sub-task: Update `create_wbw_video_job` to interpret `playlist_id='default'` (or empty string if previously used) as a instruction to use the reciter's default playlist from the database.
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Backend Logic Implementation' (Protocol in workflow.md)
 
 ## Phase 3: Integration and Final Verification
 - [ ] Task: End-to-end verification of WBW upload behavior

@@ -131,7 +131,7 @@ def upload_to_youtube(video_details: str):
     youtube = get_authenticated_service()
     success = True
     video_id = None
-    playlist_id = playlist[video_details["reciter"]]
+    playlist_id = playlist.get(video_details["reciter"])
     
     # Upload the video file to YouTube
     try:
@@ -157,7 +157,7 @@ def upload_to_youtube(video_details: str):
             print("✅ Thumbnail added to video successfully")
     
     # Add video to playlist if applicable
-    if success and not video_details["is_short"] and video_details["reciter"] in playlist:
+    if success and not video_details["is_short"] and playlist_id:
         try:
             add_video_to_playlist(youtube, video_id, playlist_id)
         except Exception as e:
