@@ -21,7 +21,8 @@
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Rendering Implementation' (Protocol in workflow.md)
 
 ## Phase 4: Integration and Verification
-- [ ] Task: Integrate interlinear rendering into the video generation process
-    - [ ] Sub-task: Update `processes/surah_video.py` to trigger the interlinear rendering path when `WBW_INTERLINEAR_ENABLED` is true.
-    - [ ] Sub-task: Verify that highlighting remains synchronized with the new layout during video generation.
+- [x] Task: Integrate interlinear rendering into the video generation process [d3ff686]
+    - [x] Sub-task: Update `processes/surah_video.py` to trigger the interlinear rendering path when `WBW_INTERLINEAR_ENABLED` is true.
+    - [x] Sub-task: Verify that highlighting remains synchronized with the new layout during video generation.
+- [ ] Task: Conductor - User Manual Verification 'Phase 4: Integration and Verification' (Protocol in workflow.md)
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Integration and Verification' (Protocol in workflow.md)
