@@ -7,13 +7,14 @@ load_dotenv()
 UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
 UNSPLASH_SEARCH_URL = "https://api.unsplash.com/search/photos"
 
-def search_unsplash(query: str, per_page: int = 10):
+def search_unsplash(query: str, page: int = 1, per_page: int = 10):
     if not UNSPLASH_ACCESS_KEY:
         print("UNSPLASH_ACCESS_KEY not found in environment variables.")
         return []
     
     params = {
         "query": query,
+        "page": page,
         "per_page": per_page,
         "client_id": UNSPLASH_ACCESS_KEY
     }

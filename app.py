@@ -500,8 +500,8 @@ async def upload_background(file: UploadFile = File(...)):
 
 
 @app.get("/unsplash-search")
-async def unsplash_search(query: str):
-    results = await run_in_threadpool(search_unsplash, query)
+async def unsplash_search(query: str, page: int = 1):
+    results = await run_in_threadpool(search_unsplash, query, page, 20)
     return results
 
 @app.post("/set-active-background")
