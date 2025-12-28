@@ -17,4 +17,4 @@
 - [x] Task: Verify cross-interface consistency
     - [x] Sub-task: Ensure the paginated search works correctly on both the home page and the word-by-word page.
     - [x] Sub-task: Finalize button visibility logic (hiding "Previous" on Page 1).
-- [~] Task: Conductor - User Manual Verification 'Phase 3: Final Integration and UI Refinement' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Final Integration and UI Refinement' [checkpoint: 87cefb4] (Protocol in workflow.md)
