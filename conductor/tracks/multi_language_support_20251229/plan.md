@@ -1,6 +1,6 @@
 # Implementation Plan: Multi-Language Support
 
-## Phase 1: Database & Configuration Infrastructure
+## Phase 1: Database & Configuration Infrastructure [checkpoint: 9b2191f]
 - [x] Task: Create Language model and seed data
     - [x] Sub-task: Define `Language` model in `db/models/language.py` (or similar).
     - [x] Sub-task: Create a migration/init script to create the table and insert 'bengali', 'english'.
