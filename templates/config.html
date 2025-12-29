@@ -91,6 +91,40 @@
     <button type="submit" class="btn btn-success">Save All Changes</button>
 </form>
 
+<hr>
+<h2>Language Settings</h2>
+<form method="post" action="/config/language/update">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Language</th>
+                <th>Code</th>
+                <th>Font</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for lang in languages %}
+            <tr>
+                <td>{{ lang.name|title }}</td>
+                <td>{{ lang.code }}</td>
+                <td>
+                    <select name="font_{{ lang.id }}" class="form-control">
+                        <option value="Arial" {% if lang.font == 'Arial' %}selected{% endif %}>Arial</option>
+                        <option value="Segoe UI" {% if lang.font == 'Segoe UI' %}selected{% endif %}>Segoe UI (Default English)</option>
+                        <option value="Times New Roman" {% if lang.font == 'Times New Roman' %}selected{% endif %}>Times New Roman</option>
+                        <option value="kalpurush.ttf" {% if lang.font == 'kalpurush.ttf' %}selected{% endif %}>Kalpurush (Default Bengali)</option>
+                        <option value="me_quran.ttf" {% if lang.font == 'me_quran.ttf' %}selected{% endif %}>Me Quran</option>
+                        <option value="noorehuda.ttf" {% if lang.font == 'noorehuda.ttf' %}selected{% endif %}>Noorehuda</option>
+                        <option value="{{ lang.font }}" {% if lang.font not in ['arial.ttf', 'kalpurush.ttf', 'me_quran.ttf', 'noorehuda.ttf'] %}selected{% endif %}>{{ lang.font }} (Custom)</option>
+                    </select>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-primary">Save Language Settings</button>
+</form>
+
 {% endblock %}
 
 {% block scripts %}

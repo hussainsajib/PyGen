@@ -16,6 +16,8 @@ from db_ops.crud_text import read_text_data, read_translation
 from db_ops.crud_wbw import get_wbw_timestamps
 from db_ops.crud_reciters import get_reciter_by_key
 from db.database import async_session
+from db.models.language import Language
+from sqlalchemy import select
 from net_ops.download_file import download_mp3_temp
 from processes.surah_video import create_ayah_clip, create_wbw_ayah_clip, create_wbw_advanced_ayah_clip # Import all
 from factories.composite_clip import generate_intro, generate_outro
@@ -46,11 +48,18 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
 
     # Fetch reciter from DB to check for WBW database
     import anyio
-    async def fetch_reciter():
+    async def fetch_db_data():
         async with async_session() as session:
-            return await get_reciter_by_key(session, reciter_key)
+            reciter = await get_reciter_by_key(session, reciter_key)
+            
+            lang_name = config_manager.get("DEFAULT_LANGUAGE", "bengali")
+            result = await session.execute(select(Language).filter_by(name=lang_name))
+            lang_obj = result.scalar_one_or_none()
+            font = lang_obj.font if lang_obj else "arial.ttf"
+            
+            return reciter, font
     
-    db_reciter = anyio.from_thread.run(fetch_reciter)
+    db_reciter, translation_font = anyio.from_thread.run(fetch_db_data)
     wbw_data = {}
     if db_reciter and db_reciter.wbw_database:
         print(f"[INFO] - WBW database found: {db_reciter.wbw_database}", flush=True)
@@ -72,7 +81,7 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
         try:
             if ayah in wbw_data:
                 print(f"[INFO] - Creating Advanced WBW clip for Ayah {ayah}", flush=True)
-                clip = create_wbw_advanced_ayah_clip(surah, ayah, reciter, full_audio, is_short=is_short, segments=wbw_data[ayah], background_image_path=active_background)
+                clip = create_wbw_advanced_ayah_clip(surah, ayah, reciter, full_audio, is_short=is_short, segments=wbw_data[ayah], background_image_path=active_background, translation_font=translation_font)
                 if clip is None:
                     print(f"[INFO] - Falling back to standard clip for Ayah {ayah}", flush=True)
                     clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background)

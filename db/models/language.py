@@ -7,6 +7,7 @@ class Language(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, unique=True, nullable=False)
     code = Column(String, unique=True, nullable=False)
+    font = Column(String, default="arial.ttf")
 
     def __repr__(self):
-        return f"<Language(name='{self.name}', code='{self.code}')>"
+        return f"<Language(name='{self.name}', code='{self.code}', font='{self.font}')>"

@@ -24,6 +24,8 @@ from db_ops.crud_jobs import (
 
 from db_ops import crud_reciters
 from db_ops.crud_language import get_all_languages
+from db.models.language import Language
+from sqlalchemy import select
 from config_manager import ConfigManager, config_manager, get_config_manager
 from processes.youtube_utils import (
     get_authenticated_service,
@@ -334,6 +336,26 @@ async def delete_config(
     config: ConfigManager = Depends(get_config_manager)
 ):
     await config.delete(db, key)
+    return RedirectResponse(url="/config", status_code=303)
+
+@app.post("/config/language/update")
+async def update_language_font(
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    form = await request.form()
+    for key, value in form.items():
+        if key.startswith("font_"):
+            try:
+                lang_id = int(key.split("_")[1])
+                stmt = select(Language).where(Language.id == lang_id)
+                result = await db.execute(stmt)
+                lang = result.scalar_one_or_none()
+                if lang:
+                    lang.font = value
+            except ValueError:
+                continue
+    await db.commit()
     return RedirectResponse(url="/config", status_code=303)
 
 @app.get("/playlists", name="playlists", response_class=HTMLResponse)

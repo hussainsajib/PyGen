@@ -114,7 +114,7 @@ def generate_wbw_advanced_arabic_text_clip(text: str, is_short: bool, duration: 
     
     return arabic_text_clip.set_position(('center', arabic_pos)).set_duration(duration)
 
-def generate_wbw_advanced_translation_text_clip(text: str, is_short: bool, duration: float, font_size: int) -> TextClip:
+def generate_wbw_advanced_translation_text_clip(text: str, is_short: bool, duration: float, font_size: int, font: str = None) -> TextClip:
     """
     Generates a single line translation clip for advanced WBW rendering.
     """
@@ -125,6 +125,8 @@ def generate_wbw_advanced_translation_text_clip(text: str, is_short: bool, durat
         
     config = COMMON["translation_textbox_config"].copy()
     config["fontsize"] = font_size
+    if font:
+        config["font"] = font
     config["size"] = size
     
     translation_clip = TextClip(text, **config)
@@ -132,7 +134,7 @@ def generate_wbw_advanced_translation_text_clip(text: str, is_short: bool, durat
     
     return translation_clip.set_position(('center', translation_pos)).set_duration(duration)
 
-def generate_wbw_interlinear_text_clip(words: list, translations: list, is_short: bool, duration: float, arabic_font_size: int, translation_font_size: int) -> CompositeVideoClip:
+def generate_wbw_interlinear_text_clip(words: list, translations: list, is_short: bool, duration: float, arabic_font_size: int, translation_font_size: int, translation_font: str = None) -> CompositeVideoClip:
     """
     Generates a CompositeVideoClip where translations are rendered directly below each Arabic word.
     Every Arabic word is underlined.
@@ -149,6 +151,8 @@ def generate_wbw_interlinear_text_clip(words: list, translations: list, is_short
     
     trans_config = COMMON["translation_textbox_config"].copy()
     trans_config["fontsize"] = translation_font_size
+    if translation_font:
+        trans_config["font"] = translation_font
     trans_config.pop("size", None)
     trans_config.pop("method", None)
     
@@ -271,13 +275,15 @@ def generate_translation_text_clip(text: str, is_short: bool, duration: int) -> 
                         .set_duration(duration)
     return translation_clip
 
-def generate_full_ayah_translation_clip(text: str, is_short: bool, duration: int) -> TextClip:
+def generate_full_ayah_translation_clip(text: str, is_short: bool, duration: int, font: str = None) -> TextClip:
     translation_sizes = COMMON["f_translation_size"](is_short, text)
     # Use configurable font size, fallback to 30
     font_size = int(config_manager.get("WBW_FULL_TRANSLATION_FONT_SIZE", 30))
     
     config = COMMON["translation_textbox_config"].copy()
     config["fontsize"] = font_size
+    if font:
+        config["font"] = font
     
     translation_clip = TextClip(text, size=translation_sizes["size"], **config)
     translation_pos = COMMON["f_full_ayah_translation_position"](is_short)

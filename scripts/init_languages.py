@@ -20,15 +20,24 @@ async def init_languages():
     async with async_session() as session:
         # Check and add Bengali
         result = await session.execute(select(Language).filter_by(name='bengali'))
-        if not result.scalar_one_or_none():
+        lang = result.scalar_one_or_none()
+        if not lang:
             print("Adding Bengali...")
-            session.add(Language(name='bengali', code='bn'))
+            session.add(Language(name='bengali', code='bn', font='kalpurush.ttf'))
+        else:
+            # Update font if not set or default
+            if not lang.font or lang.font == 'arial.ttf':
+                 lang.font = 'kalpurush.ttf'
             
         # Check and add English
         result = await session.execute(select(Language).filter_by(name='english'))
-        if not result.scalar_one_or_none():
+        lang = result.scalar_one_or_none()
+        if not lang:
             print("Adding English...")
-            session.add(Language(name='english', code='en'))
+            session.add(Language(name='english', code='en', font='Segoe UI'))
+        else:
+            if not lang.font or lang.font == 'Arial': # Update from Arial too
+                lang.font = 'Segoe UI'
         
         await session.commit()
     

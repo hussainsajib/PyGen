@@ -22,7 +22,13 @@
 - [~] Task: Conductor - User Manual Verification 'Phase 2: Asset Reorganization & Code Refactoring' (Protocol in workflow.md)
 
 ## Phase 3: Integration & Verification
-- [ ] Task: Verify End-to-End Video Generation
-    - [ ] Sub-task: Ensure that the video generation process picks up the correct translation file based on the config.
-    - [ ] Sub-task: Add a test case to verify path resolution for both languages.
+- [x] Task: Verify End-to-End Video Generation
+    - [x] Sub-task: Ensure that the video generation process picks up the correct translation file based on the config.
+    - [x] Sub-task: Add a test case to verify path resolution for both languages.
+- [x] Task: Implement Per-Language Font Support
+    - [x] Sub-task: Add `font` column to `Language` model.
+    - [x] Sub-task: Update `scripts/init_languages.py` to seed default fonts.
+    - [x] Sub-task: Update `processes/surah_video.py` to fetch and use the font for the current language.
+    - [x] Sub-task: Update Config UI to allow editing fonts for languages (or just seeding is enough for now?).
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Integration & Verification' (Protocol in workflow.md)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Integration & Verification' (Protocol in workflow.md)
