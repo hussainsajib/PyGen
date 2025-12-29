@@ -1,25 +1,33 @@
 import sqlite3
 import os
 from collections import defaultdict
+from config_manager import config_manager
 
-TRANSLATION_DB = "./databases/translation/rawai_al_bayan.sqlite"
+TRANSLATION_DB = "./databases/translation/bengali/rawai_al_bayan.sqlite"
 
 def nested_dict():
     return defaultdict(nested_dict)
 
 def get_full_translation_for_ayah(surah_number: int, ayah_number: int, db_name: str = "rawai_al_bayan"):
     """Fetches the full translation text for a specific ayah."""
-    db_path = f"./databases/translation/{db_name}.sqlite"
-    # Fallback to default path if only name is provided without extension or if path constructed is wrong
+    language = config_manager.get("DEFAULT_LANGUAGE", "bengali")
+    
+    # Construct path based on language
+    db_path = f"./databases/translation/{language}/{db_name}.sqlite"
+    
+    # Fallback/Checks
     if not os.path.exists(db_path):
-         # Try direct path if db_name looks like a path or just use default
+         # Try legacy/direct path if provided
          if os.path.exists(db_name):
              db_path = db_name
          elif os.path.exists(f"databases/translation/{db_name}.sqlite"):
+             # Fallback to root translation folder (legacy)
              db_path = f"databases/translation/{db_name}.sqlite"
          else:
-             print(f"Warning: Translation DB {db_path} not found. Fallback to default.")
-             db_path = TRANSLATION_DB
+             # Attempt to find it in other languages? Or just warn.
+             print(f"Warning: Translation DB {db_path} not found. Trying default fallback.")
+             # Fallback to hardcoded default (likely Bengali for now as it's the main one)
+             db_path = f"./databases/translation/bengali/rawai_al_bayan.sqlite"
 
     try:
         with sqlite3.connect(db_path) as conn:
@@ -45,7 +53,14 @@ def read_text_data(surah_number: int):
         return processed_data
     
 def read_translation(surah_number: int):
-    with sqlite3.connect(TRANSLATION_DB) as conn:
+    language = config_manager.get("DEFAULT_LANGUAGE", "bengali")
+    db_name = "rawai_al_bayan"
+    db_path = f"./databases/translation/{language}/{db_name}.sqlite"
+    
+    if not os.path.exists(db_path):
+        db_path = TRANSLATION_DB
+
+    with sqlite3.connect(db_path) as conn:
         cursor = conn.cursor()
         query = f"""SELECT sura, ayah, text FROM translation WHERE sura = {surah_number}"""
         cursor.execute(query)

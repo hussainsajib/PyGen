@@ -146,8 +146,13 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
         
         # 1. Fetch data from new WBW databases
         text_db = "databases/text/qpc-hafs-word-by-word.db"
-        trans_db = "databases/translation/bangali-word-by-word-translation.sqlite"
         
+        language = config_manager.get("DEFAULT_LANGUAGE", "bengali")
+        if language == "bengali":
+            trans_db = "databases/translation/bengali/bangali-word-by-word-translation.sqlite"
+        else:
+            trans_db = f"databases/translation/{language}/word-by-word-translation.sqlite"
+
         arabic_words = get_wbw_text_for_ayah(text_db, surah.number, ayah)
         bengali_words = get_wbw_translation_for_ayah(trans_db, surah.number, ayah)
         

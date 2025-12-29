@@ -13,13 +13,13 @@
 - [~] Task: Conductor - User Manual Verification 'Phase 1: Database & Configuration Infrastructure' (Protocol in workflow.md)
 
 ## Phase 2: Asset Reorganization & Code Refactoring
-- [ ] Task: Reorganize translation database files
-    - [ ] Sub-task: Create `databases/translation/bengali` and `databases/translation/english`.
-    - [ ] Sub-task: Move existing translation files to the `bengali` folder.
-- [ ] Task: Refactor translation access logic
-    - [ ] Sub-task: Identify where translation files are loaded (likely `db_ops` or `processes`).
-    - [ ] Sub-task: Update logic to use `DEFAULT_LANGUAGE` config to resolve the path (e.g., `databases/translation/{lang}/...`).
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Asset Reorganization & Code Refactoring' (Protocol in workflow.md)
+- [x] Task: Reorganize translation database files
+    - [x] Sub-task: Create `databases/translation/bengali` and `databases/translation/english`.
+    - [x] Sub-task: Move existing translation files to the `bengali` folder.
+- [x] Task: Refactor translation access logic
+    - [x] Sub-task: Identify where translation files are loaded (likely `db_ops` or `processes`).
+    - [x] Sub-task: Update logic to use `DEFAULT_LANGUAGE` config to resolve the path (e.g., `databases/translation/{lang}/...`).
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Asset Reorganization & Code Refactoring' (Protocol in workflow.md)
 
 ## Phase 3: Integration & Verification
 - [ ] Task: Verify End-to-End Video Generation

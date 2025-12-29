@@ -17,4 +17,5 @@ def inspect_db(db_path):
     print("-" * 20)
 
 inspect_db("databases/text/qpc-hafs-word-by-word.db")
-inspect_db("databases/translation/bangali-word-by-word-translation.sqlite")
+    print("\n--- Bengali WBW Translation DB ---")
+    inspect_db("databases/translation/bengali/bangali-word-by-word-translation.sqlite")

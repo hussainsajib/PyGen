@@ -13,4 +13,4 @@ def check_db(db_path, surah, ayah, table, surah_col, ayah_col):
     conn.close()
 
 check_db("databases/text/qpc-hafs-word-by-word.db", 1, 1, "words", "surah", "ayah")
-check_db("databases/translation/bangali-word-by-word-translation.sqlite", 1, 1, "word_translation", "surah_number", "ayah_number")
+check_db("databases/translation/bengali/bangali-word-by-word-translation.sqlite", 1, 1, "word_translation", "surah_number", "ayah_number")
