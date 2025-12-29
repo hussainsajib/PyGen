@@ -46,13 +46,14 @@ def test_wbw_enhanced_e2e_flow():
             reciter="ar.alafasy",
             is_short=True,
             upload_after_generation=True,
-            playlist_id="PL_TEST_PLAYLIST"
+            playlist_id="PL_TEST_PLAYLIST",
+            custom_title="Custom Prefix"
         )
 
         # 3. Verify the sequence of actions
         
         # Verify video generation was called
-        mock_gen_video.assert_called_once()
+        mock_gen_video.assert_called_once_with(114, 1, 1, "ar.alafasy", True, custom_title="Custom Prefix")
         
         # Verify anyio run was called for recording and upload status update
         # 1. record_media_asset

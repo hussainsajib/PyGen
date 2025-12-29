@@ -36,14 +36,14 @@ def generate_video_description(surah: Surah, reciter: Reciter, filename: str, is
             f.write("Social Links: facebook.com/TakwaBangla\n\n")
             f.write("#Shorts #Quran #Islam #IslamicReminders #Muslim #TakwaBangla ")
             # Add surah specific hashtag
-            f.write(f"#Surah{surah.eng_name.replace(' ', '')} ")
+            f.write(f"#Surah{surah.name_eng.replace(' ', '')} ")
         else:
             f.write(f"""{e2b(str(surah.number))} - সুরাহ {surah.name_bangla}\nতিলাওয়াতঃ {reciter.bangla_name}\n\n""")
         
         f.write("#ইসলামিক_ভিডিও #ইসলাম #ইসলামিক #ইসলামিকভিডিও #কোরান #তিলাওয়াত #quran #qurantilawat #surah #memorize\n\n")
         
         # Dynamic Tag Generation (added to bottom of info file for reference during upload)
-        tags = ["Quran", "Islam", "Islamic", "Quran Tilawat", reciter.eng_name, surah.eng_name, "Takwa Bangla"]
+        tags = ["Quran", "Islam", "Islamic", "Quran Tilawat", reciter.eng_name, surah.name_eng, "Takwa Bangla"]
         if is_short:
             tags.extend(["Shorts", "YouTube Shorts", "Quran Shorts"])
         
