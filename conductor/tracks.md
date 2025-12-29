@@ -6,7 +6,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 
 
-## [~] Track: Word-by-Word Interlinear Rendering
+## [x] Track: Word-by-Word Interlinear Rendering
 
 *Link: [./conductor/tracks/wbw_interlinear_20251226/](./conductor/tracks/wbw_interlinear_20251226/)*
 

@@ -11,18 +11,16 @@
     - [x] Sub-task: Write failing tests for word width calculation that considers both the Arabic word and its translation.
     - [x] Sub-task: Modify `processes/wbw_utils.py` to calculate block widths based on the wider of the two elements (Arabic word or translation).
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Engine Logic & Segmentation' (Protocol in workflow.md)
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Engine Logic & Segmentation' (Protocol in workflow.md)
 
 ## Phase 3: Rendering Implementation [checkpoint: d3e6d72]
 - [x] Task: Implement interlinear text clip generation [239dd97]
     - [x] Sub-task: Write failing tests for the interlinear rendering (validating correct centering and the presence of an underline).
     - [x] Sub-task: Update `factories/single_clip.py` to implement `generate_wbw_interlinear_text_clip`. This will use Pillow to draw the Arabic word, a solid underline, and the translation text centered directly below.
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Rendering Implementation' (Protocol in workflow.md)
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Rendering Implementation' (Protocol in workflow.md)
 
-## Phase 4: Integration and Verification
+## Phase 4: Integration and Verification [checkpoint: 68fb662]
 - [x] Task: Integrate interlinear rendering into the video generation process [d3ff686]
     - [x] Sub-task: Update `processes/surah_video.py` to trigger the interlinear rendering path when `WBW_INTERLINEAR_ENABLED` is true.
     - [x] Sub-task: Verify that highlighting remains synchronized with the new layout during video generation.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Integration and Verification' (Protocol in workflow.md)
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Integration and Verification' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Integration and Verification' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Integration and Verification' (Protocol in workflow.md)
