@@ -65,6 +65,14 @@
                         <input type="checkbox" id="{{ item.key }}_checkbox" class="form-check-input dynamic-switch" role="switch" data-target="{{ item.key }}_value" {% if item.value == 'True' %}checked{% endif %}>
                         <input type="hidden" name="{{ item.key }}" id="{{ item.key }}_value" value="{{ item.value }}">
                     </div>
+                {% elif item.key == 'DEFAULT_LANGUAGE' %}
+                    <select name="{{ item.key }}" class="form-control">
+                        {% for language in languages %}
+                            <option value="{{ language.name }}" {% if language.name == item.value %}selected{% endif %}>
+                                {{ language.name|title }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 {% else %}
                     <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="form-control">
                 {% endif %}

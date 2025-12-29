@@ -23,6 +23,7 @@ from db_ops.crud_jobs import (
 )
 
 from db_ops import crud_reciters
+from db_ops.crud_language import get_all_languages
 from config_manager import ConfigManager, config_manager, get_config_manager
 from processes.youtube_utils import (
     get_authenticated_service,
@@ -277,7 +278,8 @@ async def retry_job_endpoint(job_id: int, db: AsyncSession = Depends(get_db)):
 @app.get("/config", response_class=HTMLResponse, name="config")
 async def config_form(
     request: Request,
-    config: ConfigManager = Depends(get_config_manager)
+    config: ConfigManager = Depends(get_config_manager),
+    db: AsyncSession = Depends(get_db)
 ):
     # Load reciters for the dropdown
     reciters = []
@@ -294,10 +296,14 @@ async def config_form(
     # Get config items directly from the manager (already sorted)
     config_items = config.get_all()
     
+    # Get available languages
+    languages = await get_all_languages(db)
+    
     return templates.TemplateResponse("config.html", {
         "request": request, 
         "config": config_items,
-        "reciters": reciters
+        "reciters": reciters,
+        "languages": languages
     })
 
 @app.post("/config")
