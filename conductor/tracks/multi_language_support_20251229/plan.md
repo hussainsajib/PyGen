@@ -12,7 +12,7 @@
     - [x] Sub-task: Update `app.py` (config route) to pass language options to the template.
 - [~] Task: Conductor - User Manual Verification 'Phase 1: Database & Configuration Infrastructure' (Protocol in workflow.md)
 
-## Phase 2: Asset Reorganization & Code Refactoring
+## Phase 2: Asset Reorganization & Code Refactoring [checkpoint: db074c6]
 - [x] Task: Reorganize translation database files
     - [x] Sub-task: Create `databases/translation/bengali` and `databases/translation/english`.
     - [x] Sub-task: Move existing translation files to the `bengali` folder.
