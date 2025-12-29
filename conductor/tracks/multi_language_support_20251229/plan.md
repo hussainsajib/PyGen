@@ -21,7 +21,7 @@
     - [x] Sub-task: Update logic to use `DEFAULT_LANGUAGE` config to resolve the path (e.g., `databases/translation/{lang}/...`).
 - [~] Task: Conductor - User Manual Verification 'Phase 2: Asset Reorganization & Code Refactoring' (Protocol in workflow.md)
 
-## Phase 3: Integration & Verification
+## Phase 3: Integration & Verification [checkpoint: 32a322c]
 - [x] Task: Verify End-to-End Video Generation
     - [x] Sub-task: Ensure that the video generation process picks up the correct translation file based on the config.
     - [x] Sub-task: Add a test case to verify path resolution for both languages.
@@ -30,5 +30,5 @@
     - [x] Sub-task: Update `scripts/init_languages.py` to seed default fonts.
     - [x] Sub-task: Update `processes/surah_video.py` to fetch and use the font for the current language.
     - [x] Sub-task: Update Config UI to allow editing fonts for languages (or just seeding is enough for now?).
-- [~] Task: Conductor - User Manual Verification 'Phase 3: Integration & Verification' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Integration & Verification' (Protocol in workflow.md)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Integration & Verification' (Protocol in workflow.md)
