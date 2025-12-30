@@ -26,7 +26,7 @@
     - [x] Sub-task: Update `app.py` to pass the available translations for each language to the template.
 - [~] Task: Conductor - User Manual Verification 'Phase 2: Video Overlay Localization' (Protocol in workflow.md)
 
-## Phase 3: Information File Localization
+## Phase 3: Information File Localization [checkpoint: ba2f6fd]
 - [x] Task: Localize generated text files
     - [x] Sub-task: Refactor `processes/description.py` to use language-specific labels (e.g., "Reciter" vs "ক্বারী").
     - [x] Sub-task: Ensure the file content (names of Surahs/Reciters) uses the database-stored localized strings.
