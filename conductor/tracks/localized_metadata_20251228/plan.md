@@ -27,10 +27,10 @@
 - [~] Task: Conductor - User Manual Verification 'Phase 2: Video Overlay Localization' (Protocol in workflow.md)
 
 ## Phase 3: Information File Localization
-- [ ] Task: Localize generated text files
-    - [ ] Sub-task: Refactor `processes/description.py` to use language-specific labels (e.g., "Reciter" vs "ক্বারী").
-    - [ ] Sub-task: Ensure the file content (names of Surahs/Reciters) uses the database-stored localized strings.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Information File Localization' (Protocol in workflow.md)
+- [x] Task: Localize generated text files
+    - [x] Sub-task: Refactor `processes/description.py` to use language-specific labels (e.g., "Reciter" vs "ক্বারী").
+    - [x] Sub-task: Ensure the file content (names of Surahs/Reciters) uses the database-stored localized strings.
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Information File Localization' (Protocol in workflow.md)
 
 ## Phase 4: Integration & Final Verification
 - [ ] Task: End-to-End Verification

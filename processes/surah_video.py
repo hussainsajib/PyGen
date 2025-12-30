@@ -358,7 +358,7 @@ async def generate_surah(surah_number: int, reciter_tag: str, custom_title: str 
     except Exception as e:
         print(str(e), flush=True)
     print(f"[INFO] - Final video written to {output_path}", flush=True)
-    info_file_path = generate_details(surah, reciter, True, 1, 1, custom_title=custom_title)
+    info_file_path = generate_details(surah, reciter, True, 1, 1, custom_title=custom_title, language=current_language)
     print(f"[INFO] - Info file written to {info_file_path}", flush=True)
     
     total_ayahs = len(timestamp_data)
