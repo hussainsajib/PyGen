@@ -3,8 +3,10 @@ from db_ops.crud_text import read_text_data, read_translation, get_full_translat
 from db_ops.crud_wbw import get_wbw_timestamps, get_wbw_text_for_ayah, get_wbw_translation_for_ayah
 from db_ops.crud_reciters import get_reciter_by_key
 from db.database import async_session
+from sqlalchemy.ext.asyncio import AsyncSession
 from net_ops.download_file import download_mp3_temp, cleanup_temp_file
 from factories.video import get_resolution, make_silence # Import both
+from sqlalchemy.ext.asyncio import AsyncSession
 from factories.single_clip import (
     generate_arabic_text_clip,
     generate_wbw_arabic_text_clip,
@@ -27,14 +29,15 @@ from processes.description import generate_details
 from config_manager import config_manager
 from db.models.language import Language
 from sqlalchemy.future import select
+from db_ops.crud_language import fetch_localized_metadata # Import the new helper
 
 from moviepy.editor import *
 import tempfile
 import json
 import anyio
+import os
 
-
-def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short: bool, background_image_path: str = None):
+def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short: bool, background_image_path: str = None, translation_font: str = None, brand_name: str = None, language: str = "bengali"):
     try:
         screen_size = get_resolution(is_short)
         current_clips = []
@@ -68,16 +71,17 @@ def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, s
         if COMMON["enable_footer"]:
             # Reciter name overlay
             if COMMON["enable_reciter_info"]:
-                reciter_name_clip = generate_reciter_name_clip(f"{reciter.bangla_name}", is_short=is_short, duration=duration)
+                display_reciter_name = reciter.bangla_name if language == "bengali" else reciter.english_name
+                reciter_name_clip = generate_reciter_name_clip(display_reciter_name, is_short=is_short, duration=duration)
                 current_clips.append(reciter_name_clip)
 
             if COMMON["enable_surah_info"]:
-                surah_name_clip = generate_surah_info_clip(surah.name_bangla, ayah, is_short=is_short, duration=duration)
+                display_surah_name = surah.bangla_name if language == "bengali" else surah.english_name
+                surah_name_clip = generate_surah_info_clip(display_surah_name, ayah, is_short=is_short, duration=duration, language=language)
                 current_clips.append(surah_name_clip)
 
-            # Verser number overlay
             if COMMON["enable_channel_info"]:
-                brand_name_clip = generate_brand_clip("তাকওয়া বাংলা", is_short=is_short, duration=duration)
+                brand_name_clip = generate_brand_clip(brand_name, is_short=is_short, duration=duration)
                 current_clips.append(brand_name_clip)
         composite = CompositeVideoClip(current_clips, size=screen_size).set_duration(duration)
     except Exception as e:
@@ -92,7 +96,7 @@ def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, s
     return composite
 
 
-def create_wbw_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short: bool, segments: list, background_image_path: str = None):
+def create_wbw_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short: bool, segments: list, background_image_path: str = None, translation_font: str = None, brand_name: str = None):
     try:
         screen_size = get_resolution(is_short)
         current_clips = []
@@ -118,13 +122,15 @@ def create_wbw_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_m
         
         if COMMON["enable_footer"]:
             if COMMON["enable_reciter_info"]:
-                reciter_name_clip = generate_reciter_name_clip(f"{reciter.bangla_name}", is_short=is_short, duration=duration)
+                display_reciter_name = reciter.bangla_name if language == "bengali" else reciter.english_name
+                reciter_name_clip = generate_reciter_name_clip(display_reciter_name, is_short=is_short, duration=duration)
                 current_clips.append(reciter_name_clip)
             if COMMON["enable_surah_info"]:
-                surah_name_clip = generate_surah_info_clip(surah.name_bangla, ayah, is_short=is_short, duration=duration)
+                display_surah_name = surah.bangla_name if language == "bengali" else surah.english_name
+                surah_name_clip = generate_surah_info_clip(display_surah_name, ayah, is_short=is_short, duration=duration)
                 current_clips.append(surah_name_clip)
             if COMMON["enable_channel_info"]:
-                brand_name_clip = generate_brand_clip("তাকওয়া বাংলা", is_short=is_short, duration=duration)
+                brand_name_clip = generate_brand_clip(brand_name, is_short=is_short, duration=duration)
                 current_clips.append(brand_name_clip)
                 
         composite = CompositeVideoClip(current_clips, size=screen_size).set_duration(duration)
@@ -139,7 +145,7 @@ def create_wbw_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_m
         raise e
 
 
-def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_audio, is_short: bool, segments: list, background_image_path: str = None, translation_font: str = None):
+def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_audio, is_short: bool, segments: list, background_image_path: str = None, translation_font: str = None, brand_name: str = None, language: str = "bengali", full_translation_db: str = "rawai_al_bayan"):
     """
     Creates an ayah clip using advanced multi-line segmentation.
     """
@@ -149,11 +155,11 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
         # 1. Fetch data from new WBW databases
         text_db = "databases/text/qpc-hafs-word-by-word.db"
         
-        language = config_manager.get("DEFAULT_LANGUAGE", "bengali")
+        # The `language` parameter is already from config
         if language == "bengali":
-            trans_db = "databases/translation/bengali/bangali-word-by-word-translation.sqlite"
+            trans_db = os.path.abspath("databases/translation/bengali/bangali-word-by-word-translation.sqlite")
         else:
-            trans_db = f"databases/translation/{language}/word-by-word-translation.sqlite"
+            trans_db = os.path.abspath(f"databases/translation/{language}/word-by-word-translation.sqlite")
 
         arabic_words = get_wbw_text_for_ayah(text_db, surah.number, ayah)
         bengali_words = get_wbw_translation_for_ayah(trans_db, surah.number, ayah)
@@ -163,10 +169,9 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
         interlinear_trans_font_size = int(config_manager.get("WBW_TRANSLATION_FONT_SIZE", 20))
         
         full_trans_enabled = config_manager.get("WBW_FULL_TRANSLATION_ENABLED", "False") == "True"
-        full_trans_source = config_manager.get("WBW_FULL_TRANSLATION_SOURCE", "rawai_al_bayan")
         full_ayah_translation = ""
         if full_trans_enabled:
-            full_ayah_translation = get_full_translation_for_ayah(surah.number, ayah, full_trans_source)
+            full_ayah_translation = get_full_translation_for_ayah(surah.number, ayah, full_translation_db)
 
         if is_short:
             font_size = int(config_manager.get("WBW_FONT_SIZE_SHORT", 40))
@@ -217,11 +222,13 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
             # Footer
             if COMMON["enable_footer"]:
                 if COMMON["enable_reciter_info"]:
-                    current_line_clips.append(generate_reciter_name_clip(reciter.bangla_name, is_short, line_duration))
+                    display_reciter_name = reciter.bangla_name if language == "bengali" else reciter.english_name
+                    current_line_clips.append(generate_reciter_name_clip(display_reciter_name, is_short, line_duration))
                 if COMMON["enable_surah_info"]:
-                    current_line_clips.append(generate_surah_info_clip(surah.name_bangla, ayah, is_short, line_duration))
+                    display_surah_name = surah.bangla_name if language == "bengali" else surah.english_name
+                    current_line_clips.append(generate_surah_info_clip(display_surah_name, ayah, is_short, line_duration, language=language))
                 if COMMON["enable_channel_info"]:
-                    current_line_clips.append(generate_brand_clip("তাকওয়া বাংলা", is_short, line_duration))
+                    current_line_clips.append(generate_brand_clip(brand_name, is_short, line_duration))
             
             line_composite = CompositeVideoClip(current_line_clips, size=screen_size).set_duration(line_duration)
             ayah_clips.append(line_composite)
@@ -259,12 +266,29 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
         raise e
 
 
-def generate_surah(surah_number: int, reciter_tag: str, custom_title: str = None):
-    reciter = Reciter(reciter_tag)
-    surah = Surah(surah_number)
-    surah_url = read_surah_data(surah.number, reciter.database_name)
+async def generate_surah(surah_number: int, reciter_tag: str, custom_title: str = None):
+    # Fetch localized metadata (reciter, lang_obj, surah_obj)
+    async with async_session() as session:
+        reciter_db_obj, lang_obj, surah_db_obj = await fetch_localized_metadata(session, surah_number, reciter_tag, config_manager)
+    
+    # Check if surah was found
+    if not surah_db_obj:
+        raise ValueError(f"Could not find Surah {surah_number} in the database.")
+    
+    # Extract info from language object, with fallbacks
+    translation_font = lang_obj.font if lang_obj else "arial.ttf"
+    brand_name = lang_obj.brand_name if lang_obj and lang_obj.brand_name else "Taqwa"
+    current_language = lang_obj.name if lang_obj else "bengali"
+    full_translation_db = lang_obj.full_translation_db if lang_obj and lang_obj.full_translation_db else "rawai_al_bayan"
+
+    # Use the fetched Surah and Reciter objects
+    surah = surah_db_obj
+    reciter = reciter_db_obj # This is the Reciter model instance from DB
+
+    # Now proceed with video generation using the fetched localized data
+    surah_url = read_surah_data(surah.number, reciter.database)
     if not surah_url:
-        raise ValueError(f"Could not find audio URL for Surah {surah.number} and Reciter '{reciter.database_name}'. The reciter's database may be missing this surah.")
+        raise ValueError(f"Could not find audio URL for Surah {surah.number} and Reciter '{reciter.database}'. The reciter's database may be missing this surah.")
     
     downloaded_surah_file = download_mp3_temp(surah_url)
 
@@ -272,35 +296,23 @@ def generate_surah(surah_number: int, reciter_tag: str, custom_title: str = None
     
     surah_data = read_text_data(surah.number)
     translation_data = read_translation(surah.number)
-    timestamp_data = read_timestamp_data(surah.number, reciter.database_name)
+    timestamp_data = read_timestamp_data(surah.number, reciter.database)
     
     if not timestamp_data:
         raise ValueError(f"No timestamp data found for Surah {surah.number} and Reciter '{reciter.database_name}'. Cannot create video.")
 
-    # Fetch reciter and font from DB
-    async def fetch_db_data():
-        async with async_session() as session:
-            reciter = await get_reciter_by_key(session, reciter_tag)
-            
-            lang_name = config_manager.get("DEFAULT_LANGUAGE", "bengali")
-            result = await session.execute(select(Language).filter_by(name=lang_name))
-            lang_obj = result.scalar_one_or_none()
-            font = lang_obj.font if lang_obj else "arial.ttf"
-            
-            return reciter, font
-    
-    db_reciter, translation_font = anyio.from_thread.run(fetch_db_data)
+    # Fetch WBW data if reciter has it
     wbw_data = {}
-    if db_reciter and db_reciter.wbw_database:
-        print(f"[INFO] - WBW database found: {db_reciter.wbw_database}", flush=True)
-        db_path = os.path.join("databases", "word-by-word", db_reciter.wbw_database)
+    if reciter and reciter.wbw_database:
+        print(f"[INFO] - WBW database found: {reciter.wbw_database}", flush=True)
+        db_path = os.path.join("databases", "word-by-word", reciter.wbw_database)
         wbw_data = get_wbw_timestamps(db_path, surah_number, 1, 114) # Fetch all for this surah
 
     active_background = config_manager.get("ACTIVE_BACKGROUND")
     
     clips = []
     if COMMON["enable_intro"]:
-        intro = generate_intro(surah=surah, reciter=reciter, background_image_url=active_background, is_short=False)
+        intro = generate_intro(surah=surah, reciter=reciter, background_image_url=active_background, is_short=False, language=current_language)
         print(f"[INFO] - Intro generated", flush=True)
         clips.append(intro)
     print(f"[INFO] - Going inside the ayah loop", flush=True)
@@ -310,13 +322,14 @@ def generate_surah(surah_number: int, reciter_tag: str, custom_title: str = None
             # Use Advanced WBW clip if data exists for this ayah
             if ayah in wbw_data:
                 print(f"[INFO] - Creating Advanced WBW clip for Ayah {ayah}", flush=True)
-                clip = create_wbw_advanced_ayah_clip(surah, ayah, reciter, full_audio, is_short=False, segments=wbw_data[ayah], background_image_path=active_background, translation_font=translation_font)
+                clip = create_wbw_advanced_ayah_clip(surah, ayah, reciter, full_audio, is_short=False, segments=wbw_data[ayah], background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language, full_translation_db=full_translation_db)
                 if clip is None:
                     # Fallback to standard clip if WBW fails
                     print(f"[INFO] - Falling back to standard clip for Ayah {ayah}", flush=True)
-                    clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, background_image_path=active_background)
+                    clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language)
             else:
-                clip = create_ayah_clip(surah, ayah, reciter,gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, background_image_path=active_background)
+                print(f"DEBUG: Passing language to create_ayah_clip: {current_language}", flush=True)
+                clip = create_ayah_clip(surah, ayah, reciter,gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language)
         except Exception as e:
             print(f"[ERROR ] - Error creating clip for Surah {surah_number}, Ayah {ayah}: {e}", flush=True)
             raise e
@@ -330,9 +343,7 @@ def generate_surah(surah_number: int, reciter_tag: str, custom_title: str = None
     final_video = concatenate_videoclips(clips)
     print(f"[INFO] - Going to write the final video", flush=True)
 
-    # Write the final video to a temporary file.
-    #output_path = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False).name
-    output_path = f"exported_data/videos/quran_video_{surah_number}_{reciter.eng_name}.mp4"
+    output_path = f"exported_data/videos/quran_video_{surah_number}_{reciter.english_name}.mp4"
     try:
         final_video.write_videofile(
             output_path, 
@@ -350,17 +361,14 @@ def generate_surah(surah_number: int, reciter_tag: str, custom_title: str = None
     info_file_path = generate_details(surah, reciter, True, 1, 1, custom_title=custom_title)
     print(f"[INFO] - Info file written to {info_file_path}", flush=True)
     
-    # Get total ayah count from surah_data or similar
-    # For now, let's assume we can get it from timestamp_data length or just return the info we have
     total_ayahs = len(timestamp_data)
 
     return {
         "video": output_path, 
         "info": info_file_path, 
         "is_short": False, 
-        "reciter": reciter.tag,
+        "reciter": reciter.reciter_key,
         "surah_number": surah_number,
         "start_ayah": 1,
         "end_ayah": total_ayahs
-    }
-    
+    }    

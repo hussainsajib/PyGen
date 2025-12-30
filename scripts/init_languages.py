@@ -23,11 +23,11 @@ async def init_languages():
         lang = result.scalar_one_or_none()
         if not lang:
             print("Adding Bengali...")
-            session.add(Language(name='bengali', code='bn', font='kalpurush.ttf'))
+            session.add(Language(name='bengali', code='bn', font='Kalpurush'))
         else:
-            # Update font if not set or default
-            if not lang.font or lang.font == 'arial.ttf':
-                 lang.font = 'kalpurush.ttf'
+            # Update font if not set or default from old values
+            if not lang.font or lang.font == 'kalpurush.ttf':
+                 lang.font = 'Kalpurush'
             
         # Check and add English
         result = await session.execute(select(Language).filter_by(name='english'))
@@ -36,7 +36,7 @@ async def init_languages():
             print("Adding English...")
             session.add(Language(name='english', code='en', font='Segoe UI'))
         else:
-            if not lang.font or lang.font == 'Arial': # Update from Arial too
+            if not lang.font or lang.font == 'arial.ttf' or lang.font == 'Arial': # Update from Arial and arial.ttf
                 lang.font = 'Segoe UI'
         
         await session.commit()

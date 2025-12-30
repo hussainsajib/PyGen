@@ -1,31 +1,25 @@
 import json
 
-
 class Surah:
-    number: int = 0
-    name_ar: str = None
-    name_eng: str = None
-    name_bangla: str = None
-    name_translation_eng: str = None
-    name_translation_bangla: str = None
-    total_ayah: int = 0
-    total_ruku: int = 0
-    type_of_revelation: str = None
+    number: int = None
+    english_name: str = None
+    bangla_name: str = None
+    arabic_name: str = None
+    english_meaning: str = None
+    bangla_meaning: str = None
+    total_ayah: int = None
 
-    def __init__(self, num: int) -> None:
-        self.number = num
-        self.get_quran_data()
-
-    def get_quran_data(self):
+    def __init__(self, number: int):
+        self.number = number
         with open("data/surah_data.json", "r", encoding="utf-8") as f:
-            data = json.load(f)[str(self.number)]
+            data = json.load(f).get(str(number))
+            if data:
+                self.english_name = data.get("english_name")
+                self.bangla_name = data.get("bangla_name")
+                self.arabic_name = data.get("arabic_name")
+                self.english_meaning = data.get("english_meaning")
+                self.bangla_meaning = data.get("bangla_meaning")
+                self.total_ayah = int(data.get("total_ayah", 0))
 
-            self.name_ar = data["arabic_name"]
-            self.name_eng = data["english_name"]
-            self.name_bangla = data["bangla_name"]
-            self.name_translation_eng = data["english_meaning"]
-            self.name_translation_bangla = data["bangla_meaning"]
-            self.total_ayah = data["total_ayah"]
-            self.total_ruku = data["total_ruku"]
-            self.type_of_revelation = data["relevation_place"]
-        
+    def __repr__(self):
+        return f"<Surah Class: {self.number} - {self.english_name}>"

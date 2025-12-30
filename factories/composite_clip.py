@@ -4,7 +4,7 @@ from factories.single_clip import generate_background
 from processes.video_configs import FONT_COLOR, COMMON
 from processes.Classes import Reciter, Surah
 
-def generate_intro(surah: Surah, reciter: Reciter, background_image_url, is_short: bool):
+def generate_intro(surah: Surah, reciter: Reciter, background_image_url, is_short: bool, language: str = "bengali"):
     intro_clips = []
     audio = AudioFileClip("recitation_data/basmalah.mp3")
     background = generate_background(background_image_url, audio.duration, is_short)
@@ -12,7 +12,8 @@ def generate_intro(surah: Surah, reciter: Reciter, background_image_url, is_shor
 
     if COMMON["enable_title"]:
         try:
-            title = TextClip(txt=f"সুরাহ {surah.name_bangla}", font="kalpurush", fontsize=100, color=FONT_COLOR)\
+            display_surah_name = surah.bangla_name if language == "bengali" else surah.english_name
+            title = TextClip(txt=f"সুরাহ {display_surah_name}", font="kalpurush", fontsize=100, color=FONT_COLOR)\
                     .set_position(("center", 0.4), relative=True)\
                     .set_duration(audio.duration)
             intro_clips.append(title)
@@ -20,7 +21,8 @@ def generate_intro(surah: Surah, reciter: Reciter, background_image_url, is_shor
             print(f"[ERROR] - failed to generate intro title clip: {e}", flush=True)
 
     if COMMON["enable_subtitle"]:
-        sub_title = TextClip(txt=f"{reciter.bangla_name}", font="kalpurush", fontsize=50, color=FONT_COLOR)\
+        display_reciter_name = reciter.bangla_name if language == "bengali" else reciter.english_name
+        sub_title = TextClip(txt=f"{display_reciter_name}", font="kalpurush", fontsize=50, color=FONT_COLOR)\
                 .set_position(("center", 0.6), relative=True)\
                 .set_duration(audio.duration)
         intro_clips.append(sub_title)

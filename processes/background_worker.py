@@ -27,8 +27,7 @@ async def job_worker():
                     if job.job_type == "manual_upload" or (job.surah_number == 0 and job.job_type == "standard"):
                         # Manual upload job (checking both for backward compatibility)
                         data = json.loads(job.surah_name)
-                        await run_in_threadpool(
-                            manual_upload_to_youtube,
+                        await manual_upload_to_youtube(
                             video_filename=data["video_filename"],
                             reciter_key=job.reciter,
                             playlist_id=data["playlist_id"],
@@ -36,8 +35,7 @@ async def job_worker():
                         )
                     elif job.job_type == "wbw":
                         # Word-by-word video generation job
-                        await run_in_threadpool(
-                            create_wbw_video_job,
+                        await create_wbw_video_job(
                             surah=job.surah_number,
                             start_verse=job.start_verse,
                             end_verse=job.end_verse,
@@ -49,7 +47,7 @@ async def job_worker():
                         )
                     else:
                         # Standard full surah generation job
-                        await run_in_threadpool(create_surah_video, job.surah_number, job.reciter, custom_title=job.custom_title)
+                        await create_surah_video(job.surah_number, job.reciter, custom_title=job.custom_title)
 
                     job.progress = 100.0
                     job.status = JobStatus.done

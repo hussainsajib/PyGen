@@ -23,7 +23,7 @@ from db_ops.crud_jobs import (
 )
 
 from db_ops import crud_reciters
-from db_ops.crud_language import get_all_languages
+from db_ops.crud_language import get_all_languages, get_translations_for_language
 from db.models.language import Language
 from sqlalchemy import select
 from config_manager import ConfigManager, config_manager, get_config_manager
@@ -301,11 +301,19 @@ async def config_form(
     # Get available languages
     languages = await get_all_languages(db)
     
+    # Get available translations for each language
+    lang_translations = {}
+    for lang in languages:
+        translations = await get_translations_for_language(db, lang.id)
+        lang_translations[lang.name] = [{"db_name": t.db_name, "display_name": t.display_name} for t in translations]
+
+    
     return templates.TemplateResponse("config.html", {
         "request": request, 
         "config": config_items,
         "reciters": reciters,
-        "languages": languages
+        "languages": languages,
+        "lang_translations_json": json.dumps(lang_translations) # Pass as JSON for JS
     })
 
 @app.post("/config")

@@ -10,14 +10,21 @@
 - [~] Task: Conductor - User Manual Verification 'Phase 1: Database & Model Expansion' (Protocol in workflow.md)
 
 ## Phase 2: Video Overlay Localization
-- [ ] Task: Refactor brand rendering
-    - [ ] Sub-task: Update `factories/single_clip.py` to remove hardcoded brand strings from `generate_brand_clip`.
-    - [ ] Sub-task: Update `processes/surah_video.py` to fetch the localized `brand_name` from the `Language` table.
-- [ ] Task: Localize Surah and Reciter rendering
-    - [ ] Sub-task: Update `processes/surah_video.py` to fetch Surah metadata from the new `surahs` table instead of JSON.
-    - [ ] Sub-task: Ensure `Reciter` names are fetched from the DB based on the active language.
-    - [ ] Sub-task: Update `generate_reciter_name_clip` and `generate_surah_info_clip` to use the localized strings.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Video Overlay Localization' (Protocol in workflow.md)
+- [x] Task: Refactor brand rendering
+    - [x] Sub-task: Update `factories/single_clip.py` to remove hardcoded brand strings from `generate_brand_clip`.
+    - [x] Sub-task: Update `processes/surah_video.py` to fetch the localized `brand_name` from the `Language` table.
+- [x] Task: Localize Surah and Reciter rendering
+    - [x] Sub-task: Update `processes/surah_video.py` to fetch Surah metadata from the new `surahs` table instead of JSON.
+    - [x] Sub-task: Ensure `Reciter` names are fetched from the DB based on the active language.
+    - [x] Sub-task: Update `generate_reciter_name_clip` and `generate_surah_info_clip` to use the localized strings.
+- [x] Task: Make Full Translation DB Language-Dependent
+    - [x] Sub-task: Add `full_translation_db` column to `Language` model and migrate.
+    - [x] Sub-task: Refactor `create_wbw_advanced_ayah_clip` to use the new per-language setting.
+- [x] Task: Dynamic Full Translation Source Dropdown
+    - [x] Sub-task: Create `language_translations` table to map translation DBs to languages.
+    - [x] Sub-task: Update Config UI (`config.html`) with JavaScript to dynamically update the `WBW_FULL_TRANSLATION_SOURCE` dropdown based on the `DEFAULT_LANGUAGE` selection.
+    - [x] Sub-task: Update `app.py` to pass the available translations for each language to the template.
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Video Overlay Localization' (Protocol in workflow.md)
 
 ## Phase 3: Information File Localization
 - [ ] Task: Localize generated text files

@@ -20,23 +20,40 @@ from db.models.language import Language
 from sqlalchemy import select
 from net_ops.download_file import download_mp3_temp
 from processes.surah_video import create_ayah_clip, create_wbw_ayah_clip, create_wbw_advanced_ayah_clip # Import all
+from db_ops.crud_language import fetch_localized_metadata
 from factories.composite_clip import generate_intro, generate_outro
 
-def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_key: str, is_short: bool, custom_title: str = None):
-    surah = Surah(surah_number)
-    reciter = Reciter(reciter_key)
+async def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_key: str, is_short: bool, custom_title: str = None):
+    # Fetch localized metadata (reciter, lang_obj, surah_obj)
+    async with async_session() as session:
+        reciter_db_obj, lang_obj, surah_db_obj = await fetch_localized_metadata(session, surah_number, reciter_key, config_manager)
     
-    # 1. Download full audio and get all data from DB
-    surah_url = read_surah_data(surah.number, reciter.database_name)
+    # Check if surah was found
+    if not surah_db_obj:
+        raise ValueError(f"Could not find Surah {surah_number} in the database.")
+        
+    # Extract info from language object, with fallbacks
+    translation_font = lang_obj.font if lang_obj else "arial.ttf"
+    brand_name = lang_obj.brand_name if lang_obj and lang_obj.brand_name else "Taqwa"
+    current_language = lang_obj.name if lang_obj else "bengali"
+    full_translation_db = lang_obj.full_translation_db if lang_obj and lang_obj.full_translation_db else "rawai_al_bayan"
+    
+    # Use the fetched Surah and Reciter objects
+    surah = surah_db_obj
+    reciter = reciter_db_obj # This is the Reciter model instance from DB
+    
+    # Now proceed with video generation using the fetched localized data
+    surah_url = read_surah_data(surah.number, reciter.database)
     if not surah_url:
-        raise ValueError(f"Could not find audio URL for Surah {surah.number} and Reciter '{reciter.database_name}'.")
+        raise ValueError(f"Could not find audio URL for Surah {surah.number} and Reciter '{reciter.database}'.")
 
     downloaded_surah_file = download_mp3_temp(surah_url)
+
     full_audio = AudioFileClip(downloaded_surah_file)
     
     surah_data = read_text_data(surah.number)
     translation_data = read_translation(surah.number)
-    timestamp_data = read_timestamp_data(surah.number, reciter.database_name)
+    timestamp_data = read_timestamp_data(surah.number, reciter.database)
 
     if not timestamp_data:
         raise ValueError(f"No timestamp data found for Surah {surah.number} and Reciter '{reciter.database_name}'.")
@@ -46,24 +63,11 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
     if not verse_range_timestamps:
         raise ValueError(f"No timestamp data found for verses {start_verse}-{end_verse} in Surah {surah.number}.")
 
-    # Fetch reciter from DB to check for WBW database
-    import anyio
-    async def fetch_db_data():
-        async with async_session() as session:
-            reciter = await get_reciter_by_key(session, reciter_key)
-            
-            lang_name = config_manager.get("DEFAULT_LANGUAGE", "bengali")
-            result = await session.execute(select(Language).filter_by(name=lang_name))
-            lang_obj = result.scalar_one_or_none()
-            font = lang_obj.font if lang_obj else "arial.ttf"
-            
-            return reciter, font
-    
-    db_reciter, translation_font = anyio.from_thread.run(fetch_db_data)
+    # Fetch WBW data if reciter has it
     wbw_data = {}
-    if db_reciter and db_reciter.wbw_database:
-        print(f"[INFO] - WBW database found: {db_reciter.wbw_database}", flush=True)
-        db_path = os.path.join("databases", "word-by-word", db_reciter.wbw_database)
+    if reciter and reciter.wbw_database:
+        print(f"[INFO] - WBW database found: {reciter.wbw_database}", flush=True)
+        db_path = os.path.join("databases", "word-by-word", reciter.wbw_database)
         wbw_data = get_wbw_timestamps(db_path, surah_number, start_verse, end_verse)
 
     active_background = config_manager.get("ACTIVE_BACKGROUND")
@@ -72,7 +76,7 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
     
     # 3. Conditionally create Intro
     if not is_short and COMMON["enable_intro"]:
-        intro = generate_intro(surah, reciter, active_background, is_short)
+        intro = generate_intro(surah, reciter, active_background, is_short, language=current_language)
         clips.append(intro)
     
     # 4. Loop through the filtered timestamps and create a clip for each ayah
@@ -81,12 +85,12 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
         try:
             if ayah in wbw_data:
                 print(f"[INFO] - Creating Advanced WBW clip for Ayah {ayah}", flush=True)
-                clip = create_wbw_advanced_ayah_clip(surah, ayah, reciter, full_audio, is_short=is_short, segments=wbw_data[ayah], background_image_path=active_background, translation_font=translation_font)
+                clip = create_wbw_advanced_ayah_clip(surah, ayah, reciter, full_audio, is_short=is_short, segments=wbw_data[ayah], background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language, full_translation_db=full_translation_db)
                 if clip is None:
                     print(f"[INFO] - Falling back to standard clip for Ayah {ayah}", flush=True)
-                    clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background)
+                    clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language)
             else:
-                clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background)
+                clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language)
             clips.append(clip)
         except Exception as e:
             logger.error(f"Error creating clip for Surah {surah_num}, Ayah {ayah}: {e}")
@@ -102,7 +106,7 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
         clips.append(outro)
 
     final_video = concatenate_videoclips(clips)
-    output_path = get_filename(surah_number, start_verse, end_verse, reciter.eng_name, is_short)
+    output_path = get_filename(surah_number, start_verse, end_verse, reciter.english_name, is_short)
     
     final_video.write_videofile(output_path, codec='libx264', fps=24, audio_codec="aac", threads=VIDEO_ENCODING_THREADS)
     
@@ -112,7 +116,7 @@ def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_
         "video": output_path, 
         "info": info_file_path, 
         "is_short": is_short, 
-        "reciter": reciter.tag,
+        "reciter": reciter.reciter_key,
         "surah_number": surah_number,
         "start_ayah": start_verse,
         "end_ayah": end_verse

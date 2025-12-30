@@ -13,7 +13,7 @@ def get_full_translation_for_ayah(surah_number: int, ayah_number: int, db_name: 
     language = config_manager.get("DEFAULT_LANGUAGE", "bengali")
     
     # Construct path based on language
-    db_path = f"./databases/translation/{language}/{db_name}.sqlite"
+    db_path = os.path.abspath(f"databases/translation/{language}/{db_name}.sqlite")
     
     # Fallback/Checks
     if not os.path.exists(db_path):

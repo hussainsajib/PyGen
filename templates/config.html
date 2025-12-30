@@ -66,12 +66,16 @@
                         <input type="hidden" name="{{ item.key }}" id="{{ item.key }}_value" value="{{ item.value }}">
                     </div>
                 {% elif item.key == 'DEFAULT_LANGUAGE' %}
-                    <select name="{{ item.key }}" class="form-control">
+                    <select name="{{ item.key }}" id="default_language_select" class="form-control">
                         {% for language in languages %}
                             <option value="{{ language.name }}" {% if language.name == item.value %}selected{% endif %}>
                                 {{ language.name|title }}
                             </option>
                         {% endfor %}
+                    </select>
+                {% elif item.key == 'WBW_FULL_TRANSLATION_SOURCE' %}
+                    <select name="{{ item.key }}" id="wbw_full_translation_source_select" class="form-control">
+                        {# Options will be populated by JavaScript #}
                     </select>
                 {% else %}
                     <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="form-control">
@@ -110,12 +114,12 @@
                 <td>
                     <select name="font_{{ lang.id }}" class="form-control">
                         <option value="Arial" {% if lang.font == 'Arial' %}selected{% endif %}>Arial</option>
-                        <option value="Segoe UI" {% if lang.font == 'Segoe UI' %}selected{% endif %}>Segoe UI (Default English)</option>
+                        <option value="Segoe UI" {% if lang.font == 'Segoe UI' %}selected{% endif %}>Segoe UI</option>
                         <option value="Times New Roman" {% if lang.font == 'Times New Roman' %}selected{% endif %}>Times New Roman</option>
-                        <option value="kalpurush.ttf" {% if lang.font == 'kalpurush.ttf' %}selected{% endif %}>Kalpurush (Default Bengali)</option>
+                        <option value="Kalpurush" {% if lang.font == 'Kalpurush' %}selected{% endif %}>Kalpurush</option>
                         <option value="me_quran.ttf" {% if lang.font == 'me_quran.ttf' %}selected{% endif %}>Me Quran</option>
                         <option value="noorehuda.ttf" {% if lang.font == 'noorehuda.ttf' %}selected{% endif %}>Noorehuda</option>
-                        <option value="{{ lang.font }}" {% if lang.font not in ['arial.ttf', 'kalpurush.ttf', 'me_quran.ttf', 'noorehuda.ttf'] %}selected{% endif %}>{{ lang.font }} (Custom)</option>
+                        <option value="{{ lang.font }}" {% if lang.font not in ['Arial', 'Segoe UI', 'Times New Roman', 'Kalpurush', 'me_quran.ttf', 'noorehuda.ttf'] %}selected{% endif %}>{{ lang.font }} (Custom)</option>
                     </select>
                 </td>
             </tr>
@@ -130,7 +134,42 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // --- Helper Functions ---
+    // --- Data from Server ---
+    const langTranslations = JSON.parse('{{ lang_translations_json|safe }}');
+    const currentFullTranslationSource = '{{ config|selectattr("key", "equalto", "WBW_FULL_TRANSLATION_SOURCE")|map(attribute="value")|first }}';
+
+    // --- Elements ---
+    const langSelect = document.getElementById('default_language_select');
+    const translationSourceSelect = document.getElementById('wbw_full_translation_source_select');
+    
+    // --- Update Function ---
+    function updateTranslationSources() {
+        const selectedLang = langSelect.value;
+        const translations = langTranslations[selectedLang] || [];
+        
+        // Clear existing options
+        translationSourceSelect.innerHTML = '';
+        
+        // Populate new options
+        translations.forEach(trans => {
+            const option = document.createElement('option');
+            option.value = trans.db_name;
+            option.textContent = trans.display_name;
+            if (trans.db_name === currentFullTranslationSource) {
+                option.selected = true;
+            }
+            translationSourceSelect.appendChild(option);
+        });
+    }
+
+    // --- Event Listener ---
+    if (langSelect && translationSourceSelect) {
+        langSelect.addEventListener('change', updateTranslationSources);
+        // Initial population
+        updateTranslationSources();
+    }
+
+    // ... (rest of the script)
     const hexToRgb = (hex) => {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? {

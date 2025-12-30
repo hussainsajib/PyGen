@@ -2,7 +2,6 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from db.models.base import Base
-# This will fail initially
 from db.models.surah import Surah
 
 @pytest.fixture
@@ -19,6 +18,9 @@ def test_surah_model_creation(db_session):
         number=1,
         english_name="Al-Fatiha",
         bangla_name="আল-ফাতিহা",
+        arabic_name="سُوْرَۃُ الفَاتِحَة",
+        english_meaning="The Opening",
+        bangla_meaning="সূচনা",
         total_ayah=7
     )
     db_session.add(surah)
@@ -27,3 +29,7 @@ def test_surah_model_creation(db_session):
     retrieved = db_session.query(Surah).filter_by(number=1).first()
     assert retrieved.english_name == "Al-Fatiha"
     assert retrieved.bangla_name == "আল-ফাতিহা"
+    assert retrieved.arabic_name == "سُوْرَۃُ الفَاتِحَة"
+    assert retrieved.english_meaning == "The Opening"
+    assert retrieved.bangla_meaning == "সূচনা"
+    assert retrieved.total_ayah == 7

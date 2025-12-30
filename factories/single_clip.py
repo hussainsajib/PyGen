@@ -7,6 +7,15 @@ from bangla import convert_english_digit_to_bangla_digit as e2b
 from processes.video_configs import BACKGROUND_OPACITY, BACKGROUND_RGB, COMMON, FOOTER_CONFIG, SHORT, LONG
 from config_manager import config_manager
 import numpy as np
+import os
+
+def get_font_path(font_name: str) -> str:
+    """Checks for a font in a local 'fonts' directory, otherwise returns the name."""
+    if font_name and font_name.endswith(".ttf"):
+        local_path = os.path.join("fonts", font_name)
+        if os.path.exists(local_path):
+            return os.path.abspath(local_path)
+    return font_name # Return as is, assuming it's a system font
 
 def generate_image_background(background_image_url: str, duration: int, is_short: bool):
     resolution = get_resolution(is_short)
@@ -126,10 +135,16 @@ def generate_wbw_advanced_translation_text_clip(text: str, is_short: bool, durat
     config = COMMON["translation_textbox_config"].copy()
     config["fontsize"] = font_size
     if font:
-        config["font"] = font
+        config["font"] = get_font_path(font)
     config["size"] = size
     
-    translation_clip = TextClip(text, **config)
+    try:
+        translation_clip = TextClip(text, **config)
+    except Exception as e:
+        print(f"FATAL: TextClip failed for translation '{text[:20]}...' with font '{config.get('font')}'. Error: {e}", flush=True)
+        # Create a placeholder clip to avoid crashing the whole video
+        translation_clip = ColorClip(size=(1,1), color=(0,0,0), duration=duration)
+
     translation_pos = COMMON["f_translation_position"](is_short)
     
     return translation_clip.set_position(('center', translation_pos)).set_duration(duration)
@@ -283,7 +298,7 @@ def generate_full_ayah_translation_clip(text: str, is_short: bool, duration: int
     config = COMMON["translation_textbox_config"].copy()
     config["fontsize"] = font_size
     if font:
-        config["font"] = font
+        config["font"] = get_font_path(font)
     
     translation_clip = TextClip(text, size=translation_sizes["size"], **config)
     translation_pos = COMMON["f_full_ayah_translation_position"](is_short)
@@ -298,8 +313,9 @@ def generate_reciter_name_clip(reciter_name_bangla: str, is_short: bool, duratio
                     .set_duration(duration)
     return reciter_name_clip
 
-def generate_surah_info_clip(surah_name_bangla: str, verse_number: int, is_short: bool, duration: int):
-    surah_name_clip = TextClip(f'{surah_name_bangla} : {e2b(str(verse_number))}', font="kalpurush", **FOOTER_CONFIG)
+def generate_surah_info_clip(surah_name: str, verse_number: int, is_short: bool, duration: int, language: str = "bengali"):
+    verse_str = e2b(str(verse_number)) if language == "bengali" else str(verse_number)
+    surah_name_clip = TextClip(f'{surah_name} : {verse_str}', font="kalpurush", **FOOTER_CONFIG)
     surah_pos = COMMON["f_surah_info_position"](is_short, surah_name_clip.w)
     surah_name_clip = surah_name_clip.set_position(surah_pos, relative=True)\
                     .set_duration(duration)
