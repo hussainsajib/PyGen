@@ -1,6 +1,6 @@
 # Implementation Plan: Multi-Language Metadata Synchronization
 
-## Phase 1: Database & Model Expansion
+## Phase 1: Database & Model Expansion [checkpoint: 42561ef]
 - [x] Task: Expand Language model and migrate
     - [x] Sub-task: Add `brand_name` column to `Language` model in `db/models/language.py`.
     - [x] Sub-task: Create a migration script to add the column and update existing rows ('bengali' -> 'তাকওয়া বাংলা', 'english' -> 'Taqwa').
