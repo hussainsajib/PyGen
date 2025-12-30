@@ -9,7 +9,7 @@
     - [x] Sub-task: Create a seeding script to populate the `surahs` table from `data/surah_data.json`.
 - [~] Task: Conductor - User Manual Verification 'Phase 1: Database & Model Expansion' (Protocol in workflow.md)
 
-## Phase 2: Video Overlay Localization
+## Phase 2: Video Overlay Localization [checkpoint: 7d707fe]
 - [x] Task: Refactor brand rendering
     - [x] Sub-task: Update `factories/single_clip.py` to remove hardcoded brand strings from `generate_brand_clip`.
     - [x] Sub-task: Update `processes/surah_video.py` to fetch the localized `brand_name` from the `Language` table.
