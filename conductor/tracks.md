@@ -76,7 +76,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 
 
-## [~] Track: Multi-Language Metadata Synchronization
+## [x] Track: Multi-Language Metadata Synchronization
 
 
 
