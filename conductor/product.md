@@ -22,6 +22,10 @@ PyGen is an automated video generation platform designed specifically for creati
     - **Interlinear Rendering:** New specialized layout that centers translations directly beneath each Arabic word with solid underlines for improved clarity.
     - **Optimized Layout:** Refined positioning of metadata (Reciter, Surah, Brand) and translation overlays for better visibility.
     - **UX Refinements:** Streamlined form submission workflow with intuitive redirects and quick-reset background options.
+    - **Multi-Language Support:** Comprehensive support for generating videos in multiple languages (e.g., Bengali, English).
+        - **Dynamic Translation Sourcing:** Automated selection of language-specific translation and WBW databases.
+        - **Customizable Typography:** Per-language font configuration to ensure correct rendering of special characters (e.g., macron characters in transliterations).
+        - **Integrated Management:** Centralized configuration for default generation language and font settings via the web dashboard.
 - **Job Management System:** A robust backend that queues video generation tasks, allowing for bulk processing.
 - **Visual Customization:** User-defined themes, including font choices, color palettes, and background styles.
 - **Dynamic Background Management:** Integrated stock image search (Unsplash) and local file upload system to customize video backgrounds per-job.

@@ -4,3 +4,5 @@ from .config import Config
 from .reciter import Reciter
 from .media_asset import MediaAsset
 from .language import Language
+from .surah import Surah
+from .surah import Surah

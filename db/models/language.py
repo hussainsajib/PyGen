@@ -8,6 +8,7 @@ class Language(Base):
     name = Column(String, unique=True, nullable=False)
     code = Column(String, unique=True, nullable=False)
     font = Column(String, default="arial.ttf")
+    brand_name = Column(String, default="Taqwa")
 
     def __repr__(self):
-        return f"<Language(name='{self.name}', code='{self.code}', font='{self.font}')>"
+        return f"<Language(name='{self.name}', code='{self.code}', font='{self.font}', brand_name='{self.brand_name}')>"
