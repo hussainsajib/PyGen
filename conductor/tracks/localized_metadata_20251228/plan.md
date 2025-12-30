@@ -33,7 +33,7 @@
 - [~] Task: Conductor - User Manual Verification 'Phase 3: Information File Localization' (Protocol in workflow.md)
 
 ## Phase 4: Integration & Final Verification
-- [ ] Task: End-to-End Verification
-    - [ ] Sub-task: Verify a full Bengali video generation (brand, names, .txt file).
-    - [ ] Sub-task: Verify a full English video generation (brand, names, .txt file).
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Integration & Final Verification' (Protocol in workflow.md)
+- [x] Task: End-to-End Verification
+    - [x] Sub-task: Verify a full Bengali video generation (brand, names, .txt file).
+    - [x] Sub-task: Verify a full English video generation (brand, names, .txt file).
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Integration & Final Verification' (Protocol in workflow.md)
