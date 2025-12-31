@@ -117,33 +117,21 @@ async def create_wbw_video_job(surah: int, start_verse: int, end_verse:int,
     
     # Upload to YouTube if requested
     if upload_after_generation:
-        from processes import youtube_utils
+        target_channel_id = await _get_target_youtube_channel_id()
         
-        target_channel_id = await _get_target_youtube_channel_id() # Fetch channel ID
+        target_playlist_id = None
+        if playlist_id == "default":
+            target_playlist_id = await _get_playlist_for_reciter(reciter)
+        elif playlist_id and playlist_id != "none":
+            target_playlist_id = playlist_id
         
-        # Determine the target playlist behavior
-        # 'none'    => Upload without playlist
-        # 'default' => Use reciter's default from DB (if any)
-        # ID        => Use specific override ID
-        
-        original_playlist = await _get_playlist_for_reciter(reciter)
-        override_applied = False
-        
-        if playlist_id == "none":
-            # Temporarily clear the playlist for this reciter if it exists
-            if reciter in youtube_utils.playlist:
-                del youtube_utils.playlist[reciter]
-            override_applied = True
-        elif playlist_id == "default":
-            # 'default' means we don't apply an override, use what's in youtube_utils.playlist
-            pass
-        elif playlist_id:
-            # Apply specific override ID
-            youtube_utils.playlist[reciter] = playlist_id
-            override_applied = True
-            
         try:
-            video_id = await run_in_threadpool(upload_to_youtube, video_details, target_channel_id, original_playlist)
+            video_id = await run_in_threadpool(
+                upload_to_youtube,
+                video_details=video_details,
+                target_channel_id=target_channel_id,
+                playlist_id=target_playlist_id
+            )
             if video_id:
                 await update_media_asset_upload(video_details["video"], video_id)
         except Exception as e:
@@ -152,7 +140,6 @@ async def create_wbw_video_job(surah: int, start_verse: int, end_verse:int,
 async def manual_upload_to_youtube(video_filename: str, reciter_key: str, playlist_id: str, details_filename: str):
     import os
     import re
-    from processes.youtube_utils import upload_to_youtube
     
     target_channel_id = await _get_target_youtube_channel_id() # Fetch channel ID
     
@@ -185,14 +172,14 @@ async def manual_upload_to_youtube(video_filename: str, reciter_key: str, playli
         "is_short": False
     }
     
-    from processes import youtube_utils
-    original_playlist = youtube_utils.playlist.copy()
-    if playlist_id:
-        youtube_utils.playlist[reciter_key] = playlist_id
-    
     try:
-        video_id = await run_in_threadpool(upload_to_youtube, video_details, target_channel_id, playlist_id) # Pass channel ID and playlist_id
+        video_id = await run_in_threadpool(
+            upload_to_youtube,
+            video_details=video_details,
+            target_channel_id=target_channel_id,
+            playlist_id=playlist_id
+        )
         if video_id:
             await update_media_asset_upload(video_path, video_id)
-    finally:
-        youtube_utils.playlist = original_playlist
+    except Exception as e:
+        print(f"YouTube upload failed: {e}")

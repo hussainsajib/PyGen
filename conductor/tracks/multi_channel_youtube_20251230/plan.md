@@ -21,7 +21,7 @@
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Dynamic Authentication & Upload' (Protocol in workflow.md)
 
 ## Phase 3: Integration & Final Verification
-- [ ] Task: End-to-End Verification - Bengali Channel
+- [~] Task: End-to-End Verification - Bengali Channel
     - [ ] Sub-task: Generate a video with `DEFAULT_LANGUAGE` set to Bengali and `UPLOAD_TO_YOUTUBE` enabled.
     - [ ] Sub-task: Verify the video is uploaded to the "Taqwa Bangla" channel.
 - [ ] Task: End-to-End Verification - English Channel
