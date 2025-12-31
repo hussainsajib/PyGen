@@ -26,6 +26,12 @@ PyGen is an automated video generation platform designed specifically for creati
         - **Dynamic Translation Sourcing:** Automated selection of language-specific translation and WBW databases.
         - **Customizable Typography:** Per-language font configuration to ensure correct rendering of special characters (e.g., macron characters in transliterations).
         - **Integrated Management:** Centralized configuration for default generation language and font settings via the web dashboard.
+    - **Multi-Language Metadata Synchronization:** All video metadata (Surah name, Reciter name, Brand name) and generated information files are localized based on the selected `DEFAULT_LANGUAGE`.
+        - **Localized Overlays:** Surah, Reciter, and Brand names in video overlays dynamically switch between Bengali and English.
+        - **Localized Ayah Numbers:** Ayah numbers in video overlays are localized (e.g., Bengali numbers for Bengali language).
+        - **Localized Information Files:** Generated `.txt` information files (titles, descriptions, tags) are fully localized based on the selected language.
+        - **Dynamic Full Translation Source:** The available full translation database options in the Config UI dynamically update based on the selected `DEFAULT_LANGUAGE`.
+        - **Database-Driven Surah Metadata:** Surah metadata (localized names, verse counts, etc.) is now sourced from a dedicated `surahs` database table.
 - **Job Management System:** A robust backend that queues video generation tasks, allowing for bulk processing.
 - **Visual Customization:** User-defined themes, including font choices, color palettes, and background styles.
 - **Dynamic Background Management:** Integrated stock image search (Unsplash) and local file upload system to customize video backgrounds per-job.

@@ -23,21 +23,25 @@ async def init_languages():
         lang = result.scalar_one_or_none()
         if not lang:
             print("Adding Bengali...")
-            session.add(Language(name='bengali', code='bn', font='Kalpurush'))
+            session.add(Language(name='bengali', code='bn', font='Kalpurush', youtube_channel_id='UCVfyI5zQRcJxuJMxreY6I8g'))
         else:
-            # Update font if not set or default from old values
+            # Update font and youtube_channel_id if not set or default
             if not lang.font or lang.font == 'kalpurush.ttf':
                  lang.font = 'Kalpurush'
+            if not lang.youtube_channel_id or lang.youtube_channel_id == 'UC-BENGALI-CHANNEL-ID':
+                lang.youtube_channel_id = 'UCVfyI5zQRcJxuJMxreY6I8g'
             
         # Check and add English
         result = await session.execute(select(Language).filter_by(name='english'))
         lang = result.scalar_one_or_none()
         if not lang:
             print("Adding English...")
-            session.add(Language(name='english', code='en', font='Segoe UI'))
+            session.add(Language(name='english', code='en', font='Segoe UI', youtube_channel_id='UC-TtqbMYI3TzOxfyEqT8VGQ'))
         else:
-            if not lang.font or lang.font == 'arial.ttf' or lang.font == 'Arial': # Update from Arial and arial.ttf
+            if not lang.font or lang.font == 'arial.ttf' or lang.font == 'Arial':
                 lang.font = 'Segoe UI'
+            if not lang.youtube_channel_id or lang.youtube_channel_id == 'UC-ENGLISH-CHANNEL-ID':
+                lang.youtube_channel_id = 'UC-TtqbMYI3TzOxfyEqT8VGQ'
         
         await session.commit()
     

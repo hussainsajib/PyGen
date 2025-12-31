@@ -17,19 +17,65 @@ TIMEZONE = ZoneInfo("America/New_York")
 scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
 api_service_name = "youtube"
 api_version = "v3"
-client_secrets_file = "client_info.json"
-playlist = {
-    "ar.alafasy": "PLvbeiWY3e2QdAVhMyI3No2J5NnBupVBud",
-    "ar.abdulbasit": "PLvbeiWY3e2QdeIRQsi82skdXhYLg2gqv0",
-    # manual videos mishary: "PLvbeiWY3e2Qe8VLdBCLe5HeheC00U7Wfa",
-    "ar.abdullahaljuhany": "PLvbeiWY3e2QfDUsdWO1dunljV9TBmTEo1",
-    "ar.hanirifai": "PLvbeiWY3e2QffC6tRZbrgg6XqhJpGhoGV",
-    "ar.husary": "PLvbeiWY3e2QexlQuJlqb-NbptmMO-KIJ1",
-    "ar.nasserqatami": "PLvbeiWY3e2QfmJW5vg0MX2YZ-cjdhfOUi",
-    "ar.ibrahimakhbar": "PLvbeiWY3e2Qe5KAoGBhsteMaYNV-4ZqNk",
-    "ar.saoodshuraym": "PLvbeiWY3e2Qc7Qxv_L8ZW2QGuoDSBDDt1",
-    "ar.yasserdossary": "PLvbeiWY3e2QcvuqO3ScgzD6Fi1n9mnEUR"
-}
+from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
+# ...
+
+# Set up the API service
+scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
+api_service_name = "youtube"
+api_version = "v3"
+ACTUAL_CLIENT_SECRETS_FILE = "client_secret.json" # Renamed to avoid confusion with TOKEN_STORE_FILE
+
+
+def get_authenticated_service(target_channel_id: str = None): # New parameter
+    credentials = None
+    all_tokens = _read_token_data()
+
+    if target_channel_id:
+        token_info = all_tokens.get(target_channel_id)
+        if token_info:
+            credentials = Credentials.from_authorized_user_info(token_info, scopes)
+
+    if not credentials or not credentials.valid:
+        if credentials and credentials.expired and credentials.refresh_token:
+            credentials.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                ACTUAL_CLIENT_SECRETS_FILE, 
+                scopes
+            )
+            credentials = flow.run_local_server(port=8080) # This will store token in credentials object
+        
+        # Save updated credentials
+        if target_channel_id:
+            all_tokens[target_channel_id] = credentials.to_json()
+            _write_token_data(all_tokens)
+
+    return googleapiclient.discovery.build(api_service_name, api_version, credentials=credentials)
+# The client_secrets_file (actual_client_secrets.json) should be in the root directory
+# For this task, client_info.json will store the tokens.
+TOKEN_STORE_FILE = "client_info.json"
+
+
+def _read_token_data():
+    """Reads token data from TOKEN_STORE_FILE."""
+    if os.path.exists(TOKEN_STORE_FILE):
+        with open(TOKEN_STORE_FILE, "r") as f:
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                return {} # Return empty dict if file is corrupted
+    return {}
+
+def _write_token_data(data):
+    """Writes token data to TOKEN_STORE_FILE."""
+    with open(TOKEN_STORE_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
+
+# Set up the API service
+scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
 
 def get_video_details(info_file_path: str):
     # Read the video details from the info file
@@ -79,15 +125,6 @@ def get_release_date():
 
     write_new_upload_time(release_date)
     return release_date
-
-def get_authenticated_service():
-    # Authenticate and create the API client
-    flow = InstalledAppFlow.from_client_secrets_file(
-        client_secrets_file, 
-        scopes
-    )
-    credentials = flow.run_local_server(port=8080)
-    return googleapiclient.discovery.build(api_service_name, api_version, credentials=credentials)
 
 def initialize_upload_request(youtube, video_details: dict):
     title, description, tags = get_video_details(video_details["info"])
@@ -143,12 +180,11 @@ def add_video_to_playlist(youtube, video_id, playlist_id):
     return response
     
 
-def upload_to_youtube(video_details: str):
+def upload_to_youtube(video_details: dict, target_channel_id: str = None, playlist_id: str = None):
     # Upload video
-    youtube = get_authenticated_service()
+    youtube = get_authenticated_service(target_channel_id)
     success = True
     video_id = None
-    playlist_id = playlist.get(video_details["reciter"])
     
     # Upload the video file to YouTube
     try:
