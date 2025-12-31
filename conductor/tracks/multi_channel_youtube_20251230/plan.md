@@ -11,7 +11,7 @@
     - [x] Sub-task: Implement logic to load/save specific token data from `client_info.json` based on the target `youtube_channel_id`.
 - [~] Task: Conductor - User Manual Verification 'Phase 1: Database & Token Storage' (Protocol in workflow.md)
 
-## Phase 2: Dynamic Authentication & Upload
+## Phase 2: Dynamic Authentication & Upload [checkpoint: eb19290]
 - [~] Task: Update YouTube authentication process
     - [ ] Sub-task: Modify `processes/youtube_utils.py` to acquire and refresh tokens specifically for the `youtube_channel_id` associated with the active language.
     - [ ] Sub-task: Implement a mechanism to prompt for re-authentication if a token is invalid or expired for a specific channel.
