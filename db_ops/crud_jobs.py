@@ -33,6 +33,23 @@ async def enqueue_job(
     await session.commit()
     return job
 
+
+async def enqueue_fb_manual_upload_job(session: AsyncSession, video_filename: str, details_filename: str):
+    import json
+    data = {
+        "video_filename": video_filename,
+        "details_filename": details_filename
+    }
+    job = Job(
+        surah_number=0,
+        surah_name=json.dumps(data),
+        reciter="Facebook", # Use Facebook as reciter placeholder
+        job_type="fb_manual_upload"
+    )
+    session.add(job)
+    await session.commit()
+    return job
+
 async def get_all_jobs(session: AsyncSession):
     result = await session.execute(select(Job).order_by(Job.id.desc())) # Newest first
     return result.scalars().all()

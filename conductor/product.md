@@ -47,6 +47,12 @@ PyGen is an automated video generation platform designed specifically for creati
     - **Direct Interface Integration:** Streamlined upload and playlist selection directly from the Word-by-Word generation interface.
     - **Flexible Playlist Management:** Support for "None (Upload Only)" defaults and explicit "Reciter's Default" overrides in the WBW workflow.
     - Integration with YouTube playlists organized by reciter.
+- **Facebook Ecosystem Integration:**
+    - Automatic uploading of new videos based on configuration flags.
+    - **Reels Support:** Automated detection and uploading of vertical, short-form content as Facebook Reels.
+    - Manual management and upload interface for existing media.
+    - Modular API integration for seamless cross-platform distribution.
+    - Authentication via long-lived Page Access Tokens for server-side automation.
 
 ## User Experience
 The web interface provides a centralized dashboard for managing the entire content lifecycle. It features a specialized "Word-by-Word" creation interface for synchronized content, and users can dynamically select video backgrounds from a searchable Unsplash gallery or upload local files. It also includes an enhanced "Manual Upload" dashboard where users can view generated assets in-browser, manage files with atomic/bulk deletion, and track upload statuses through reciter-grouped collapsible sections.

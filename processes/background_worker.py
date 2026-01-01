@@ -4,7 +4,7 @@ from db.database import async_session
 import asyncio
 import logging
 import json
-from processes.processes import create_surah_video, manual_upload_to_youtube, create_wbw_video_job
+from processes.processes import create_surah_video, manual_upload_to_youtube, manual_upload_to_facebook, create_wbw_video_job
 from fastapi.concurrency import run_in_threadpool
 
 logger = logging.getLogger(__name__)
@@ -31,6 +31,13 @@ async def job_worker():
                             video_filename=data["video_filename"],
                             reciter_key=job.reciter,
                             playlist_id=data["playlist_id"],
+                            details_filename=data["details_filename"]
+                        )
+                    elif job.job_type == "fb_manual_upload":
+                        # Facebook manual upload job
+                        data = json.loads(job.surah_name)
+                        await manual_upload_to_facebook(
+                            video_filename=data["video_filename"],
                             details_filename=data["details_filename"]
                         )
                     elif job.job_type == "wbw":

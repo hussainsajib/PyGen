@@ -86,8 +86,18 @@
                                                     <input type="hidden" name="playlist_id" value="{{ video.playlist_id or '' }}">
                                                     <input type="hidden" name="details_filename" value="{{ video.details_filename }}">
                                                     <button type="submit" class="btn btn-outline-primary btn-sm" 
-                                                            {% if not video.details_present or not video.playlist_id or not video.reciter_key %}disabled{% endif %}>
-                                                        <i class="fab fa-youtube"></i> Upload
+                                                            {% if not video.details_present or not video.playlist_id or not video.reciter_key %}disabled{% endif %}
+                                                            title="Upload to YouTube">
+                                                        <i class="fab fa-youtube"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ url_for('trigger_fb_manual_upload') }}" method="post" class="d-inline ms-1">
+                                                    <input type="hidden" name="video_filename" value="{{ video.filename }}">
+                                                    <input type="hidden" name="details_filename" value="{{ video.details_filename }}">
+                                                    <button type="submit" class="btn btn-outline-info btn-sm" 
+                                                            {% if not video.details_present %}disabled{% endif %}
+                                                            title="Upload to Facebook">
+                                                        <i class="fab fa-facebook"></i>
                                                     </button>
                                                 </form>
                                                 <form action="{{ url_for('delete_media', asset_id=video.id) }}" method="post" class="d-inline ms-1">

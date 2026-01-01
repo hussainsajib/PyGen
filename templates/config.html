@@ -60,6 +60,11 @@
                         <input type="checkbox" id="upload_to_youtube_checkbox" class="form-check-input" role="switch" {% if item.value == 'True' %}checked{% endif %}>
                         <input type="hidden" name="{{ item.key }}" id="upload_to_youtube_value" value="{{ item.value }}">
                     </div>
+                {% elif item.key == 'ENABLE_FACEBOOK_UPLOAD' %}
+                    <div class="form-check form-switch">
+                        <input type="checkbox" id="enable_facebook_upload_checkbox" class="form-check-input" role="switch" {% if item.value == 'True' %}checked{% endif %}>
+                        <input type="hidden" name="{{ item.key }}" id="enable_facebook_upload_value" value="{{ item.value }}">
+                    </div>
                 {% elif item.key == 'WBW_FULL_TRANSLATION_ENABLED' or item.key == 'WBW_INTERLINEAR_ENABLED' %}
                     <div class="form-check form-switch">
                         <input type="checkbox" id="{{ item.key }}_checkbox" class="form-check-input dynamic-switch" role="switch" data-target="{{ item.key }}_value" {% if item.value == 'True' %}checked{% endif %}>
@@ -253,6 +258,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if (uploadCheckbox && uploadValue) {
         uploadCheckbox.addEventListener('change', function() {
             uploadValue.value = this.checked ? "True" : "False";
+        });
+    }
+
+    // --- ENABLE_FACEBOOK_UPLOAD Checkbox ---
+    const fbUploadCheckbox = document.getElementById('enable_facebook_upload_checkbox');
+    const fbUploadValue = document.getElementById('enable_facebook_upload_value');
+    if (fbUploadCheckbox) {
+        fbUploadCheckbox.addEventListener('change', function() {
+            fbUploadValue.value = this.checked ? 'True' : 'False';
         });
     }
 

@@ -15,13 +15,13 @@ from processes.processes import create_and_post, create_surah_video
 from processes.background_worker import job_worker, logger
 from db_ops.crud_jobs import (
     get_all_jobs, 
-    enqueue_job, 
+    enqueue_job,
     clear_completed_jobs,
     delete_single_job,
     retry_job,
-    enqueue_manual_upload_job
+    enqueue_manual_upload_job,
+    enqueue_fb_manual_upload_job
 )
-
 from db_ops import crud_reciters
 from db_ops.crud_language import get_all_languages, get_translations_for_language
 from db.models.language import Language
@@ -446,6 +446,17 @@ async def trigger_manual_upload(
     db: AsyncSession = Depends(get_db)
 ):
     await enqueue_manual_upload_job(db, video_filename, reciter_key, playlist_id, details_filename)
+    return RedirectResponse(url=request.url_for("jobs"), status_code=303)
+
+
+@app.post("/trigger-fb-manual-upload", name="trigger_fb_manual_upload")
+async def trigger_fb_manual_upload(
+    request: Request,
+    video_filename: str = Form(...),
+    details_filename: str = Form(...),
+    db: AsyncSession = Depends(get_db)
+):
+    await enqueue_fb_manual_upload_job(db, video_filename, details_filename)
     return RedirectResponse(url=request.url_for("jobs"), status_code=303)
 
 

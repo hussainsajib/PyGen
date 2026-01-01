@@ -27,4 +27,7 @@
     - YouTube Data API v3 (For automated uploads and playlist management)
     - Google Auth/OAuth 2.0 (For secure API authorization)
     - Google Cloud Storage (For media asset persistence)
+- **Meta for Developers:**
+    - Facebook Graph API v19.0 (For automated Page video and Reels uploads)
+    - Long-lived Page Access Tokens (For persistent server-side authorization)
 - **Unsplash API:** For searching and downloading high-quality stock images for video backgrounds.

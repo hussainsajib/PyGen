@@ -4,6 +4,7 @@ import anyio
 from fastapi.concurrency import run_in_threadpool
 from processes.video_utils import generate_video
 from processes.youtube_utils import upload_to_youtube
+from processes.facebook_utils import FacebookClient
 from processes.screenshot import extract_frame
 from processes.surah_video import generate_surah
 from config_manager import config_manager
@@ -34,6 +35,45 @@ async def _get_playlist_for_reciter(reciter_key: str):
         if reciter_obj:
             return reciter_obj.playlist_id
     return None
+
+async def _upload_to_facebook_if_enabled(video_details: dict):
+    """Checks if Facebook upload is enabled and performs the upload if it is."""
+    if config_manager.get("ENABLE_FACEBOOK_UPLOAD") == "True":
+        fb_token = os.getenv("FB_PAGE_ACCESS_TOKEN")
+        fb_page_id = os.getenv("FB_PAGE_ID")
+        
+        if not fb_token or not fb_page_id:
+            print("Facebook credentials missing from environment variables.")
+            return
+
+        fb_client = FacebookClient(fb_token, fb_page_id)
+        
+        # Parse metadata from info file if available
+        title = "Quran Recitation"
+        description = ""
+        
+        info_path = video_details.get("info")
+        if info_path and os.path.exists(info_path):
+            try:
+                with open(info_path, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                    if lines:
+                        title = lines[0].strip()
+                        description = "".join(lines[1:]).strip()
+            except Exception as e:
+                print(f"Error reading info file for Facebook upload: {e}")
+
+        try:
+            video_id = await run_in_threadpool(
+                fb_client.upload_to_facebook,
+                video_path=video_details["video"],
+                title=title,
+                description=description
+            )
+            if video_id:
+                print(f"Facebook upload successful: {video_id}")
+        except Exception as e:
+            print(f"Facebook upload failed: {e}")
 
 async def record_media_asset(video_details: dict):
     """Records a new media asset in the database."""
@@ -97,6 +137,9 @@ async def create_surah_video(surah: int, reciter: str, custom_title: str = None)
                 await update_media_asset_upload(video_details["video"], video_id)
         except Exception as e:
             print(f"YouTube upload failed: {e}")
+            
+    # Upload to Facebook if enabled
+    await _upload_to_facebook_if_enabled(video_details)
 
 async def create_wbw_video_job(surah: int, start_verse: int, end_verse:int, 
                         reciter: str, is_short:bool = False, 
@@ -136,6 +179,9 @@ async def create_wbw_video_job(surah: int, start_verse: int, end_verse:int,
                 await update_media_asset_upload(video_details["video"], video_id)
         except Exception as e:
             print(f"YouTube upload failed: {e}")
+
+    # Upload to Facebook if enabled
+    await _upload_to_facebook_if_enabled(video_details)
 
 async def manual_upload_to_youtube(video_filename: str, reciter_key: str, playlist_id: str, details_filename: str):
     import os
@@ -183,3 +229,66 @@ async def manual_upload_to_youtube(video_filename: str, reciter_key: str, playli
             await update_media_asset_upload(video_path, video_id)
     except Exception as e:
         print(f"YouTube upload failed: {e}")
+
+async def manual_upload_to_facebook(video_filename: str, details_filename: str):
+    import os
+    
+    video_path = os.path.join("exported_data/videos", video_filename)
+    details_path = os.path.join("exported_data/details", details_filename)
+    
+    video_details = {
+        "video": video_path,
+        "info": details_path,
+    }
+    
+    # We use our existing helper which checks if enabled and handles the upload
+    # Note: For manual upload, we might want to bypass the 'enabled' check, 
+    # but for now let's keep it consistent.
+    
+    fb_token = os.getenv("FB_PAGE_ACCESS_TOKEN")
+    fb_page_id = os.getenv("FB_PAGE_ID")
+    
+    if not fb_token or not fb_page_id:
+        print("Facebook credentials missing from environment variables.")
+        return
+
+    fb_client = FacebookClient(fb_token, fb_page_id)
+    
+    # Parse metadata
+    title = "Quran Recitation"
+    description = ""
+    if os.path.exists(details_path):
+        try:
+            with open(details_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+                if lines:
+                    title = lines[0].strip()
+                    description = "".join(lines[1:]).strip()
+        except Exception as e:
+            print(f"Error reading info file for Facebook upload: {e}")
+
+            try:
+
+                video_id = await run_in_threadpool(
+
+                    fb_client.upload_to_facebook,
+
+                    video_path=video_path,
+
+                    title=title,
+
+                    description=description
+
+                )
+
+                if video_id:
+
+                    print(f"Manual Facebook upload successful: {video_id}")
+
+            except Exception as e:
+
+                print(f"Facebook manual upload failed: {e}")
+
+        
+
+    

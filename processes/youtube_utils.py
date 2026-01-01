@@ -35,9 +35,9 @@ def get_authenticated_service(target_channel_id: str = None): # New parameter
 
     if target_channel_id:
         token_info = all_tokens.get(target_channel_id)
-        print(f"DEBUG: Found token_info for channel '{target_channel_id}': {token_info}", flush=True)
         if token_info:
-            credentials = Credentials.from_authorized_user_info(token_info, scopes)
+            credentials = Credentials.from_authorized_user_info(json.loads(token_info))
+
 
     if not credentials or not credentials.valid:
         if credentials and credentials.expired and credentials.refresh_token:
@@ -66,15 +66,15 @@ def _read_token_data():
         try:
             with open(TOKEN_STORE_FILE, "r") as f:
                 content = f.read()
-                print(f"DEBUG: Reading from '{TOKEN_STORE_FILE}'. Content: '{content}'", flush=True)
                 # Check if file is not empty before trying to load
                 if content:
                     return json.loads(content)
         except (json.JSONDecodeError, IOError) as e:
             print(f"Warning: Could not read token file '{TOKEN_STORE_FILE}'. It might be empty or corrupted. A new one will be created. Error: {e}")
             return {}
-    print(f"DEBUG: Token file '{TOKEN_STORE_FILE}' does not exist.", flush=True)
-    return {}
+            return {}
+    else:
+        return {}
 
 def _write_token_data(data):
     """Writes token data to TOKEN_STORE_FILE."""
