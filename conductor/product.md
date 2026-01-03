@@ -41,8 +41,8 @@ PyGen is an automated video generation platform designed specifically for creati
 - **YouTube Ecosystem Integration:** 
     - Automatic uploading of new videos based on configuration flags.
     - **Shorts Optimization:** Intelligent duration validation and automatic metadata enhancement (e.g., `#Shorts` tagging) for Shorts-formatted content.
-        - **Custom Title Prefixes:** Ability to provide user-defined title segments.
-        - **SEO-Optimized Metadata:** Automated generation of SEO-friendly descriptions and relevant YouTube tags.
+        - **Custom Title Prefixes:** Support for user-defined title segments combined with structured Surah/Ayah metadata.
+        - **SEO-Optimized Metadata:** Automated generation of professional, localized descriptions with social links, consistent headers, and relevant platform-specific hashtags and tags.
     - Manual management and upload interface for existing media.
     - **Direct Interface Integration:** Streamlined upload and playlist selection directly from the Word-by-Word generation interface.
     - **Flexible Playlist Management:** Support for "None (Upload Only)" defaults and explicit "Reciter's Default" overrides in the WBW workflow.

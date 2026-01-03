@@ -82,8 +82,12 @@ async def create_video(
     # If global upload is on, and it's a WBW job, we default to upload unless specifically overridden
     # For now, if UPLOAD_TO_YOUTUBE is true, we set it to true for the job.
     final_upload = upload_after_generation
-    if job_type == "wbw" and config.get("UPLOAD_TO_YOUTUBE") == "True":
-        final_upload = True
+    if job_type == "wbw":
+        if config.get("UPLOAD_TO_YOUTUBE") == "True":
+            final_upload = True
+        else:
+            # If global config is off, force off, ignoring potential stale UI inputs
+            final_upload = False
 
     await enqueue_job(
         db, 

@@ -45,7 +45,8 @@ class FacebookClient:
         
         try:
             # Step 1: Initialize
-            response = httpx.post(init_url, params=params)
+            logger.info("Initializing Facebook Reel upload session...")
+            response = httpx.post(init_url, params=params, timeout=30.0)
             response.raise_for_status()
             data = response.json()
             video_id = data.get("video_id")
@@ -53,6 +54,7 @@ class FacebookClient:
             
             # Step 2: Upload the file
             file_size = os.path.getsize(video_path)
+            logger.info(f"Uploading Reel content ({file_size} bytes)...")
             with open(video_path, 'rb') as f:
                 # Meta Reels upload expects binary data in the body, plus specific headers
                 headers = {
@@ -64,6 +66,7 @@ class FacebookClient:
                 upload_response.raise_for_status()
             
             # Step 3: Publish the Reel
+            logger.info("Publishing Reel...")
             publish_url = f"{self.base_url}/{self.page_id}/video_reels"
             publish_params = {
                 "access_token": self.page_access_token,
@@ -72,7 +75,7 @@ class FacebookClient:
                 "video_state": "PUBLISHED",
                 "description": description
             }
-            publish_response = httpx.post(publish_url, params=publish_params)
+            publish_response = httpx.post(publish_url, params=publish_params, timeout=60.0)
             publish_response.raise_for_status()
             
             logger.info(f"Successfully uploaded Reel to Facebook. ID: {video_id}")

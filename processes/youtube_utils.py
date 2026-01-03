@@ -36,7 +36,11 @@ def get_authenticated_service(target_channel_id: str = None): # New parameter
     if target_channel_id:
         token_info = all_tokens.get(target_channel_id)
         if token_info:
-            credentials = Credentials.from_authorized_user_info(json.loads(token_info))
+            try:
+                credentials = Credentials.from_authorized_user_info(json.loads(token_info))
+            except ValueError:
+                # Token data might be malformed or missing fields (like refresh_token)
+                credentials = None
 
 
     if not credentials or not credentials.valid:
@@ -47,7 +51,8 @@ def get_authenticated_service(target_channel_id: str = None): # New parameter
                 ACTUAL_CLIENT_SECRETS_FILE, 
                 scopes
             )
-            credentials = flow.run_local_server(port=8080) # This will store token in credentials object
+            # Force 'consent' to ensure we get a refresh_token
+            credentials = flow.run_local_server(port=8080, access_type='offline', prompt='consent') 
         
         # Save updated credentials
         if target_channel_id:

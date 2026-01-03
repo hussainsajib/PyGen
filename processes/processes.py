@@ -138,6 +138,10 @@ async def create_surah_video(surah: int, reciter: str, custom_title: str = None)
         except Exception as e:
             print(f"YouTube upload failed: {e}")
             
+    # Sleep for 20 seconds before uploading to Facebook if YouTube upload was attempted/enabled
+    if config_manager.get("UPLOAD_TO_YOUTUBE") == "True":
+        await asyncio.sleep(20)
+
     # Upload to Facebook if enabled
     await _upload_to_facebook_if_enabled(video_details)
 
@@ -179,6 +183,10 @@ async def create_wbw_video_job(surah: int, start_verse: int, end_verse:int,
                 await update_media_asset_upload(video_details["video"], video_id)
         except Exception as e:
             print(f"YouTube upload failed: {e}")
+
+    # Sleep for 20 seconds before uploading to Facebook if YouTube upload was attempted/enabled
+    if upload_after_generation:
+        await asyncio.sleep(20)
 
     # Upload to Facebook if enabled
     await _upload_to_facebook_if_enabled(video_details)
