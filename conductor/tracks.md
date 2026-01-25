@@ -15,5 +15,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [~] Track: Fix Manual Upload Path for Shorts
+## [x] Track: Fix Manual Upload Path for Shorts
 *Link: [./tracks/fix_manual_upload_path_shorts_20260124/](./tracks/fix_manual_upload_path_shorts_20260124/)*
