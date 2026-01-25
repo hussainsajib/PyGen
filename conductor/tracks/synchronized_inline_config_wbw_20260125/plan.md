@@ -2,11 +2,11 @@
 
 This plan outlines the steps to add inline configuration controls (Language, YouTube/Facebook upload) to the Word-by-Word page and synchronize them with the global application settings.
 
-## Phase 1: Backend Infrastructure (API)
+## Phase 1: Backend Infrastructure (API) [checkpoint: be628d8]
 - [x] Task: Write unit tests for an API endpoint that allows updating specific configuration keys.
 - [x] Task: Implement or extend a route (e.g., `POST /config/set`) to handle asynchronous configuration updates from the frontend.
 - [x] Task: Verify that the configuration service correctly updates the database and the in-memory cache.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Backend Infrastructure (API)' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Backend Infrastructure (API)' (Protocol in workflow.md) be628d8
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Backend Infrastructure (API)' (Protocol in workflow.md)
 
 ## Phase 2: Frontend Implementation (wbw.html)
