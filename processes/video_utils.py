@@ -220,3 +220,16 @@ def discover_assets(reciters=None):
         
     return videos
 
+def get_video_duration(file_path: str) -> float:
+    """
+    Retrieves the duration of a video file in seconds.
+    
+    Args:
+        file_path (str): The path to the video file.
+        
+    Returns:
+        float: The duration of the video in seconds.
+    """
+    with VideoFileClip(file_path) as video:
+        return video.duration
+
