@@ -197,7 +197,13 @@ async def manual_upload_to_youtube(video_filename: str, reciter_key: str, playli
     
     target_channel_id = await _get_target_youtube_channel_id() # Fetch channel ID
     
-    video_path = os.path.join("exported_data/videos", video_filename)
+    if video_filename.startswith("quran_shorts_"):
+        video_path = os.path.join("exported_data/shorts", video_filename)
+        is_short = True
+    else:
+        video_path = os.path.join("exported_data/videos", video_filename)
+        is_short = False
+        
     details_path = os.path.join("exported_data/details", details_filename)
     
     # Try to find screenshot
@@ -223,7 +229,7 @@ async def manual_upload_to_youtube(video_filename: str, reciter_key: str, playli
         "info": details_path,
         "screenshot": screenshot_path,
         "reciter": reciter_key,
-        "is_short": False
+        "is_short": is_short
     }
     
     try:
@@ -241,7 +247,11 @@ async def manual_upload_to_youtube(video_filename: str, reciter_key: str, playli
 async def manual_upload_to_facebook(video_filename: str, details_filename: str):
     import os
     
-    video_path = os.path.join("exported_data/videos", video_filename)
+    if video_filename.startswith("quran_shorts_"):
+        video_path = os.path.join("exported_data/shorts", video_filename)
+    else:
+        video_path = os.path.join("exported_data/videos", video_filename)
+        
     details_path = os.path.join("exported_data/details", details_filename)
     
     video_details = {
