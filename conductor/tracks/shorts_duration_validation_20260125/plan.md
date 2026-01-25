@@ -3,9 +3,9 @@
 This plan outlines the steps to implement a duration check for Word-by-Word Shorts, ensuring they don't exceed the 60-second limit for YouTube uploads.
 
 ## Phase 1: Core Logic & Infrastructure
-- [~] Task: Create a utility function to reliably retrieve the duration of an MP4 file.
-    - [ ] Write unit tests for the duration retrieval utility (e.g., tests/test_video_duration.py).
-    - [ ] Implement the utility using `moviepy` or `ffprobe`.
+- [x] Task: Create a utility function to reliably retrieve the duration of an MP4 file. 623e2e0
+    - [x] Write unit tests for the duration retrieval utility (e.g., tests/test_video_duration.py).
+    - [x] Implement the utility using `moviepy` or `ffprobe`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Core Logic & Infrastructure' (Protocol in workflow.md)
 
 ## Phase 2: Workflow Integration
