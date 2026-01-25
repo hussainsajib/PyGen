@@ -352,6 +352,21 @@ async def delete_config(
     await config.delete(db, key)
     return RedirectResponse(url="/config", status_code=303)
 
+from pydantic import BaseModel
+
+class ConfigUpdate(BaseModel):
+    key: str
+    value: str
+
+@app.post("/config/update")
+async def update_config_api(
+    config_data: ConfigUpdate,
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
+):
+    await config.set(db, config_data.key, config_data.value)
+    return JSONResponse({"status": "success", "key": config_data.key, "value": config_data.value})
+
 @app.post("/config/language/update")
 async def update_language_font(
     request: Request,

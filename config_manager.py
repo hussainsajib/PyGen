@@ -47,16 +47,29 @@ class ConfigManager:
 
     async def set(self, db_session: AsyncSession, key: str, value: Any):
         """Sets a value in the cache and persists it to the database."""
-        db_config_item = None
-        # Find in cache
-        for item in self._config:
-            if item["key"] == key:
-                item["value"] = value
-                db_config_item = item # Found in cache
-                break
+        # Check DB first to ensure consistency
+        stmt = select(Config).where(Config.key == key)
+        result = await db_session.execute(stmt)
+        existing_db_item = result.scalars().first()
+
+        if existing_db_item:
+            # Update existing
+            existing_db_item.value = value
+            await db_session.commit()
+            
+            # Update cache
+            found_in_cache = False
+            for item in self._config:
+                if item["key"] == key:
+                    item["value"] = value
+                    found_in_cache = True
+                    break
+            
+            if not found_in_cache:
+                self._config.append({"id": existing_db_item.id, "key": existing_db_item.key, "value": existing_db_item.value})
+                self._config.sort(key=lambda item: item['id'])
         
-        if not db_config_item: # Not in cache, implies new item or cache not up-to-date
-            # Persist to database to get ID first
+        else: # Not in DB, Insert
             new_db_item = Config(key=key, value=value)
             db_session.add(new_db_item)
             await db_session.commit()
@@ -65,14 +78,6 @@ class ConfigManager:
             # Add to cache and keep sorted
             self._config.append({"id": new_db_item.id, "key": new_db_item.key, "value": new_db_item.value})
             self._config.sort(key=lambda item: item['id']) # Re-sort cache
-        else:
-            # Persist update to database
-            stmt = select(Config).where(Config.key == key)
-            result = await db_session.execute(stmt)
-            db_item_from_db = result.scalars().first()
-            if db_item_from_db:
-                db_item_from_db.value = value
-                await db_session.commit()
         
 
     async def delete(self, db_session: AsyncSession, key: str):

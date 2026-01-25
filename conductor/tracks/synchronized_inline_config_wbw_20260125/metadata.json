@@ -1,0 +1,8 @@
+{
+  "track_id": "synchronized_inline_config_wbw_20260125",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-25T12:14:00Z",
+  "updated_at": "2026-01-25T12:14:00Z",
+  "description": "add new buttons in the word-by-word video creation page to select the language and upload to youtube and facebook config. changing these configs should also change the configs in Configs page and update them in the database"
+}

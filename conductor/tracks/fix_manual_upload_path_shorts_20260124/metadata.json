@@ -1,8 +1,0 @@
-{
-  "track_id": "fix_manual_upload_path_shorts_20260124",
-  "type": "bug",
-  "status": "new",
-  "created_at": "2026-01-24T23:33:00Z",
-  "updated_at": "2026-01-24T23:33:00Z",
-  "description": "when I am trying to upload from Manual Upload to Youtube, I am getting this error: [Errno 2] No such file or directory: 'exported_data/videos\quran_shorts_2_127_129_maher_al_muaiqly.mp4'"
-}
