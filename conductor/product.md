@@ -57,3 +57,5 @@ PyGen is an automated video generation platform designed specifically for creati
 
 ## User Experience
 The web interface provides a centralized dashboard for managing the entire content lifecycle. It features a specialized "Word-by-Word" creation interface for synchronized content, and users can dynamically select video backgrounds from a searchable Unsplash gallery or upload local files. It also includes an enhanced "Manual Upload" dashboard where users can view generated assets in-browser, manage files with atomic/bulk deletion, and track upload statuses through reciter-grouped collapsible sections.
+
+Additionally, the interface is fully responsive and optimized for mobile accessibility, ensuring that creators can manage their workflows, monitor job queues, and configure settings seamlessly on any device.

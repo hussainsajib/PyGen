@@ -8,6 +8,7 @@
 - **Theme:** Modern and Bold.
 - **Aesthetic:** Use strong contrasts and vibrant color palettes to convey power and speed. The interface should feel dynamic and high-performance.
 - **Layout:** Prioritize clarity and rapid access to core functions and status information.
+- **Responsive Design:** Maintain full functionality and readability across all screen sizes, utilizing adaptive grid systems and touch-friendly interactive elements.
 
 ## User Interaction & Feedback
 - **Feedback Loops:** Utilize real-time progress bars for all processing and upload tasks to provide immediate visual confirmation of activity and speed.

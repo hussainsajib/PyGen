@@ -19,6 +19,7 @@
 
 ## Frontend & Templating
 - **Frontend Framework:** React (Integrated with FastAPI for dynamic user interfaces)
+- **CSS Framework:** Bootstrap 5 (Used for responsive grid systems and consistent UI styling)
 - **Templating Engine:** Jinja2 (Integrated with FastAPI for server-side rendering)
 - **Static Assets:** CSS/JavaScript for modern, bold UI components
 
