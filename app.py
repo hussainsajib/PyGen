@@ -170,12 +170,18 @@ async def wbw_interface(
     reciters.sort(key=lambda x: x["english_name"])
     
     upload_to_youtube = config.get("UPLOAD_TO_YOUTUBE", "False") == "True"
+    enable_facebook_upload = config.get("ENABLE_FACEBOOK_UPLOAD", "False") == "True"
+    default_language = config.get("DEFAULT_LANGUAGE", "bengali")
+    languages = await get_all_languages(db)
     
     context = {
         "request": request, 
         "surahs": surahs, 
         "reciters": reciters,
         "upload_to_youtube": upload_to_youtube,
+        "enable_facebook_upload": enable_facebook_upload,
+        "default_language": default_language,
+        "languages": languages,
         "playlists": playlists,
         "bg_rgb": config.get("BACKGROUND_RGB", "(239, 233, 227)"),
         "font_color": config.get("FONT_COLOR", "rgb(201, 181, 156)")

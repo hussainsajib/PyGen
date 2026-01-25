@@ -10,10 +10,10 @@ This plan outlines the steps to add inline configuration controls (Language, You
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Backend Infrastructure (API)' (Protocol in workflow.md)
 
 ## Phase 2: Frontend Implementation (wbw.html)
-- [ ] Task: Write integration tests to verify that the Word-by-Word page correctly displays and submits configuration changes.
-- [ ] Task: Update `templates/wbw.html` to include the Language selection dropdown and Social Media Upload switches.
-- [ ] Task: Implement JavaScript logic in `wbw.html` to send asynchronous `fetch` requests when settings are changed.
-- [ ] Task: Add visual feedback (e.g., CSS transitions or status icons) to indicate successful synchronization.
+- [x] Task: Write integration tests to verify that the Word-by-Word page correctly displays and submits configuration changes.
+- [x] Task: Update `templates/wbw.html` to include the Language selection dropdown and Social Media Upload switches.
+- [x] Task: Implement JavaScript logic in `wbw.html` to send asynchronous `fetch` requests when settings are changed.
+- [x] Task: Add visual feedback (e.g., CSS transitions or status icons) to indicate successful synchronization.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Frontend Implementation (wbw.html)' (Protocol in workflow.md)
 
 ## Phase 3: Final Integration & Verification
