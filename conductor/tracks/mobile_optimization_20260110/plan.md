@@ -12,9 +12,9 @@ This plan outlines the steps to make the PyGen web application responsive and mo
 - [x] Task: Update `templates/wbw.html`. d27b33b
     - [x] Sub-task: Wrap all tables in `div.table-responsive`. (No tables found, but checked)
     - [x] Sub-task: Ensure form groups use responsive classes (e.g., `col-12 col-md-6`) to stack on mobile and span on desktop.
-- [ ] Task: Update `templates/config.html`.
-    - [ ] Sub-task: Apply responsive classes to the configuration forms and tables.
-    - [ ] Sub-task: Ensure input fields and buttons are touch-friendly.
+- [x] Task: Update `templates/config.html`. ec85723
+    - [x] Sub-task: Apply responsive classes to the configuration forms and tables.
+    - [x] Sub-task: Ensure input fields and buttons are touch-friendly.
 - [ ] Task: Update `templates/manual_upload.html` (and others) to ensure consistent table responsiveness.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Interface Responsiveness' (Protocol in workflow.md)
 
