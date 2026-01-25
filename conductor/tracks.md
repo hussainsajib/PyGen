@@ -12,10 +12,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 ## [x] Track: YouTube Channel Token Refresh Utility
 *Link: [./conductor/tracks/youtube_token_refresh_20260104/](./conductor/tracks/youtube_token_refresh_20260104/)*
 
----
-
-## [x] Track: Mobile Optimization
-*Link: [./conductor/tracks/mobile_optimization_20260110/](./conductor/tracks/mobile_optimization_20260110/)*
 
 ---
 
