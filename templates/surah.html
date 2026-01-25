@@ -13,7 +13,7 @@
             <div class="card-body">
                 <form method="get" id="surah-form" action="/create-surah-video">
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6 mb-3 mb-md-0">
                             <label for="surah-select" class="form-label">Select Surah:</label>
                             <select class="form-select" name="surah_number" id="surah-select">
                                 {% for surah in surahs %}
@@ -23,13 +23,14 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6">
                             <label for="reciter1" class="form-label">Select Reciter:</label>
                             <select class="form-select" id="reciter1" name="reciter" required>
                                 {% for r in reciters %}
                                 <option value="{{r.key}}" {% if r.key == c_reciter %} selected="selected"{% endif %}>{{ r.english_name }}</option>
                                 {% endfor %}
                             </select>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="custom_title" class="form-label">Video Title (Prefix):</label>
