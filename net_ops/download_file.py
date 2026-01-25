@@ -23,6 +23,30 @@ def download_mp3_temp(url: str):
     print(f"Temporary MP3 saved at: {temp.name}")
     return temp.name
 
+def download_file(url: str, filename: str, target_dir: str = "background"):
+    """
+    Downloads a file from a URL to a specified directory with a given filename.
+    """
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+        
+    file_path = os.path.join(target_dir, filename)
+    
+    response = requests.get(url, stream=True)
+    if response.status_code != 200:
+        raise Exception(f"Failed to download: status {response.status_code}")
+
+    total_size = int(response.headers.get("content-length", 0))
+    block_size = 1024 
+
+    with open(file_path, "wb") as f, tqdm(total=total_size, unit='B', unit_scale=True, desc=f"Downloading {filename}") as progress_bar:
+        for chunk in response.iter_content(block_size):
+            if chunk:
+                f.write(chunk)
+                progress_bar.update(len(chunk))
+                
+    return file_path
+
 def cleanup_temp_file(file_path: str):
     try:
         os.remove(file_path)

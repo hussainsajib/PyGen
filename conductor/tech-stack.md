@@ -31,3 +31,4 @@
     - Facebook Graph API v19.0 (For automated Page video and Reels uploads)
     - Long-lived Page Access Tokens (For persistent server-side authorization)
 - **Unsplash API:** For searching and downloading high-quality stock images for video backgrounds.
+- **Pexels API:** For searching and downloading high-quality stock videos for video backgrounds.

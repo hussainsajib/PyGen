@@ -34,8 +34,9 @@ PyGen is an automated video generation platform designed specifically for creati
         - **Database-Driven Surah Metadata:** Surah metadata (localized names, verse counts, etc.) is now sourced from a dedicated `surahs` database table.
 - **Job Management System:** A robust backend that queues video generation tasks, allowing for bulk processing.
 - **Visual Customization:** User-defined themes, including font choices, color palettes, and background styles.
-- **Dynamic Background Management:** Integrated stock image search (Unsplash) and local file upload system to customize video backgrounds per-job.
-    - **Paginated Discovery:** Enhanced image search with 20 results per page and navigation controls for richer asset discovery.
+- **Dynamic Background Management:** Integrated stock media search (Unsplash for images, Pexels for videos) and local file upload system to customize video backgrounds per-job.
+    - **Paginated Discovery:** Unified search interface for images and videos with navigation controls for richer asset discovery.
+    - **Video Background Support:** Seamless integration of stock videos with automated looping, audio muting, and configurable playback speed adjustment.
 - **Reciter Management:** Support for detailed reciter metadata, including optional links to word-by-word (WBW) segmentation databases with automated file-existence validation.
 - **Media Asset Persistence:** A dedicated database (`media_assets`) to track all generated content, its metadata, and disk locations.
 - **YouTube Ecosystem Integration:** 
@@ -43,7 +44,7 @@ PyGen is an automated video generation platform designed specifically for creati
     - **Shorts Optimization:** Intelligent duration validation and automatic metadata enhancement (e.g., `#Shorts` tagging) for Shorts-formatted content.
         - **Custom Title Prefixes:** Support for user-defined title segments combined with structured Surah/Ayah metadata.
         - **SEO-Optimized Metadata:** Automated generation of professional, localized descriptions with social links, consistent headers, and relevant platform-specific hashtags and tags.
-    - Manual management and upload interface for existing media.
+    - Manual management, upload, and token refresh interface for existing media.
     - **Direct Interface Integration:** Streamlined upload and playlist selection directly from the Word-by-Word generation interface.
     - **Flexible Playlist Management:** Support for "None (Upload Only)" defaults and explicit "Reciter's Default" overrides in the WBW workflow.
     - Integration with YouTube playlists organized by reciter.

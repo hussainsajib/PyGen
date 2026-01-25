@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, BackgroundTasks, Request, Depends, Form, Header, File, UploadFile
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,8 +32,11 @@ from processes.youtube_utils import (
     get_all_playlists,
     get_videos_from_playlist,
     update_video_privacy,
+    refresh_channel_token,
 )
 from net_ops.unsplash import search_unsplash, download_unsplash_image
+from net_ops.pexels import search_pexels_videos
+from net_ops.download_file import download_file
 
 load_dotenv()
 IMAGEMAGICK_BINARY=os.getenv("IMAGEMAGICK_BINARY")
@@ -223,8 +226,7 @@ async def create_surah(request: Request,
     with open("data/surah_data.json", "r", encoding="utf-8") as f:
         data = json.load(f)
         surah_name = data[str(surah_number)]["english_name"]
-    await enqueue_job(db, surah_number, surah_name=surah_name, reciter=reciter, custom_title=custom_title)
-    #background_tasks.add_task(create_surah_video, surah_number, reciter)
+    await enqueue_job(db, surah_number, surah_name=surah_name, reciter=reciter, custom_title=custom_title, upload_after_generation=config.get("UPLOAD_TO_YOUTUBE") == "True")
     return RedirectResponse(request.url_for("surah"))
 
 @app.get("/create-all-surah-videos", name="create_all_surah_videos")
@@ -369,6 +371,22 @@ async def update_language_font(
                 continue
     await db.commit()
     return RedirectResponse(url="/config", status_code=303)
+
+@app.post("/youtube/refresh-token")
+async def youtube_refresh_token(
+    language_id: int = Form(...),
+    db: AsyncSession = Depends(get_db)
+):
+    lang_obj = await db.get(Language, language_id)
+    if not lang_obj or not lang_obj.youtube_channel_id:
+        return JSONResponse({"status": "error", "message": "Language or Channel ID not found."}, status_code=404)
+    
+    try:
+        # Run in threadpool because it starts a local server and blocks
+        await run_in_threadpool(refresh_channel_token, lang_obj.youtube_channel_id)
+        return JSONResponse({"status": "success", "message": "Token refresh process initiated."})
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
 
 @app.get("/playlists", name="playlists", response_class=HTMLResponse)
 async def view_playlists(request: Request):
@@ -573,21 +591,28 @@ async def clear_active_background(
     return {"status": "success"}
 
 @app.post("/download-unsplash")
-async def download_unsplash(
-    url: str = Form(...),
-    filename: str = Form(...),
-    db: AsyncSession = Depends(get_db),
-    config: ConfigManager = Depends(get_config_manager)
-):
-    path = await run_in_threadpool(download_unsplash_image, url, filename)
-    if path:
-        await config.set(db, "ACTIVE_BACKGROUND", path)
-        return {"status": "success", "path": path}
-    return {"status": "error", "message": "Download failed"}
+async def download_unsplash(url: str = Form(...), filename: str = Form(...)):
+    try:
+        path = await run_in_threadpool(download_unsplash_image, url, filename)
+        return JSONResponse({"status": "success", "path": path})
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
 
+@app.get("/pexels-search")
+async def pexels_search(query: str, page: int = 1, orientation: str = None):
+    videos = await search_pexels_videos(query, page=page, orientation=orientation)
+    return JSONResponse(videos)
 
-@app.get("/reciters", name="reciters_list", response_class=HTMLResponse)
-async def get_reciters_page(request: Request, db: AsyncSession = Depends(get_db)):
+@app.post("/download-pexels-video")
+async def download_pexels_video(url: str = Form(...), filename: str = Form(...)):
+    try:
+        path = await run_in_threadpool(download_file, url, filename, "background")
+        return JSONResponse({"status": "success", "path": path})
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+@app.get("/reciters", response_class=HTMLResponse, name="reciters_list")
+async def list_reciters(request: Request, db: AsyncSession = Depends(get_db)):
     reciters = await crud_reciters.get_all_reciters(db)
     return templates.TemplateResponse("reciters.html", {"request": request, "reciters": reciters})
 

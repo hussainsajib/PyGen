@@ -19,6 +19,7 @@ api_service_name = "youtube"
 api_version = "v3"
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
+from google.auth.exceptions import RefreshError
 # ...
 
 # Set up the API service
@@ -29,38 +30,205 @@ ACTUAL_CLIENT_SECRETS_FILE = "client_info.json" # Use the correct file as specif
 TOKEN_STORE_FILE = "youtube_tokens.json"
 
 
-def get_authenticated_service(target_channel_id: str = None): # New parameter
+def get_authenticated_service(target_channel_id: str = None, force_reauth: bool = False): # New parameter
+
+
     credentials = None
+
+
     all_tokens = _read_token_data()
 
-    if target_channel_id:
+
+
+
+
+    if target_channel_id and not force_reauth:
+
+
         token_info = all_tokens.get(target_channel_id)
+
+
         if token_info:
+
+
             try:
+
+
                 credentials = Credentials.from_authorized_user_info(json.loads(token_info))
-            except ValueError:
+
+
+            except (ValueError, KeyError):
+
+
                 # Token data might be malformed or missing fields (like refresh_token)
+
+
                 credentials = None
 
 
-    if not credentials or not credentials.valid:
-        if credentials and credentials.expired and credentials.refresh_token:
-            credentials.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                ACTUAL_CLIENT_SECRETS_FILE, 
-                scopes
-            )
-            # Force 'consent' to ensure we get a refresh_token
-            credentials = flow.run_local_server(port=8080, access_type='offline', prompt='consent') 
+    
+
+
+    if not credentials or not credentials.valid or force_reauth:
+
+
+        if credentials and credentials.expired and credentials.refresh_token and not force_reauth:
+
+
+            try:
+
+
+                credentials.refresh(Request())
+
+
+            except RefreshError:
+
+
+                # Refresh token is invalid or revoked, force re-authentication
+
+
+                credentials = None
+
+
         
-        # Save updated credentials
+
+
+                if not credentials or force_reauth: # This will now be true if refresh failed or reauth is forced
+
+
+        
+
+
+                    flow = InstalledAppFlow.from_client_secrets_file(
+
+
+        
+
+
+                        ACTUAL_CLIENT_SECRETS_FILE, 
+
+
+        
+
+
+                        scopes
+
+
+        
+
+
+                    )
+
+
+        
+
+
+                    # Force 'consent' to ensure we get a refresh_token
+
+
+        
+
+
+                    print("INFO: Attempting to start local server for authentication...", flush=True)
+
+
+        
+
+
+                    try:
+
+
+        
+
+
+                        credentials = flow.run_local_server(port=8080, access_type='offline', prompt='consent')
+
+
+        
+
+
+                        print("INFO: Authentication successful.", flush=True)
+
+
+        
+
+
+                    except Exception as e:
+
+
+        
+
+
+                        print(f"ERROR: Failed to run local server for auth: {e}", flush=True)
+
+
+        
+
+
+                        raise e
+
+
+        
+
+
+                
+
+
+        
+
+
+                # Save updated credentials
+
+
+        
+
+
+        
+
+
         if target_channel_id:
+
+
             all_tokens[target_channel_id] = credentials.to_json()
+
+
             _write_token_data(all_tokens)
 
+
+
+
+
     return googleapiclient.discovery.build(api_service_name, api_version, credentials=credentials)
+
+
+
+
+
+def refresh_channel_token(channel_id: str):
+
+
+    """
+
+
+    Forces re-authentication for a specific channel ID.
+
+
+    """
+
+
+    print(f"INFO: Forcing re-authentication for channel_id: {channel_id}")
+
+
+    get_authenticated_service(target_channel_id=channel_id, force_reauth=True)
+
+
+
+
+
 # The client_secrets_file (actual_client_secrets.json) should be in the root directory
+
+
+
 # For this task, client_info.json will store the tokens.
 TOKEN_STORE_FILE = "client_info.json"
 

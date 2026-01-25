@@ -1,6 +1,6 @@
 from factories.video import get_resolution
 from factories.image import edit_image
-from moviepy.editor import ImageClip, ColorClip, TextClip, CompositeVideoClip
+from moviepy.editor import ImageClip, ColorClip, TextClip, CompositeVideoClip, VideoFileClip, vfx
 from moviepy.video.fx.resize import resize
 from convert_numbers import english_to_arabic as e2a
 from bangla import convert_english_digit_to_bangla_digit as e2b
@@ -23,6 +23,59 @@ def generate_image_background(background_image_url: str, duration: int, is_short
     background_clip = ImageClip(background_image_url).set_opacity(BACKGROUND_OPACITY).set_duration(duration)
     return resize(background_clip, resolution)
 
+def generate_video_background(video_path: str, duration: int, is_short: bool):
+    resolution = get_resolution(is_short)
+    
+    # Load the video
+    clip = VideoFileClip(video_path)
+    
+    # 1. Mute audio
+    clip = clip.without_audio()
+    
+    # 2. Apply Speed
+    try:
+        speed = float(config_manager.get("VIDEO_BACKGROUND_SPEED", 1.0))
+    except ValueError:
+        speed = 1.0
+        
+    if speed != 1.0 and speed > 0:
+        clip = clip.fx(vfx.speedx, speed)
+        
+    # 3. Resize/Crop to fill screen
+    clip_aspect = clip.w / clip.h
+    target_aspect = resolution[0] / resolution[1]
+    
+    if clip_aspect > target_aspect:
+        # Clip is wider than target. Resize to target height.
+        # However, moviepy resize might require width OR height.
+        # We want to match height first.
+        clip = clip.resize(height=resolution[1])
+        # After resize, width changes. Center crop width.
+        # current width is clip.w (which is updated after resize usually, but safer to calc or let crop handle centered)
+        # Actually in moviepy v1, resize returns new clip with new size.
+        clip = clip.crop(x_center=clip.w/2, width=resolution[0])
+    else:
+        # Clip is taller/narrower. Resize to target width.
+        clip = clip.resize(width=resolution[0])
+        # Center crop height
+        clip = clip.crop(y_center=clip.h/2, height=resolution[1])
+        
+    # Apply opacity? Usually video backgrounds don't need opacity reduction unless overlaying text.
+    # But generate_image_background applies BACKGROUND_OPACITY.
+    # If the user wants dark background, they likely want opacity.
+    # VideoFileClip supports opacity? Yes.
+    clip = clip.set_opacity(BACKGROUND_OPACITY)
+
+    # 4. Loop to match duration
+    # vfx.loop repeats the clip.
+    if clip.duration < duration:
+        clip = vfx.loop(clip, duration=duration)
+    else:
+        # If longer, just set duration (trims it)
+        clip = clip.set_duration(duration)
+    
+    return clip
+
 def generate_solid_background(duration: int, resolution: tuple):
     return ColorClip(size=resolution, color=BACKGROUND_RGB).set_duration(duration)
 
@@ -30,6 +83,8 @@ def generate_solid_background(duration: int, resolution: tuple):
 def generate_background(background_image_url: str, duration: int, is_short: bool):
     resolution = get_resolution(is_short)
     if background_image_url:
+        if background_image_url.lower().endswith(('.mp4', '.mov', '.avi', '.mkv')):
+            return generate_video_background(background_image_url, duration, is_short)
         return generate_image_background(background_image_url, duration, is_short)
     return generate_solid_background(duration, resolution)
 

@@ -54,7 +54,12 @@ async def job_worker():
                         )
                     else:
                         # Standard full surah generation job
-                        await create_surah_video(job.surah_number, job.reciter, custom_title=job.custom_title)
+                        await create_surah_video(
+                            job.surah_number, 
+                            job.reciter, 
+                            custom_title=job.custom_title,
+                            upload_after_generation=bool(job.upload_after_generation)
+                        )
 
                     job.progress = 100.0
                     job.status = JobStatus.done

@@ -117,7 +117,7 @@ async def create_and_post(surah: int, start_verse: int, end_verse:int,
         except Exception as e:
             print(f"YouTube upload failed: {e}")
         
-async def create_surah_video(surah: int, reciter: str, custom_title: str = None):
+async def create_surah_video(surah: int, reciter: str, custom_title: str = None, upload_after_generation: bool = False):
     video_details = await generate_surah(surah, reciter, custom_title=custom_title)
     if not video_details:
         raise Exception("Error generating video")
@@ -129,7 +129,7 @@ async def create_surah_video(surah: int, reciter: str, custom_title: str = None)
     await record_media_asset(video_details)
     
     # Upload to YouTube if enabled in config
-    if config_manager.get("UPLOAD_TO_YOUTUBE") == "True":
+    if upload_after_generation:
         try:
             target_channel_id = await _get_target_youtube_channel_id()
             video_id = await run_in_threadpool(upload_to_youtube, video_details, target_channel_id)
@@ -139,7 +139,7 @@ async def create_surah_video(surah: int, reciter: str, custom_title: str = None)
             print(f"YouTube upload failed: {e}")
             
     # Sleep for 20 seconds before uploading to Facebook if YouTube upload was attempted/enabled
-    if config_manager.get("UPLOAD_TO_YOUTUBE") == "True":
+    if upload_after_generation:
         await asyncio.sleep(20)
 
     # Upload to Facebook if enabled
