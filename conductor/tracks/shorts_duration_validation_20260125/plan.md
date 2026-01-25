@@ -19,10 +19,10 @@ This plan outlines the steps to implement a duration check for Word-by-Word Shor
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Workflow Integration' (Protocol in workflow.md) b13f243
 
 ## Phase 3: Feedback and Logging
-- [ ] Task: Implement informative logging for skipped uploads.
-    - [ ] Add `logger.warning` or equivalent when a YouTube upload is skipped due to duration.
-- [ ] Task: (Optional) Update the Job database model or metadata to store the reason for skip.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Feedback and Logging' (Protocol in workflow.md)
+- [x] Task: Implement informative logging for skipped uploads. a007900
+    - [x] Add `logger.warning` or equivalent when a YouTube upload is skipped due to duration.
+- [ ] Task: (Optional) Update the Job database model or metadata to store the reason for skip. (Skipped: Logging is sufficient)
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Feedback and Logging' (Protocol in workflow.md)
 
 ## Phase 4: Final Integration & Verification
 - [ ] Task: Perform a comprehensive end-to-end manual verification.
