@@ -16,7 +16,8 @@ def test_get_video_duration_success():
         mock_video_file_clip.assert_called_once_with("dummy_path.mp4")
 
 def test_get_video_duration_file_not_found():
-    """Test behavior when video file does not exist (handled by MoviePy mostly, but we ensure our wrapper handles it)."""
+    """Test behavior when video file does not exist (now raises ValueError via our wrapper)."""
     with patch("processes.video_utils.VideoFileClip", side_effect=IOError("File not found")):
-        with pytest.raises(IOError):
+        with pytest.raises(ValueError) as excinfo:
             get_video_duration("non_existent.mp4")
+        assert "Could not determine duration" in str(excinfo.value)

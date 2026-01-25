@@ -229,7 +229,14 @@ def get_video_duration(file_path: str) -> float:
         
     Returns:
         float: The duration of the video in seconds.
+        
+    Raises:
+        ValueError: If the video file cannot be read or duration is unavailable.
     """
-    with VideoFileClip(file_path) as video:
-        return video.duration
+    try:
+        with VideoFileClip(file_path) as video:
+            return video.duration
+    except Exception as e:
+        logger.error(f"Error reading video duration for {file_path}: {e}")
+        raise ValueError(f"Could not determine duration for video: {file_path}") from e
 
