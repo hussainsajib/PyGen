@@ -2,7 +2,7 @@ import os
 import asyncio
 import anyio
 from fastapi.concurrency import run_in_threadpool
-from processes.video_utils import generate_video
+from processes.video_utils import generate_video, get_video_duration
 from processes.youtube_utils import upload_to_youtube
 from processes.facebook_utils import FacebookClient
 from processes.screenshot import extract_frame
@@ -162,8 +162,15 @@ async def create_wbw_video_job(surah: int, start_verse: int, end_verse:int,
     # Persist to database
     await record_media_asset(video_details)
     
+    # Check duration for Shorts duration limit (YouTube)
+    duration = await run_in_threadpool(get_video_duration, video_details["video"])
+    can_upload_to_youtube = True
+    if is_short and duration > 60:
+        print(f"[WARNING] - Short exceeds 60s ({duration:.2f}s). Skipping YouTube upload.")
+        can_upload_to_youtube = False
+    
     # Upload to YouTube if requested
-    if upload_after_generation:
+    if upload_after_generation and can_upload_to_youtube:
         target_channel_id = await _get_target_youtube_channel_id()
         
         target_playlist_id = None
