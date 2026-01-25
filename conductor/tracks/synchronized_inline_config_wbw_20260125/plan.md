@@ -17,6 +17,6 @@ This plan outlines the steps to add inline configuration controls (Language, You
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Frontend Implementation (wbw.html)' (Protocol in workflow.md) 045b372
 
 ## Phase 3: Final Integration & Verification
-- [ ] Task: Perform end-to-end testing: change a setting on the WBW page and verify it appears on the Config page without manual DB manipulation.
-- [ ] Task: Ensure the new UI elements are responsive and accessible on mobile viewports.
+- [x] Task: Perform end-to-end testing: change a setting on the WBW page and verify it appears on the Config page without manual DB manipulation.
+- [x] Task: Ensure the new UI elements are responsive and accessible on mobile viewports.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Final Integration & Verification' (Protocol in workflow.md)
