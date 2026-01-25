@@ -7,6 +7,7 @@ from processes.youtube_utils import upload_to_youtube
 from processes.facebook_utils import FacebookClient
 from processes.screenshot import extract_frame
 from processes.surah_video import generate_surah
+from processes.logger import logger
 from config_manager import config_manager
 from db.database import async_session
 from db_ops import crud_media_assets
@@ -166,7 +167,7 @@ async def create_wbw_video_job(surah: int, start_verse: int, end_verse:int,
     duration = await run_in_threadpool(get_video_duration, video_details["video"])
     can_upload_to_youtube = True
     if is_short and duration > 60:
-        print(f"[WARNING] - Short exceeds 60s ({duration:.2f}s). Skipping YouTube upload.")
+        logger.warning(f"Short exceeds 60s ({duration:.2f}s). Skipping YouTube upload.")
         can_upload_to_youtube = False
     
     # Upload to YouTube if requested
