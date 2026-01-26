@@ -15,7 +15,8 @@ async def enqueue_job(
     upload_after_generation: bool = False,
     playlist_id: str = None,
     custom_title: str = None,
-    background_path: str = None
+    background_path: str = None,
+    lines_per_page: int = 15
 ):
     job = Job(
         surah_number=surah_number,
@@ -29,7 +30,8 @@ async def enqueue_job(
         upload_after_generation=1 if upload_after_generation else 0,
         playlist_id=playlist_id,
         custom_title=custom_title,
-        background_path=background_path
+        background_path=background_path,
+        lines_per_page=lines_per_page
     )
     session.add(job)
     await session.commit()

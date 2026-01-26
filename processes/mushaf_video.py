@@ -20,7 +20,7 @@ from config_manager import config_manager
 from sqlalchemy import select
 from db.models.language import Language
 
-async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: bool = False, background_path: str = None, custom_title: str = None):
+async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: bool = False, background_path: str = None, custom_title: str = None, lines_per_page: int = 15):
     """
     Orchestrates the generation of a Mushaf-style recitation video.
     """
@@ -69,98 +69,107 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
         
         total_audio_ms = total_duration * 1000
 
+        # Collect all aligned lines for the surah first
+        all_aligned_lines = []
         for page_num in range(start_page, end_page + 1):
-            try:
-                page_data = get_mushaf_page_data(page_num)
-                # Improved surah line detection
-                filtered_page = []
-                for line in page_data:
-                    if line["surah_number"] == surah_number:
+            page_data = get_mushaf_page_data(page_num)
+            filtered_page = []
+            for line in page_data:
+                if line["surah_number"] == surah_number:
+                    filtered_page.append(line)
+                elif line["words"]:
+                    if any(w["surah"] == surah_number for w in line["words"]):
                         filtered_page.append(line)
-                    elif line["words"]:
-                        if any(w["surah"] == surah_number for w in line["words"]):
-                            filtered_page.append(line)
-                
-                if not filtered_page:
-                    continue
-                    
-                aligned_page = align_mushaf_lines_with_timestamps(filtered_page, wbw_timestamps)
-                
-                valid_starts = [l["start_ms"] for l in aligned_page if l["start_ms"] is not None]
-                valid_ends = [l["end_ms"] for l in aligned_page if l["end_ms"] is not None]
+            
+            if not filtered_page:
+                continue
+            
+            aligned_page = align_mushaf_lines_with_timestamps(filtered_page, wbw_timestamps)
+            all_aligned_lines.extend(aligned_page)
+
+        # Chunk the lines
+        chunks = [all_aligned_lines[i:i + lines_per_page] for i in range(0, len(all_aligned_lines), lines_per_page)]
+        
+        for idx, chunk in enumerate(chunks):
+            try:
+                valid_starts = [l["start_ms"] for l in chunk if l["start_ms"] is not None]
+                valid_ends = [l["end_ms"] for l in chunk if l["end_ms"] is not None]
                 
                 if not valid_starts or not valid_ends:
-                    if page_num == start_page:
-                        page_start_ms = 0
-                        page_end_ms = 5000 # Default 5s
+                    if idx == 0:
+                        chunk_start_ms = 0
+                        chunk_end_ms = 5000
                     else:
                         continue
                 else:
-                    page_start_ms = min(valid_starts, default=0)
-                    page_end_ms = max(valid_ends, default=page_start_ms + 5000)
+                    chunk_start_ms = min(valid_starts, default=0)
+                    chunk_end_ms = max(valid_ends, default=chunk_start_ms + 5000)
                 
-                if page_num == start_page:
-                    page_start_ms = 0
-                if page_num == end_page:
-                    page_end_ms = total_audio_ms
+                if idx == 0:
+                    chunk_start_ms = 0
+                if idx == len(chunks) - 1:
+                    chunk_end_ms = total_audio_ms
                     
-                page_duration_sec = (page_end_ms - page_start_ms) / 1000.0
-                if page_duration_sec <= 0:
+                chunk_duration_sec = (chunk_end_ms - chunk_start_ms) / 1000.0
+                if chunk_duration_sec <= 0:
                     continue
                 
-                # Adjust timestamps relative to page start
-                for line in aligned_page:
-                    if line["start_ms"] is not None:
-                        line["start_ms"] -= page_start_ms
-                    if line["end_ms"] is not None:
-                        line["end_ms"] -= page_start_ms
+                # Adjust timestamps relative to chunk start
+                chunk_for_rendering = []
+                for line in chunk:
+                    line_copy = line.copy()
+                    if line_copy["start_ms"] is not None:
+                        line_copy["start_ms"] -= chunk_start_ms
+                    if line_copy["end_ms"] is not None:
+                        line_copy["end_ms"] -= chunk_start_ms
+                    chunk_for_rendering.append(line_copy)
 
                 # 5. Generate Clips
-                mushaf_clip = generate_mushaf_page_clip(aligned_page, page_num, is_short, page_duration_sec)
+                mushaf_clip = generate_mushaf_page_clip(chunk_for_rendering, chunk[0]["page_number"], is_short, chunk_duration_sec)
                 
                 # Add Overlays
                 reciter_display_name = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name
                 surah_display_name = surah_p.bangla_name if current_language == "bengali" else surah_p.english_name
                 
                 overlays = []
-                if page_num == start_page and surah_number not in [1, 9]:
+                if idx == 0 and surah_number not in [1, 9]:
                     bismillah_clip = TextClip(
                         "بسم الله الرحمن الرحيم",
                         fontsize=int(height * 0.05),
                         color=FONT_COLOR,
                         font="Arial"
-                    ).set_duration(page_duration_sec).set_position(('center', height * 0.02))
+                    ).set_duration(chunk_duration_sec).set_position(('center', height * 0.02))
                     overlays.append(bismillah_clip)
 
                 if config_manager.get("ENABLE_RECITER_INFO") == "True":
-                    overlays.append(generate_reciter_name_clip(reciter_display_name, is_short, page_duration_sec))
+                    overlays.append(generate_reciter_name_clip(reciter_display_name, is_short, chunk_duration_sec))
                 if config_manager.get("ENABLE_SURAH_INFO") == "True":
-                    overlays.append(generate_surah_info_clip(surah_display_name, 0, is_short, page_duration_sec, language=current_language))
+                    overlays.append(generate_surah_info_clip(surah_display_name, 0, is_short, chunk_duration_sec, language=current_language))
                 if config_manager.get("ENABLE_CHANNEL_INFO") == "True":
-                    overlays.append(generate_brand_clip(brand_name, is_short, page_duration_sec))
+                    overlays.append(generate_brand_clip(brand_name, is_short, chunk_duration_sec))
 
-                progress_bar_bg = ColorClip(size=(width, 5), color=(100, 100, 100)).set_opacity(0.3).set_duration(page_duration_sec).set_position(('center', height-5))
+                progress_bar_bg = ColorClip(size=(width, 5), color=(100, 100, 100)).set_opacity(0.3).set_duration(chunk_duration_sec).set_position(('center', height-5))
                 overlays.append(progress_bar_bg)
 
-                # Compose Page
-                bg_clip = generate_background(background_path, page_duration_sec, is_short)
+                # Compose Chunk
+                bg_clip = generate_background(background_path, chunk_duration_sec, is_short)
                 
-                all_page_clips = [bg_clip, mushaf_clip] + overlays
-                valid_page_clips = [c for c in all_page_clips if c is not None]
+                all_chunk_clips = [bg_clip, mushaf_clip] + overlays
+                valid_chunk_clips = [c for c in all_chunk_clips if c is not None]
                 
-                if not valid_page_clips:
+                if not valid_chunk_clips:
                     continue
                     
-                final_page_clip = CompositeVideoClip(valid_page_clips, size=resolution).set_duration(page_duration_sec)
+                final_chunk_clip = CompositeVideoClip(valid_chunk_clips, size=resolution).set_duration(chunk_duration_sec)
                 
-                audio_start = max(0, page_start_ms / 1000.0)
-                audio_end = min(total_duration, page_end_ms / 1000.0)
+                audio_start = max(0, chunk_start_ms / 1000.0)
+                audio_end = min(total_duration, chunk_end_ms / 1000.0)
                 if audio_end > audio_start:
-                    final_page_clip = final_page_clip.set_audio(full_audio.subclip(audio_start, audio_end))
+                    final_chunk_clip = final_chunk_clip.set_audio(full_audio.subclip(audio_start, audio_end))
                 
-                page_clips.append(final_page_clip)
+                page_clips.append(final_chunk_clip)
             except Exception as e:
-                print(f"[ERROR] Page {page_num} failed: {e}", flush=True)
+                print(f"[ERROR] Chunk {idx} failed: {e}", flush=True)
                 continue
 
         # 6. Final Assembly

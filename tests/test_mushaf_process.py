@@ -52,8 +52,8 @@ async def test_generate_mushaf_video_success():
         mock_page_range.return_value = (1, 1) # Single page
         
         # Mock page data
-        mock_page_data.return_value = [{"surah_number": 1, "words": []}]
-        mock_align.return_value = [{"start_ms": 0, "end_ms": 5000}]
+        mock_page_data.return_value = [{"surah_number": 1, "words": [], "page_number": 1}]
+        mock_align.return_value = [{"start_ms": 0, "end_ms": 5000, "page_number": 1, "surah_number": 1, "words": []}]
         
         mock_gen_clip.return_value = MagicMock()
         mock_gen_bg.return_value = MagicMock()
@@ -69,7 +69,7 @@ async def test_generate_mushaf_video_success():
         mock_config.get.return_value = "True"
         
         # Run function
-        result = await generate_mushaf_video(1, "ar.alafasy")
+        result = await generate_mushaf_video(1, "ar.alafasy", lines_per_page=5)
         
         # Verify
         assert result is not None

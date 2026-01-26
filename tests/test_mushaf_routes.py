@@ -21,7 +21,7 @@ def test_create_mushaf_video_route_redirects():
         # Mock enqueue_job to be async
         mock_enqueue.return_value = MagicMock()
         
-        response = client.get("/create-mushaf-video?surah=1&reciter=ar.alafasy", follow_redirects=False)
+        response = client.get("/create-mushaf-video?surah=1&reciter=ar.alafasy&lines_per_page=8", follow_redirects=False)
         
         # Should redirect to /jobs (303 RedirectResponse)
         assert response.status_code == 303
@@ -33,3 +33,4 @@ def test_create_mushaf_video_route_redirects():
         assert kwargs["job_type"] == "mushaf_video"
         assert kwargs["surah_number"] == 1
         assert kwargs["reciter"] == "ar.alafasy"
+        assert kwargs["lines_per_page"] == 8

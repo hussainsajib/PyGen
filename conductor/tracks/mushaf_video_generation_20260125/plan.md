@@ -22,7 +22,7 @@ This plan outlines the implementation of a new video generation engine that rend
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Process Orchestration & API' (Protocol in workflow.md) 17dc452
 
 ## Phase 3: Frontend Interface Integration
-- [ ] Task: Implement the Mushaf Video Creator page.
+- [~] Task: Implement the Mushaf Video Creator page.
     - [ ] Create `templates/mushaf_video.html` extending `base.html`.
     - [ ] Add Surah and Reciter selection dropdowns.
     - [ ] Add a configuration input for "Visible Lines per Scene".

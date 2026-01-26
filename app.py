@@ -81,38 +81,33 @@ async def view_mushaf(request: Request, page: int = 1):
 
 @app.get("/create-mushaf-video")
 async def create_mushaf_video(
-    request: Request, 
-    surah: int, 
+    surah: int,
     reciter: str,
+    background_path: str = None,
     is_short: bool = False,
-    upload_after_generation: bool = False,
     playlist_id: str = None,
     custom_title: str = None,
-    background_path: str = None,
-    db: AsyncSession = Depends(get_db),
-    config: ConfigManager = Depends(get_config_manager)
+    upload_after_generation: bool = False,
+    lines_per_page: int = 15,
+    db: AsyncSession = Depends(get_db)
 ):
-    """Endpoint for Mushaf video generation."""
     with open("data/surah_data.json", "r", encoding="utf-8") as f:
         data = json.load(f)
         surah_name = data[str(surah)]["english_name"]
-    
-    # We use a combined key for identification in the jobs UI
-    job_name = f"Mushaf: {surah_name} ({reciter})"
-    
+
     await enqueue_job(
-        db, 
+        db,
         surah_number=surah,
-        surah_name=job_name,
+        surah_name=surah_name,
         reciter=reciter,
         job_type="mushaf_video",
         is_short=is_short,
-        upload_after_generation=upload_after_generation,
-        playlist_id=playlist_id,
+        background_path=background_path,
+        playlist_id=playlist_id if playlist_id != "none" else None,
         custom_title=custom_title,
-        background_path=background_path
+        upload_after_generation=upload_after_generation,
+        lines_per_page=lines_per_page
     )
-    
     return RedirectResponse(url="/jobs", status_code=303)
 
 @app.get("/create-video")

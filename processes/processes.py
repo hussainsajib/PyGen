@@ -204,9 +204,10 @@ async def create_mushaf_video_job(surah: int, reciter: str, is_short: bool = Fal
                              background_path: str = None,
                              upload_after_generation: bool = False,
                              playlist_id: str = None,
-                             custom_title: str = None):
+                             custom_title: str = None,
+                             lines_per_page: int = 15):
     """Generates a Mushaf-style video and optionally uploads it to YouTube."""
-    video_details = await generate_mushaf_video(surah, reciter, is_short, background_path, custom_title=custom_title)
+    video_details = await generate_mushaf_video(surah, reciter, is_short, background_path, custom_title=custom_title, lines_per_page=lines_per_page)
     
     if not video_details:
         raise Exception("Error generating Mushaf video")
