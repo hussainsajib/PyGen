@@ -156,16 +156,17 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                 overlays.append(progress_bar_bg)
                 
                 # Dynamic Progress Bar Foreground
-                # Use a full-width green clip and crop it to simulate progress
-                progress_bar_full = ColorClip(size=(width, 5), color=(0, 200, 0)).set_opacity(0.8).set_duration(chunk_duration_sec).set_position(('left', height-5))
+                progress_bar_fg = ColorClip(size=(width, 5), color=(0, 200, 0))
                 
                 def get_progress_width(t):
-                    if chunk_duration_sec <= 0: return 0
+                    if chunk_duration_sec <= 0: return 1
                     p = start_ratio + (end_ratio - start_ratio) * (t / chunk_duration_sec)
-                    return int(width * max(0.0, min(1.0, p)))
+                    w = int(width * max(0.0, min(1.0, p)))
+                    return max(1, w)
 
-                # Apply crop. Note: crop takes x1, y1, width, height.
-                progress_bar_fg = progress_bar_full.crop(x1=0, y1=0, width=lambda t: max(1, get_progress_width(t)), height=5)
+                # Resize using lambda for width, fixed height
+                progress_bar_fg = progress_bar_fg.resize(newsize=lambda t: (get_progress_width(t), 5))
+                progress_bar_fg = progress_bar_fg.set_opacity(0.8).set_duration(chunk_duration_sec).set_position(('left', height-5))
                 overlays.append(progress_bar_fg)
 
                 # Compose Chunk
