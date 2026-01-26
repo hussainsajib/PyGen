@@ -263,7 +263,17 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
                  text = "بسم الله الرحمن الرحيم"
         elif l_type == "surah_name":
             current_font_path = font_path_sura
-            # Similarly for Surah Name
+            if not text:
+                try:
+                    from processes.Classes.surah import Surah
+                    s_obj = Surah(line["surah_number"])
+                    if s_obj.arabic_name:
+                        text = s_obj.arabic_name
+                    else:
+                        text = s_obj.english_name
+                except Exception as e:
+                    print(f"Error fetching surah name: {e}")
+                    text = str(line["surah_number"])
 
         if not text:
             continue
