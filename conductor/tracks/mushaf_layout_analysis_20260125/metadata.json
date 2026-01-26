@@ -1,0 +1,8 @@
+{
+  "track_id": "mushaf_layout_analysis_20260125",
+  "type": "other",
+  "status": "new",
+  "created_at": "2026-01-25T19:49:00Z",
+  "updated_at": "2026-01-25T19:49:00Z",
+  "description": "do an analysis of the the word_by_word_qpc-v2.db and qpc-v2-15-lines.db database inside databases/text folder. the first database is where the words of the quran are stored word by word. the second database that have the markings for start and ending of lines in the mushaf of a quran. i want to know how can I match these databases to genera te mushaf like view for the users"
+}
