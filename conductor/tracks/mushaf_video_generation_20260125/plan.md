@@ -21,7 +21,7 @@ This plan outlines the implementation of a new video generation engine that rend
     - [x] Implement the route in `app.py`.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Process Orchestration & API' (Protocol in workflow.md) 17dc452
 
-## Phase 3: Frontend Interface Integration [checkpoint: fd0873d]
+## Phase 3: Frontend Interface Integration [checkpoint: 06300c0]
 - [x] Task: Implement the Mushaf Video Creator page. 01e3051
     - [x] Create `templates/mushaf_video.html` extending `base.html`.
     - [x] Add Surah and Reciter selection dropdowns.
