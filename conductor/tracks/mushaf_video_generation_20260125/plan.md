@@ -10,7 +10,7 @@ This plan outlines the implementation of a new video generation engine that rend
     - [x] Write unit tests for the clip generator (mocking MoviePy components).
     - [x] Implement `generate_mushaf_page_clip` in `factories/single_clip.py` or a new factory.
     - [x] Add logic for semi-transparent line highlighting/glow based on active timestamps.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Data Alignment & Core Rendering' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Data Alignment & Core Rendering' (Protocol in workflow.md) 1c7e586
 
 ## Phase 2: Process Orchestration & API
 - [ ] Task: Implement the Mushaf video generation process.
