@@ -5,13 +5,11 @@ import os
 
 client = TestClient(app)
 
-def test_mushaf_route_status():
-    """Verify that the /mushaf endpoint is accessible."""
-    # Note: app might need to be fully initialized if it depends on DB init in lifespan
-    # But for a simple status check, it should work.
-    response = client.get("/mushaf")
+def test_mushaf_route_page_param():
+    """Verify that the /mushaf endpoint accepts a page parameter."""
+    response = client.get("/mushaf?page=10")
     assert response.status_code == 200
-    assert "text/html" in response.headers["content-type"]
+    assert "Page 10" in response.text
 
 def test_static_font_serving():
     """Verify that font files are accessible via the static route."""
