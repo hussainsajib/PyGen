@@ -14,7 +14,8 @@ async def enqueue_job(
     is_short: bool = False,
     upload_after_generation: bool = False,
     playlist_id: str = None,
-    custom_title: str = None
+    custom_title: str = None,
+    background_path: str = None
 ):
     job = Job(
         surah_number=surah_number,
@@ -27,7 +28,8 @@ async def enqueue_job(
         is_short=1 if is_short else 0,
         upload_after_generation=1 if upload_after_generation else 0,
         playlist_id=playlist_id,
-        custom_title=custom_title
+        custom_title=custom_title,
+        background_path=background_path
     )
     session.add(job)
     await session.commit()

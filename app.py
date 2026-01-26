@@ -79,6 +79,42 @@ async def view_mushaf(request: Request, page: int = 1):
     return templates.TemplateResponse("mushaf.html", context)
 
 
+@app.get("/create-mushaf-video")
+async def create_mushaf_video(
+    request: Request, 
+    surah: int, 
+    reciter: str,
+    is_short: bool = False,
+    upload_after_generation: bool = False,
+    playlist_id: str = None,
+    custom_title: str = None,
+    background_path: str = None,
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
+):
+    """Endpoint for Mushaf video generation."""
+    with open("data/surah_data.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+        surah_name = data[str(surah)]["english_name"]
+    
+    # We use a combined key for identification in the jobs UI
+    job_name = f"Mushaf: {surah_name} ({reciter})"
+    
+    await enqueue_job(
+        db, 
+        surah_number=surah,
+        surah_name=job_name,
+        reciter=reciter,
+        job_type="mushaf_video",
+        is_short=is_short,
+        upload_after_generation=upload_after_generation,
+        playlist_id=playlist_id,
+        custom_title=custom_title,
+        background_path=background_path
+    )
+    
+    return RedirectResponse(url="/jobs", status_code=303)
+
 @app.get("/create-video")
 async def create_video(
     request: Request, 

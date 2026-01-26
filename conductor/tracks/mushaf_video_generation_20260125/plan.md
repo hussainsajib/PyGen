@@ -13,12 +13,12 @@ This plan outlines the implementation of a new video generation engine that rend
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Data Alignment & Core Rendering' (Protocol in workflow.md) 1c7e586
 
 ## Phase 2: Process Orchestration & API
-- [ ] Task: Implement the Mushaf video generation process.
-    - [ ] Create `create_mushaf_video_job` in `processes/processes.py`.
-    - [ ] Integrate Header (Bismillah), Footer (Metadata), and Progress Bar overlays.
-- [ ] Task: Create the web endpoint for job submission.
-    - [ ] Write integration tests for the `/create-mushaf-video` route.
-    - [ ] Implement the route in `app.py`.
+- [x] Task: Implement the Mushaf video generation process. 1c7e586
+    - [x] Create `create_mushaf_video_job` in `processes/processes.py`.
+    - [x] Integrate Header (Bismillah), Footer (Metadata), and Progress Bar overlays.
+- [x] Task: Create the web endpoint for job submission. 1c7e586
+    - [x] Write integration tests for the `/create-mushaf-video` route.
+    - [x] Implement the route in `app.py`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Process Orchestration & API' (Protocol in workflow.md)
 
 ## Phase 3: Frontend Interface Integration

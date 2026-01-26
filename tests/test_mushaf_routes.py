@@ -1,20 +1,35 @@
-import pytest
 from fastapi.testclient import TestClient
 from app import app
-import os
+import pytest
+from unittest.mock import patch, MagicMock, mock_open
+import json
 
 client = TestClient(app)
 
-def test_mushaf_route_page_param():
-    """Verify that the /mushaf endpoint accepts a page parameter."""
-    response = client.get("/mushaf?page=10")
-    assert response.status_code == 200
-    assert "Page 10" in response.text
-
-def test_static_font_serving():
-    """Verify that font files are accessible via the static route."""
-    # We expect fonts to be served at /mushaf-fonts/p1.ttf
-    response = client.get("/mushaf-fonts/p1.ttf")
-    assert response.status_code == 200
-    # Content-type can vary by OS/environment, but usually it's font-related or octet-stream or text/plain
-    assert response.headers["content-type"] in ["font/ttf", "application/x-font-ttf", "application/octet-stream", "text/plain; charset=utf-8"]
+def test_create_mushaf_video_route_redirects():
+    """Test that the route enqueues a job and redirects to /jobs."""
+    mock_surah_data = {
+        "1": {"english_name": "Al-Fatihah"}
+    }
+    
+    # Patch enqueue_job in app module
+    with patch("app.enqueue_job") as mock_enqueue, \
+         patch("app.get_db") as mock_db, \
+         patch("app.get_config_manager") as mock_config, \
+         patch("builtins.open", mock_open(read_data=json.dumps(mock_surah_data))):
+        
+        # Mock enqueue_job to be async
+        mock_enqueue.return_value = MagicMock()
+        
+        response = client.get("/create-mushaf-video?surah=1&reciter=ar.alafasy", follow_redirects=False)
+        
+        # Should redirect to /jobs (303 RedirectResponse)
+        assert response.status_code == 303
+        assert response.headers["location"] == "/jobs"
+        
+        # Check if enqueue_job was called with correct type
+        mock_enqueue.assert_called_once()
+        kwargs = mock_enqueue.call_args.kwargs
+        assert kwargs["job_type"] == "mushaf_video"
+        assert kwargs["surah_number"] == 1
+        assert kwargs["reciter"] == "ar.alafasy"

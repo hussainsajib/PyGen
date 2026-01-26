@@ -4,6 +4,22 @@ import os
 DB_15_LINES = "databases/text/qpc-v2-15-lines.db"
 DB_WBW = "databases/text/word_by_word_qpc-v2.db"
 
+def get_surah_page_range(surah_number: int):
+    """
+    Returns the start and end page for a given surah.
+    """
+    conn = sqlite3.connect(DB_15_LINES)
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT MIN(page_number), MAX(page_number)
+            FROM pages
+            WHERE surah_number = ?
+        """, (surah_number,))
+        return cursor.fetchone()
+    finally:
+        conn.close()
+
 def get_mushaf_page_data(page_number: int):
     """
     Retrieves the structured page data for the 15-line Mushaf layout.

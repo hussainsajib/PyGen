@@ -33,3 +33,4 @@ class Job(Base):
     end_verse = Column(Integer, nullable=True)
     is_short = Column(Integer, default=0) # 0 for false, 1 for true
     custom_title = Column(String(100), nullable=True)
+    background_path = Column(String(255), nullable=True)
