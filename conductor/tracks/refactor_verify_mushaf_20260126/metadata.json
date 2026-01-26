@@ -1,0 +1,8 @@
+{
+  "track_id": "refactor_verify_mushaf_20260126",
+  "type": "chore",
+  "status": "new",
+  "created_at": "2026-01-26T14:20:00Z",
+  "updated_at": "2026-01-26T14:20:00Z",
+  "description": "Refactor scripts/verify_mushaf_rendering.py to align with latest Mushaf layout and font logic."
+}

@@ -276,28 +276,58 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         if l_type == "surah_name":
             # Strategies to try for Surah Header font
             surah_num = int(line["surah_number"])
-            strategies = [
-                chr(0xE900 + surah_num), # PUA E9xx
-                chr(0xF300 + surah_num), # PUA F3xx
-                str(surah_num),          # ASCII Number
-                f"{surah_num:03d}"       # ASCII 3-digit Number
+            
+            # Exact mapping extracted from QCF_SurahHeader_COLOR-Regular.ttf
+            # The font maps surahs to non-contiguous uniXXXX glyphs.
+            qcf_header_map = [
+                0xFC45, 0xFC46, 0xFC47, 0xFC4A, 0xFC4B, 0xFC4E, 0xFC4F, 0xFC51, 0xFC52, 0xFC53, 
+                0xFC55, 0xFC56, 0xFC58, 0xFC5A, 0xFC5B, 0xFC5C, 0xFC5D, 0xFC5E, 0xFC61, 0xFC62, 0xFC64, # 1-21
+                0xFB51, 0xFB52, 0xFB54, 0xFB55, 0xFB57, 0xFB58, 0xFB5A, 0xFB5B, 0xFB5D, 0xFB5E, 0xFB60, 
+                0xFB61, 0xFB63, 0xFB64, 0xFB66, 0xFB67, 0xFB69, 0xFB6A, 0xFB6C, 0xFB6D, 0xFB6F, 0xFB70, 
+                0xFB72, 0xFB73, 0xFB75, 0xFB76, 0xFB78, 0xFB79, 0xFB7B, 0xFB7C, 0xFB7E, 0xFB7F, 0xFB81, 
+                0xFB82, 0xFB84, 0xFB85, 0xFB87, 0xFB88, 0xFB8A, 0xFB8B, 0xFB8D, 0xFB8E, 0xFB90, 0xFB91, 
+                0xFB93, 0xFB94, 0xFB96, 0xFB97, 0xFB99, 0xFB9A, 0xFB9C, 0xFB9D, 0xFB9F, 0xFBA0, 0xFBA2, 
+                0xFBA3, 0xFBA5, 0xFBA6, 0xFBA8, 0xFBA9, 0xFBAB, 0xFBAC, 0xFBAE, 0xFBAF, 0xFBB1, 0xFBB2, 
+                0xFBB4, 0xFBB5, 0xFBB7, 0xFBB8, 0xFBBA, 0xFBBB, 0xFBBD, 0xFBBE, 0xFBC0, 0xFBC1, 0xFBD3, 
+                0xFBD4, 0xFBD6, 0xFBD7, 0xFBD9, 0xFBDA, 0xFBDC, 0xFBDD, 0xFBDF, 0xFBE0, 0xFBE2, 0xFBE3, 
+                0xFBE5, 0xFBE6, 0xFBE8, 0xFBE9, 0xFBEB # 22-114
             ]
+            
+            strategies = []
+            if 1 <= surah_num <= 114:
+                strategies.append(chr(qcf_header_map[surah_num - 1]))
+            
+            # Fallbacks
+            strategies.extend([
+                f"surah{surah_num:03d}",
+                chr(surah_num + 32),
+                chr(0xF300 + surah_num),
+                chr(0xE900 + surah_num),
+                str(surah_num)
+            ])
             
             img_array = None
             success = False
             
             # Helper to check if image is .notdef (box)
-            # We create a "missing" image once for comparison
-            img_missing = render_mushaf_text_to_image(chr(0x0000), current_font_path, font_size, color, size_tuple)
+            # We check against a few likely missing characters to be sure
+            missing_chars = [chr(0x0000), chr(0xFFFF), chr(0x0001)]
+            img_missings = [render_mushaf_text_to_image(c, current_font_path, font_size, color, size_tuple) for c in missing_chars]
             
             for s_text in strategies:
                 candidate_img = render_mushaf_text_to_image(s_text, current_font_path, font_size, color, size_tuple)
-                # Check if visible AND not identical to the missing glyph box
-                if np.any(candidate_img[..., 3] > 0) and not np.array_equal(candidate_img, img_missing):
+                # Check if visible
+                if not np.any(candidate_img[..., 3] > 0):
+                    continue
+                
+                # Check if it matches any of the missing glyph signatures
+                is_box = any(np.array_equal(candidate_img, m) for m in img_missings)
+                
+                if not is_box:
                     img_array = candidate_img
-                    text = s_text # Just for logging/debug
+                    text = s_text 
                     success = True
-                    # print(f"[DEBUG] Found Surah glyph using strategy: {s_text!r} (Hex: {hex(ord(s_text[0])) if len(s_text)==1 else 'str'})")
+                    print(f"[DEBUG] Selected strategy for Surah {surah_num}: {s_text!r} (Hex: {hex(ord(s_text[0])) if len(s_text)==1 else 'str'})")
                     break
             
             if not success:

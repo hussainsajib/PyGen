@@ -25,5 +25,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Refactor Mushaf Rendering Verification Script**
+- [~] **Track: Refactor Mushaf Rendering Verification Script**
 *Link: [./tracks/refactor_verify_mushaf_20260126/](./tracks/refactor_verify_mushaf_20260126/)*
