@@ -25,7 +25,7 @@ This plan outlines the steps to implement a duration check for Word-by-Word Shor
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Feedback and Logging' (Protocol in workflow.md) 0d66e74
 
 ## Phase 4: Final Integration & Verification
-- [ ] Task: Perform a comprehensive end-to-end manual verification.
+- [~] Task: Perform a comprehensive end-to-end manual verification.
     - [ ] Generate a short < 60s and verify dual upload.
     - [ ] Generate a short > 60s and verify only Facebook upload happens.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Final Integration & Verification' (Protocol in workflow.md)
