@@ -13,9 +13,9 @@ This track involves investigating the schema and data alignment between `word_by
 - [x] Task: Develop the matching logic to align words with line boundaries. ab2b41f
     - [x] Sub-task: Write TDD test cases for the matching utility (e.g., mocking small DB subsets).
     - [x] Sub-task: Implement the logic using `word_by_word_qpc-v2.db` for content and `qpc-v2-15-lines.db` for structure.
-- [ ] Task: Create a Python demonstration utility to output a sample layout.
-    - [ ] Sub-task: Implement a script that outputs JSON/Text showing Surah 1 (or Page 1) aligned by line.
-    - [ ] Sub-task: Enhance the script to generate a sample image of the page using `Pillow` or `opencv`, rendering the Arabic text line by line.
+- [x] Task: Create a Python demonstration utility to output a sample layout. ab2b41f
+    - [x] Sub-task: Implement a script that outputs JSON/Text showing Surah 1 (or Page 1) aligned by line.
+    - [x] Sub-task: Enhance the script to generate a sample image of the page using `Pillow` or `opencv`, rendering the Arabic text line by line.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Logic Development & Prototype' (Protocol in workflow.md)
 
 ## Phase 3: Final Analysis & Reporting

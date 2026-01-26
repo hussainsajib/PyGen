@@ -1,5 +1,7 @@
 import sqlite3
 import os
+import json
+from PIL import Image, ImageDraw, ImageFont
 
 def get_page_content(page_number, db_15line_path, db_wbw_path):
     """
@@ -25,7 +27,6 @@ def get_page_content(page_number, db_15line_path, db_wbw_path):
         lines = cursor_15line.fetchall()
         
         for line in lines:
-            # line structure: (page_number, line_number, line_type, is_centered, first_word_id, last_word_id, surah_number)
             page_num, line_num, l_type, centered, start_id, end_id, surah_num = line
             
             # 2. Fetch words for this line range
@@ -40,7 +41,6 @@ def get_page_content(page_number, db_15line_path, db_wbw_path):
             
             words = []
             for w in words_raw:
-                # w structure: (id, location, surah, ayah, word, text)
                 words.append({
                     "id": w[0],
                     "location": w[1],
@@ -65,24 +65,75 @@ def get_page_content(page_number, db_15line_path, db_wbw_path):
         
     return lines_data
 
+def render_page_to_image(page_content, output_path, font_path="arial.ttf"):
+    """
+    Renders the mapped page content to an image.
+    """
+    width, height = 1000, 1400
+    bg_color = (255, 255, 245) # Cream
+    image = Image.new("RGB", (width, height), bg_color)
+    draw = ImageDraw.Draw(image)
+    
+    # Try to load a nice font, fallback to default
+    try:
+        # Check for me_quran.ttf or use system arial
+        # For Arabic, specific fonts are needed for correct shaping/glyphs
+        font = ImageFont.truetype(font_path, 45)
+    except Exception as e:
+        print(f"Warning: Could not load font {font_path}, using default. Error: {e}")
+        font = ImageFont.load_default()
+
+    margin_top = 80
+    line_spacing = 80
+    
+    for line in page_content:
+        line_num = line['line_number']
+        # For Arabic text rendering in simple Pillow without Raqm, 
+        # we might need to reverse the string if it's LTR by default.
+        # But let's assume the user has a proper environment or just wants to see word placement.
+        text = " ".join([w['text'] for w in line['words']])
+        
+        # Simple center alignment
+        text_bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = text_bbox[2] - text_bbox[0]
+        
+        x = (width - text_width) / 2
+        y = margin_top + (line_num - 1) * line_spacing
+        
+        draw.text((x, y), text, font=font, fill=(0, 0, 0))
+        
+    image.save(output_path)
+    return output_path
+
 if __name__ == "__main__":
     import sys
-    import json
     
     if len(sys.argv) < 2:
-        print("Usage: python mushaf_mapper.py <page_number>")
+        print("Usage: python mushaf_mapper.py <page_number> [output_image_path]")
         sys.exit(1)
         
     page_num = int(sys.argv[1])
+    output_img = sys.argv[2] if len(sys.argv) > 2 else f"page_{page_num}.png"
+    
     db_15 = "databases/text/qpc-v2-15-lines.db"
     db_wbw = "databases/text/word_by_word_qpc-v2.db"
     
     try:
+        print(f"Mapping Page {page_num}...")
         content = get_page_content(page_num, db_15, db_wbw)
-        # For CLI output, just show a summary
+        
+        # Text output
         for line in content:
             text = " ".join([w['text'] for w in line['words']])
-            print(f"Page {line['page_number']} Line {line['line_number']} [{line['line_type']}]: {text}")
+            print(f"Line {line['line_number']}: {text}")
+            
+        # Image output
+        # Using a common system font or you can point to me_quran.ttf if you know where it is
+        render_page_to_image(content, output_img)
+        print(f"Image saved to {output_img}")
+        
     except Exception as e:
         print(f"Error: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
