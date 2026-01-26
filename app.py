@@ -83,7 +83,7 @@ async def view_mushaf(request: Request, page: int = 1):
 async def create_mushaf_video(
     surah: int,
     reciter: str,
-    background_path: str = None,
+    active_background: str = None, # Alias for background_path from UI
     is_short: bool = False,
     playlist_id: str = None,
     custom_title: str = None,
@@ -91,6 +91,7 @@ async def create_mushaf_video(
     lines_per_page: int = 15,
     db: AsyncSession = Depends(get_db)
 ):
+    background_path = active_background
     with open("data/surah_data.json", "r", encoding="utf-8") as f:
         data = json.load(f)
         surah_name = data[str(surah)]["english_name"]
