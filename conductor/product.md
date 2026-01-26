@@ -33,6 +33,10 @@ PyGen is an automated video generation platform designed specifically for creati
         - **Localized Information Files:** Generated `.txt` information files (titles, descriptions, tags) are fully localized based on the selected language.
         - **Dynamic Full Translation Source:** The available full translation database options in the Config UI dynamically update based on the selected `DEFAULT_LANGUAGE`.
         - **Database-Driven Surah Metadata:** Surah metadata (localized names, verse counts, etc.) is now sourced from a dedicated `surahs` database table.
+    - **Traditional Mushaf Viewer:** Interactive web interface for viewing the Quran in a standard 15-line layout.
+        - **Dynamic Page Navigation:** Intuitive page selection via dropdowns and sequential browsing (1-604).
+        - **High-Fidelity Rendering:** Real-time font-swapping using page-specific QPC v2 fonts to ensure accurate glyph presentation.
+        - **Authentic Aesthetic:** Optimized layout with cream-colored backgrounds and precise line boundaries based on physical Mushaf structures.
 - **Job Management System:** A robust backend that queues video generation tasks, allowing for bulk processing.
 - **Visual Customization:** User-defined themes, including font choices, color palettes, and background styles.
 - **Dynamic Background Management:** Integrated stock media search (Unsplash for images, Pexels for videos) and local file upload system to customize video backgrounds per-job.
