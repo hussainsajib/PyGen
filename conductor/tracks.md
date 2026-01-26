@@ -17,5 +17,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Duration Validation for YouTube Shorts**
+- [x] **Track: Duration Validation for YouTube Shorts**
 *Link: [./tracks/shorts_duration_validation_20260125/](./tracks/shorts_duration_validation_20260125/)*
