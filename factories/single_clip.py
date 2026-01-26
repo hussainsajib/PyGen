@@ -164,8 +164,8 @@ def generate_wbw_interlinear_text_clip(words: list, translations: list, is_short
         total_width += block_w
         if i < len(words) - 1:
             total_width += space_width
-    max_ah = max(b["ac"].h for b in processed_blocks) if processed_blocks else 0
-    max_th = max(b["tc"].h for b in processed_blocks) if processed_blocks else 0
+    max_ah = max((b["ac"].h for b in processed_blocks), default=0)
+    max_th = max((b["tc"].h for b in processed_blocks), default=0)
     line_height = max_ah + 5 + 3 + 5 + max_th
     final_clips = []
     curr_x = total_width
@@ -275,11 +275,8 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
                 if start_sec < duration:
                     h_duration = min(end_sec - start_sec, duration - start_sec)
                     if h_duration > 0.05:
-                        h_clip = (ColorClip(size=(int(width * 0.95), int(line_height)), color=(255, 255, 0))
-                                 .set_opacity(0.3)
-                                 .set_start(start_sec)
-                                 .set_duration(h_duration)
-                                 .set_position(('center', y_pos)))
+                        print(f"[DEBUG] Highlight: start={start_sec}, duration={h_duration}", flush=True)
+                        h_clip = ColorClip(size=(int(width * 0.95), int(line_height)), color=(255, 255, 0)).set_opacity(0.3).set_start(start_sec).set_duration(h_duration).set_position(('center', y_pos))
                         clips.append(h_clip)
             except (ValueError, TypeError):
                 pass
