@@ -23,6 +23,12 @@ PyGen is an automated video generation platform designed specifically for creati
     - **Synchronized Inline Configuration:** Direct synchronization of core generation settings (Language, Social Media Toggles) between creation pages and global application configuration.
     - **Optimized Layout:** Refined positioning of metadata (Reciter, Surah, Brand) and translation overlays for better visibility.
     - **UX Refinements:** Streamlined form submission workflow with intuitive redirects and quick-reset background options.
+    - **Mushaf-Style Rendering:** Specialized engine for generating videos that mirror traditional 15-line Mushaf layouts.
+        - **Adaptive Paging:** Configurable "Visible Lines per Scene" (e.g., 5, 10, or full 15 lines) with automatic chunking and paging logic.
+        - **Authentic Calligraphy:** Integration of QPC v2 fonts for page-specific glyphs, including decorative fonts for Bismillah (`QCF_BSML.TTF`) and Surah headers (`QCF_SurahHeader_COLOR-Regular.ttf`).
+        - **Dynamic Highlighting:** Synchronized semi-transparent line-level highlighting driven by word-level timestamps.
+        - **Visual Continuity:** Continuous progress tracking via a dynamic, growing progress bar integrated into the video scene.
+        - **Integrated Discovery:** Native access to the stock background module (Unsplash/Pexels) directly within the Mushaf creation interface.
     - **Multi-Language Support:** Comprehensive support for generating videos in multiple languages (e.g., Bengali, English).
         - **Dynamic Translation Sourcing:** Automated selection of language-specific translation and WBW databases.
         - **Customizable Typography:** Per-language font configuration to ensure correct rendering of special characters (e.g., macron characters in transliterations).

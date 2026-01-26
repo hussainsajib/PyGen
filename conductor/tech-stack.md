@@ -9,6 +9,8 @@
 - **Primary Database:** PostgreSQL (Advanced relational database)
 - **ORM/Database Toolkit:** SQLAlchemy (Using `asyncpg` for asynchronous PostgreSQL access)
 - **Word-by-Word Databases:** SQLite (Local storage for synchronized word-level timestamps, Arabic text, and translations)
+- **Mushaf Structural Data:** Specialized SQLite databases (`qpc-v2-15-lines.db`) defining precise page/line/word boundaries for authentic rendering.
+- **High-Fidelity Typography:** Support for Private Use Area (PUA) glyphs and page-specific TrueType fonts (QPC v2) for perfect Mushaf representation.
 - **Secondary Storage:** TinyDB (Used for lightweight, document-based storage where applicable)
 
 ## Media Processing
