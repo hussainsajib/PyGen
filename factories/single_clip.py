@@ -268,7 +268,8 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
                     from processes.Classes.surah import Surah
                     s_obj = Surah(line["surah_number"])
                     if s_obj.arabic_name:
-                        text = s_obj.arabic_name
+                        # Reverse words for RTL rendering
+                        text = " ".join(reversed(s_obj.arabic_name.split()))
                     else:
                         text = s_obj.english_name
                 except Exception as e:
