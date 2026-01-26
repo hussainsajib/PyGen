@@ -65,3 +65,42 @@ def get_mushaf_page_data(page_number: int):
         conn_wbw.close()
         
     return lines_data
+
+def align_mushaf_lines_with_timestamps(page_data: list, wbw_timestamps: dict):
+    """
+    Calculates start and end timestamps for each Mushaf line based on word-level timing.
+    """
+    for line in page_data:
+        words = line.get("words", [])
+        if not words:
+            line["start_ms"] = None
+            line["end_ms"] = None
+            continue
+            
+        # First word of the line
+        first_word = words[0]
+        # Last word of the line
+        last_word = words[-1]
+        
+        start_ms = None
+        end_ms = None
+        
+        # Look up start time for first word
+        ayah_start_segments = wbw_timestamps.get(first_word["ayah"], [])
+        for segment in ayah_start_segments:
+            if segment[0] == first_word["word"]:
+                start_ms = segment[1]
+                break
+        
+        # Look up end time for last word
+        ayah_end_segments = wbw_timestamps.get(last_word["ayah"], [])
+        for segment in ayah_end_segments:
+            if segment[0] == last_word["word"]:
+                end_ms = segment[2]
+                break
+                
+        line["start_ms"] = start_ms
+        line["end_ms"] = end_ms
+        
+    return page_data
+
