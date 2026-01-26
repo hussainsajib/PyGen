@@ -239,7 +239,9 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
             color = (255, 255, 255)
 
     for i, line in enumerate(lines):
-        text = "".join([w["text"] for w in line.get("words", [])])
+        # Reverse words for RTL rendering
+        words = line.get("words", [])
+        text = "".join([w["text"] for w in reversed(words)])
         if not text:
             continue
         y_pos = top_margin + (i * line_height)
