@@ -60,7 +60,12 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             wbw_timestamps = get_wbw_timestamps(wbw_db_path, surah_number, 1, surah_p.total_ayah)
         
         # 4. Mushaf Paging Logic
-        start_page, end_page = get_surah_page_range(surah_number)
+        page_range = get_surah_page_range(surah_number)
+        if not page_range or page_range[0] is None:
+            print(f"DEBUG: No pages found for Surah {surah_number}")
+            return None
+            
+        start_page, end_page = page_range
         
         resolution = get_resolution(is_short)
         width, height = resolution
@@ -80,20 +85,27 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             page_data = get_mushaf_page_data(page_num)
             page_data = [l for l in page_data if l["surah_number"] == surah_number]
             if not page_data:
+                print(f"[DEBUG] Page {page_num}: No lines for surah {surah_number}. Skipping.", flush=True)
                 continue
                 
+            print(f"[DEBUG] Processing Page {page_num} for Surah {surah_number}", flush=True)
             aligned_page = align_mushaf_lines_with_timestamps(page_data, wbw_timestamps)
             
             valid_starts = [l["start_ms"] for l in aligned_page if l["start_ms"] is not None]
             valid_ends = [l["end_ms"] for l in aligned_page if l["end_ms"] is not None]
             
+            print(f"[DEBUG] Page {page_num}: valid_starts count={len(valid_starts)}, valid_ends count={len(valid_ends)}", flush=True)
+            
             if not valid_starts or not valid_ends:
+                print(f"[DEBUG] Page {page_num}: Using fallback duration logic", flush=True)
                 if page_num == start_page:
                     page_start_ms = 0
-                    page_end_ms = min(valid_starts, default=5000)
+                    page_end_ms = 5000 # Default 5s for first page if no timing
                 else:
+                    print(f"[DEBUG] Page {page_num}: Skipping due to no timestamps", flush=True)
                     continue
             else:
+                print(f"[DEBUG] Page {page_num}: Calculating duration from timestamps", flush=True)
                 page_start_ms = min(valid_starts, default=0)
                 page_end_ms = max(valid_ends, default=page_start_ms + 5000)
             
@@ -150,6 +162,7 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             page_clips.append(final_page_clip)
 
         # 6. Final Assembly
+        print(f"[DEBUG] Assembling {len(page_clips)} page clips", flush=True)
         if not page_clips:
             full_audio.close()
             cleanup_temp_file(temp_audio)
