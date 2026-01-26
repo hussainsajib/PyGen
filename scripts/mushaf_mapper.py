@@ -29,6 +29,18 @@ def get_page_content(page_number, db_15line_path, db_wbw_path):
         for line in lines:
             page_num, line_num, l_type, centered, start_id, end_id, surah_num = line
             
+            # Skip lines with no word IDs
+            if start_id == '' or end_id == '':
+                lines_data.append({
+                    "page_number": page_num,
+                    "line_number": line_num,
+                    "line_type": l_type,
+                    "is_centered": bool(centered),
+                    "surah_number": surah_num,
+                    "words": []
+                })
+                continue
+
             # 2. Fetch words for this line range
             cursor_wbw.execute("""
                 SELECT id, location, surah, ayah, word, text
@@ -65,38 +77,55 @@ def get_page_content(page_number, db_15line_path, db_wbw_path):
         
     return lines_data
 
-def render_page_to_image(page_content, output_path, font_path="arial.ttf"):
+def render_page_to_image(page_content, output_path, page_number):
     """
-    Renders the mapped page content to an image.
+    Renders the mapped page content to an image using page-specific QPC v2 fonts.
     """
-    width, height = 1000, 1400
+    width, height = 1200, 1600
     bg_color = (255, 255, 245) # Cream
     image = Image.new("RGB", (width, height), bg_color)
     draw = ImageDraw.Draw(image)
     
-    # Try to load a nice font, fallback to default
-    try:
-        # Check for me_quran.ttf or use system arial
-        # For Arabic, specific fonts are needed for correct shaping/glyphs
-        font = ImageFont.truetype(font_path, 45)
-    except Exception as e:
-        print(f"Warning: Could not load font {font_path}, using default. Error: {e}")
+    # Resolve page-specific font
+    font_folder = "QPC_V2_Font.ttf"
+    font_file = f"p{page_number}.ttf"
+    font_path = os.path.join(font_folder, font_file)
+    
+    if not os.path.exists(font_path):
+        print(f"Error: Font file not found at {font_path}. Rendering will likely fail.")
         font = ImageFont.load_default()
+    else:
+        try:
+            # QPC v2 fonts typically need a larger size for clarity
+            font = ImageFont.truetype(font_path, 80)
+            print(f"Using page font: {font_path}")
+        except Exception as e:
+            print(f"Error loading font {font_path}: {e}")
+            font = ImageFont.load_default()
 
-    margin_top = 80
-    line_spacing = 80
+    margin_top = 150
+    line_spacing = 90
     
     for line in page_content:
         line_num = line['line_number']
-        # For Arabic text rendering in simple Pillow without Raqm, 
-        # we might need to reverse the string if it's LTR by default.
-        # But let's assume the user has a proper environment or just wants to see word placement.
-        text = " ".join([w['text'] for w in line['words']])
         
-        # Simple center alignment
-        text_bbox = draw.textbbox((0, 0), text, font=font)
-        text_width = text_bbox[2] - text_bbox[0]
+        # Collect words for this line
+        words_text = [w['text'] for w in line['words']]
         
+        # QPC v2 fonts render the glyphs correctly when mapped to the right Unicode points.
+        # Since standard Pillow is LTR, and Mushaf is RTL, we must reverse the order of words
+        # so the first word of the line appears on the right.
+        words_text.reverse()
+        
+        text = " ".join(words_text)
+        
+        # Center alignment
+        try:
+            text_bbox = draw.textbbox((0, 0), text, font=font)
+            text_width = text_bbox[2] - text_bbox[0]
+        except:
+            text_width = 0
+
         x = (width - text_width) / 2
         y = margin_top + (line_num - 1) * line_spacing
         
@@ -122,14 +151,8 @@ if __name__ == "__main__":
         print(f"Mapping Page {page_num}...")
         content = get_page_content(page_num, db_15, db_wbw)
         
-        # Text output
-        for line in content:
-            text = " ".join([w['text'] for w in line['words']])
-            print(f"Line {line['line_number']}: {text}")
-            
         # Image output
-        # Using a common system font or you can point to me_quran.ttf if you know where it is
-        render_page_to_image(content, output_img)
+        render_page_to_image(content, output_img, page_num)
         print(f"Image saved to {output_img}")
         
     except Exception as e:

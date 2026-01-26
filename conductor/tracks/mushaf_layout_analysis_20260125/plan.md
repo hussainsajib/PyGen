@@ -16,7 +16,7 @@ This track involves investigating the schema and data alignment between `word_by
 - [x] Task: Create a Python demonstration utility to output a sample layout. ab2b41f
     - [x] Sub-task: Implement a script that outputs JSON/Text showing Surah 1 (or Page 1) aligned by line.
     - [x] Sub-task: Enhance the script to generate a sample image of the page using `Pillow` or `opencv`, rendering the Arabic text line by line.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Logic Development & Prototype' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Logic Development & Prototype' (Protocol in workflow.md) a8ea580
 
 ## Phase 3: Final Analysis & Reporting
 - [ ] Task: Conduct a full-Quran analysis to identify potential edge cases or data gaps.
