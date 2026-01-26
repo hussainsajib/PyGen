@@ -10,7 +10,7 @@ This track involves investigating the schema and data alignment between `word_by
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Database Investigation' (Protocol in workflow.md) cf28f26
 
 ## Phase 2: Logic Development & Prototype
-- [ ] Task: Develop the matching logic to align words with line boundaries.
+- [~] Task: Develop the matching logic to align words with line boundaries.
     - [ ] Sub-task: Write TDD test cases for the matching utility (e.g., mocking small DB subsets).
     - [ ] Sub-task: Implement the logic using `word_by_word_qpc-v2.db` for content and `qpc-v2-15-lines.db` for structure.
 - [ ] Task: Create a Python demonstration utility to output a sample layout.
