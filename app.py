@@ -22,7 +22,7 @@ from db_ops.crud_jobs import (
     enqueue_manual_upload_job,
     enqueue_fb_manual_upload_job
 )
-from db_ops import crud_reciters
+from db_ops import crud_reciters, crud_mushaf
 from db_ops.crud_language import get_all_languages, get_translations_for_language
 from db.models.language import Language
 from sqlalchemy import select
@@ -55,12 +55,28 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
+# Mount the Mushaf fonts directory under a unique path
+app.mount("/mushaf-fonts", StaticFiles(directory="QPC_V2_Font.ttf"), name="mushaf_fonts")
 templates = Jinja2Templates(directory="templates")
 
 
 
 from moviepy.config import change_settings
 change_settings({"IMAGEMAGICK_BINARY": IMAGEMAGICK_BINARY})
+
+
+@app.get("/mushaf", name="mushaf", response_class=HTMLResponse)
+async def view_mushaf(request: Request, page: int = 1):
+    # Fetch page data
+    page_data = await run_in_threadpool(crud_mushaf.get_mushaf_page_data, page)
+    
+    context = {
+        "request": request,
+        "page_data": page_data,
+        "current_page": page,
+        "total_pages": 604
+    }
+    return templates.TemplateResponse("mushaf.html", context)
 
 
 @app.get("/create-video")
