@@ -2,7 +2,7 @@
 
 This plan outlines the steps to implement a traditional 15-line Mushaf layout on the PyGen web platform, including dynamic font loading and page navigation.
 
-## Phase 1: Backend Data & API [checkpoint: 453054e]
+## Phase 1: Backend Data & API [checkpoint: 3c25132]
 - [x] Task: Implement a service to retrieve Mushaf page data. 49cd7d3
     - [x] Write unit tests for the page data service (mocking both SQLite databases).
     - [x] Implement the logic to fetch line boundaries and map words for a given page number.
@@ -10,7 +10,7 @@ This plan outlines the steps to implement a traditional 15-line Mushaf layout on
     - [x] Write integration tests for the `/mushaf` route and the font serving endpoint.
     - [x] Create the `/mushaf` endpoint in `app.py`.
     - [x] Configure FastAPI to serve the `QPC_V2_Font.ttf` directory as static assets.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Backend Data & API' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Backend Data & API' (Protocol in workflow.md) 3c25132
 
 ## Phase 2: Frontend Template & Dynamic Fonts
 - [ ] Task: Create the Mushaf base template.
