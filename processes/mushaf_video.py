@@ -26,26 +26,24 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
     """
     async with async_session() as session:
         # 1. Fetch Basic Data
-        surah = Surah(surah_number)
+        reciter_db_obj, lang_obj, surah_db_obj = await fetch_localized_metadata(session, surah_number, reciter_key, config_manager)
         
-        # Get reciter model from DB for database filenames
-        reciter_db_obj = await get_reciter_by_key(session, reciter_key)
-        if not reciter_db_obj:
+        if not surah_db_obj or not reciter_db_obj:
+            print(f"DEBUG: Metadata not found for Surah {surah_number} and Reciter {reciter_key}")
             return None
-            
-        reciter = Reciter(reciter_key)
+
+        # Initialize helper classes
+        surah_p = Surah(surah_number)
+        reciter_p = Reciter(reciter_key)
         
-        lang_name = config_manager.get("DEFAULT_LANGUAGE", "bengali")
-        result = await session.execute(select(Language).filter_by(name=lang_name))
-        lang_obj = result.scalar_one_or_none()
-        
-        localized_meta = await fetch_localized_metadata(session, surah_number, lang_name)
+        current_language = lang_obj.name if lang_obj else "bengali"
+        brand_name = lang_obj.brand_name if lang_obj and lang_obj.brand_name else "Taqwa"
         
         # 2. Download Audio
         # Use read_surah_data which correctly looks up the audio_url in the reciter's database
-        audio_url = read_surah_data(surah.number, reciter_db_obj.database)
+        audio_url = read_surah_data(surah_number, reciter_db_obj.database)
         if not audio_url:
-            print(f"DEBUG: Audio URL not found for Surah {surah.number} and Reciter {reciter_key}")
+            print(f"DEBUG: Audio URL not found for Surah {surah_number} and Reciter {reciter_key}")
             return None
             
         temp_audio = download_mp3_temp(audio_url)
@@ -59,10 +57,10 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
         wbw_timestamps = {}
         if reciter_db_obj.wbw_database:
             wbw_db_path = os.path.join("databases", "word-by-word", reciter_db_obj.wbw_database)
-            wbw_timestamps = get_wbw_timestamps(wbw_db_path, surah.number, 1, surah.total_ayah)
+            wbw_timestamps = get_wbw_timestamps(wbw_db_path, surah_number, 1, surah_p.total_ayah)
         
         # 4. Mushaf Paging Logic
-        start_page, end_page = get_surah_page_range(surah.number)
+        start_page, end_page = get_surah_page_range(surah_number)
         
         resolution = get_resolution(is_short)
         width, height = resolution
@@ -80,7 +78,7 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
 
         for page_num in range(start_page, end_page + 1):
             page_data = get_mushaf_page_data(page_num)
-            page_data = [l for l in page_data if l["surah_number"] == surah.number]
+            page_data = [l for l in page_data if l["surah_number"] == surah_number]
             if not page_data:
                 continue
                 
@@ -90,8 +88,6 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             valid_ends = [l["end_ms"] for l in aligned_page if l["end_ms"] is not None]
             
             if not valid_starts or not valid_ends:
-                # If no word-level timing, we skip highlighting but still show the page?
-                # For now, if it's the first page of surah (e.g. Al-Fatihah), we might have Bismillah etc.
                 if page_num == start_page:
                     page_start_ms = 0
                     page_end_ms = min(valid_starts) if valid_starts else 5000 # Fallback 5s
@@ -121,13 +117,12 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             mushaf_clip = generate_mushaf_page_clip(aligned_page, page_num, is_short, page_duration_sec)
             
             # Add Overlays
-            reciter_name = reciter.bangla_name if lang_name == "bengali" else reciter.english_name
-            surah_name = localized_meta["surah_name"] if localized_meta else surah.english_name
-            brand_name = lang_obj.brand_name if lang_obj else ""
+            reciter_display_name = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name
+            surah_display_name = surah_p.bangla_name if current_language == "bengali" else surah_p.english_name
             
             overlays = []
             
-            if page_num == start_page and surah.number not in [1, 9]:
+            if page_num == start_page and surah_number not in [1, 9]:
                 bismillah_clip = TextClip(
                     "بسم الله الرحمن الرحيم",
                     fontsize=int(height * 0.05),
@@ -137,9 +132,9 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                 overlays.append(bismillah_clip)
 
             if config_manager.get("ENABLE_RECITER_INFO") == "True":
-                overlays.append(generate_reciter_name_clip(reciter_name, is_short, page_duration_sec))
+                overlays.append(generate_reciter_name_clip(reciter_display_name, is_short, page_duration_sec))
             if config_manager.get("ENABLE_SURAH_INFO") == "True":
-                overlays.append(generate_surah_info_clip(surah_name, 0, is_short, page_duration_sec, language=lang_name))
+                overlays.append(generate_surah_info_clip(surah_display_name, 0, is_short, page_duration_sec, language=current_language))
             if config_manager.get("ENABLE_CHANNEL_INFO") == "True":
                 overlays.append(generate_brand_clip(brand_name, is_short, page_duration_sec))
 
@@ -162,9 +157,9 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             
         final_video = concatenate_videoclips(page_clips, method="compose")
         
-        surah_slug = surah.english_name.lower().replace(" ", "_")
+        surah_slug = surah_p.english_name.lower().replace(" ", "_")
         reciter_slug = reciter_key.replace(".", "_")
-        filename = f"mushaf_video_{surah.number}_{surah_slug}_{reciter_slug}.mp4"
+        filename = f"mushaf_video_{surah_number}_{surah_slug}_{reciter_slug}.mp4"
         
         export_dir = "exported_data/shorts" if is_short else "exported_data/videos"
         os.makedirs(export_dir, exist_ok=True)
@@ -184,26 +179,23 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             c.close()
         cleanup_temp_file(temp_audio)
         
-        # Determine language for details
-        lang_name = config_manager.get("DEFAULT_LANGUAGE", "bengali")
-        
         details_path = generate_details(
-            surah, 
-            reciter, 
+            surah_p, 
+            reciter_p, 
             False, # has_translation
             1, 
-            surah.total_ayah, 
+            surah_p.total_ayah, 
             is_short, 
             custom_title=custom_title,
-            language=lang_name
+            language=current_language
         )
         
         return {
             "video": video_path,
             "info": details_path,
-            "surah_number": surah.number,
+            "surah_number": surah_number,
             "start_ayah": 1,
-            "end_ayah": surah.total_ayah,
+            "end_ayah": surah_p.total_ayah,
             "reciter": reciter_key,
             "is_short": is_short
         }
