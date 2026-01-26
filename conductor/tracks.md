@@ -23,5 +23,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Mushaf Web View Feature**
+- [x] **Track: Mushaf Web View Feature**
 *Link: [./tracks/mushaf_web_view_20260125/](./tracks/mushaf_web_view_20260125/)*
