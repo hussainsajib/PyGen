@@ -267,9 +267,9 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
                 try:
                     from processes.Classes.surah import Surah
                     s_obj = Surah(line["surah_number"])
-                    # For SurahHeader fonts, often the glyph is mapped to the surah number as a character
-                    # We try the character mapping first for this specific font
-                    text = chr(line["surah_number"]) 
+                    # For QCF Surah Header font, surah headers are usually mapped to PUA range starting at 0xE900
+                    # Surah 1 -> 0xE901, Surah 2 -> 0xE902, etc.
+                    text = chr(0xE900 + int(line["surah_number"]))
                 except Exception as e:
                     print(f"Error mapping surah number to char: {e}")
                     text = str(line["surah_number"])
