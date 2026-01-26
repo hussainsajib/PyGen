@@ -21,10 +21,10 @@ This plan outlines the refactoring of `scripts/verify_mushaf_rendering.py` to in
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Core Rendering' (Protocol in workflow.md) 6334762
 
 ## Phase 3: Integration and Bug Fixes
-- [ ] Task: Refactor the main verification loop.
-    - [ ] Update the script to loop through selected pages and generate verification images.
-    - [ ] Fix any existing bugs in coordinate calculation or output directory handling.
-- [ ] Task: Perform final end-to-end verification.
-    - [ ] Generate verification frames for Page 1 (Surah 1) and Page 2 (Surah 2).
-    - [ ] Confirm visual alignment with the main video generation engine.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Final Verification' (Protocol in workflow.md)
+- [x] Task: Refactor the main verification loop. 221d42c
+    - [x] Update the script to loop through selected pages and generate verification images.
+    - [x] Fix any existing bugs in coordinate calculation or output directory handling.
+- [x] Task: Perform final end-to-end verification. 221d42c
+    - [x] Generate verification frames for Page 1 (Surah 1) and Page 2 (Surah 2).
+    - [x] Confirm visual alignment with the main video generation engine.
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Final Verification' (Protocol in workflow.md) 221d42c
