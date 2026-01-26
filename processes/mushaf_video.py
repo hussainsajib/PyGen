@@ -94,8 +94,8 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                 else:
                     continue
             else:
-                page_start_ms = min(valid_starts)
-                page_end_ms = max(valid_ends)
+                page_start_ms = min(valid_starts, default=0)
+                page_end_ms = max(valid_ends, default=page_start_ms + 5000)
             
             if page_num == start_page:
                 page_start_ms = 0
