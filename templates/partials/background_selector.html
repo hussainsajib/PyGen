@@ -48,7 +48,7 @@
                     <!-- Stock Images Tab -->
                     <div class="tab-pane fade show active" id="images-content" role="tabpanel">
                         <div class="input-group mb-3">
-                            <input type="text" id="unsplash_query" class="form-control" placeholder="Search Unsplash images (e.g. nature, stars)">
+                            <input type="text" id="unsplash_query" class="form-control" placeholder="Search Unsplash images (e.g. nature, stars)" onkeydown="if(event.key === 'Enter'){event.preventDefault(); searchUnsplash();}">
                             <button class="btn btn-primary" type="button" onclick="searchUnsplash()">
                                 <i class="fas fa-search"></i>
                             </button>
@@ -77,7 +77,7 @@
                     <!-- Stock Videos Tab -->
                     <div class="tab-pane fade" id="videos-content" role="tabpanel">
                         <div class="input-group mb-3">
-                            <input type="text" id="pexels_query" class="form-control" placeholder="Search Pexels videos (e.g. nature, timelapse)">
+                            <input type="text" id="pexels_query" class="form-control" placeholder="Search Pexels videos (e.g. nature, timelapse)" onkeydown="if(event.key === 'Enter'){event.preventDefault(); searchPexels();}">
                             <button class="btn btn-primary" type="button" onclick="searchPexels()">
                                 <i class="fas fa-search"></i>
                             </button>
