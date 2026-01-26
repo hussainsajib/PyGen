@@ -18,8 +18,8 @@ This track involves investigating the schema and data alignment between `word_by
     - [x] Sub-task: Enhance the script to generate a sample image of the page using `Pillow` or `opencv`, rendering the Arabic text line by line.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Logic Development & Prototype' (Protocol in workflow.md) a8ea580
 
-## Phase 3: Final Analysis & Reporting
+## Phase 3: Final Analysis & Reporting [checkpoint: e7eae05]
 - [x] Task: Conduct a full-Quran analysis to identify potential edge cases or data gaps.
 - [x] Task: Finalize the technical report with join strategies and join keys.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Final Analysis & Reporting' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Final Analysis & Reporting' (Protocol in workflow.md) e7eae05
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Final Analysis & Reporting' (Protocol in workflow.md)
