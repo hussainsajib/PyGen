@@ -288,10 +288,11 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         img_array = render_mushaf_text_to_image(text, current_font_path, font_size, color, (int(width * 0.9), int(line_height)))
         
         # Check if render produced anything visible (alpha channel check)
-        # If QCF_SURA.TTF failed (e.g. wrong mapping), fallback to page font
+        # If QCF_SURA.TTF failed (e.g. wrong mapping), fallback to standard font (Arial)
+        # because pX.ttf fonts usually don't support standard Unicode Arabic.
         if l_type == "surah_name" and not np.any(img_array[..., 3] > 0):
-            print(f"[DEBUG] QCF_SURA.TTF failed to render '{text}'. Falling back to {font_path_page}")
-            img_array = render_mushaf_text_to_image(text, font_path_page, font_size, color, (int(width * 0.9), int(line_height)))
+            print(f"[DEBUG] QCF_SURA.TTF failed to render '{text}'. Falling back to Arial.")
+            img_array = render_mushaf_text_to_image(text, "arial.ttf", font_size, color, (int(width * 0.9), int(line_height)))
             
         t_clip = ImageClip(img_array).set_duration(duration).set_position(('center', y_pos))
         clips.append(t_clip)
