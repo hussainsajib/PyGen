@@ -6,9 +6,8 @@ AUDIO_API_URL = "https://api.alquran.cloud/v1/ayah/{surah}:{verse}/{reciter}"
 IMAGE_API_URL = "https://api.unsplash.com/photos/random?query=universe&orientation=landscape&client_id=gvKXwU6tDDoZl6N3O1YWUIrT19yqZZW6CQLlSEGoxew"
 
 # Dynamic Threading for Video Encoding
-# Use N-1 cores to keep system responsive, but at least 1 core.
-# Cap at 6 threads to avoid potential audio/encoding issues on some systems.
-VIDEO_ENCODING_THREADS = min(6, max(1, (os.cpu_count() or 1) - 1))
+# Use all available cores for maximum speed.
+VIDEO_ENCODING_THREADS = os.cpu_count() or 1
 
 RECITER="ar.alafasy"
 TRANSLATION="rawai_al_bayan"

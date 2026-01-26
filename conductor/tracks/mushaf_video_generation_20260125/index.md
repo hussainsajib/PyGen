@@ -1,4 +1,4 @@
-# Track add_mushaf_to_navbar_20260125 Context
+# Track mushaf_video_generation_20260125 Context
 
 - [Specification](./spec.md)
 - [Implementation Plan](./plan.md)

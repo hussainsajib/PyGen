@@ -21,9 +21,11 @@ def read_surah_data(surah_number: int, reciter_db_name: str):
     
 def read_timestamp_data(surah_number: int, reciter_db_name: str):
     database = RECITATION_DATABASE_BASEURL.format(reciter_db_name)
+    print(f"[DEBUG] read_timestamp_data: Querying {database} for Surah {surah_number}", flush=True)
     with sqlite3.connect(database) as conn:
         cursor = conn.cursor()
         query = f"""SELECT surah_number, ayah_number, timestamp_from, timestamp_to, segments FROM segments WHERE surah_number = {surah_number}"""
         cursor.execute(query)
         rows = cursor.fetchall()
+        print(f"[DEBUG] read_timestamp_data: Found {len(rows)} rows", flush=True)
         return rows if rows else None

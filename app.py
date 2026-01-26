@@ -186,6 +186,61 @@ async def read_root(request: Request, db: AsyncSession = Depends(get_db)):
     context = {"request": request, "surahs": surahs, "reciters": reciters}
     return templates.TemplateResponse("index.html", context)
 
+@app.get("/mushaf-video", name="mushaf_video_creator", response_class=HTMLResponse)
+async def mushaf_video_interface(
+    request: Request, 
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
+):
+    surahs = []
+    reciters = []
+
+    with open("data/surah_data.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+        for k, v in data.items():
+            surah = {"number": int(v["serial"]), "name": v["english_name"], "total_verses": v["total_ayah"]}
+            surahs.append(surah)
+    surahs.sort(key=lambda x: x["number"])
+
+    db_reciters = await crud_reciters.get_all_reciters(db)
+    
+    playlists = []
+    seen_playlists = set()
+    for r in db_reciters:
+        if r.playlist_id and r.playlist_id not in seen_playlists:
+            playlists.append({"id": r.playlist_id, "name": f"Playlist {r.playlist_id} ({r.english_name})"})
+            seen_playlists.add(r.playlist_id)
+            
+    for r in db_reciters:
+        # Note: Mushaf video also needs WBW timestamps for highlighting
+        if r.wbw_database: 
+            reciters.append({
+                "english_name": r.english_name,
+                "key": r.reciter_key
+            })
+    reciters.sort(key=lambda x: x["english_name"])
+    
+    upload_to_youtube = config.get("UPLOAD_TO_YOUTUBE", "False") == "True"
+    enable_facebook_upload = config.get("ENABLE_FACEBOOK_UPLOAD", "False") == "True"
+    default_language = config.get("DEFAULT_LANGUAGE", "bengali")
+    bg_rgb = config.get("BACKGROUND_RGB", "(0,0,0)")
+    font_color = config.get("FONT_COLOR", "white")
+    languages = await get_all_languages(db)
+    
+    context = {
+        "request": request, 
+        "surahs": surahs, 
+        "reciters": reciters,
+        "upload_to_youtube": upload_to_youtube,
+        "enable_facebook_upload": enable_facebook_upload,
+        "default_language": default_language,
+        "bg_rgb": bg_rgb,
+        "font_color": font_color,
+        "languages": languages,
+        "playlists": playlists
+    }
+    return templates.TemplateResponse("mushaf_video.html", context)
+
 @app.get("/word-by-word", name="wbw", response_class=HTMLResponse)
 async def wbw_interface(
     request: Request, 
@@ -224,6 +279,8 @@ async def wbw_interface(
     upload_to_youtube = config.get("UPLOAD_TO_YOUTUBE", "False") == "True"
     enable_facebook_upload = config.get("ENABLE_FACEBOOK_UPLOAD", "False") == "True"
     default_language = config.get("DEFAULT_LANGUAGE", "bengali")
+    bg_rgb = config.get("BACKGROUND_RGB", "(0,0,0)")
+    font_color = config.get("FONT_COLOR", "white")
     languages = await get_all_languages(db)
     
     context = {
@@ -233,10 +290,10 @@ async def wbw_interface(
         "upload_to_youtube": upload_to_youtube,
         "enable_facebook_upload": enable_facebook_upload,
         "default_language": default_language,
+        "bg_rgb": bg_rgb,
+        "font_color": font_color,
         "languages": languages,
-        "playlists": playlists,
-        "bg_rgb": config.get("BACKGROUND_RGB", "(239, 233, 227)"),
-        "font_color": config.get("FONT_COLOR", "rgb(201, 181, 156)")
+        "playlists": playlists
     }
     return templates.TemplateResponse("wbw.html", context)
 

@@ -1,0 +1,399 @@
+<!-- Background Selection Section -->
+<div class="mb-4">
+    <label class="form-label d-block">Background:</label>
+    <div class="d-flex align-items-center mb-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#backgroundModal">
+            <i class="fas fa-image me-1"></i> Select Background
+        </button>
+        <button type="button" id="default_color_btn" class="btn btn-sm fw-bold border" style="background-color: {% if bg_rgb.startswith('rgb') %}{{ bg_rgb }}{% else %}rgb{{ bg_rgb }}{% endif %}; color: {{ font_color }};" onclick="clearBackground()">
+            Default Color
+        </button>
+        <span id="selected_bg_name" class="ms-3 text-primary fw-bold small"></span>
+        <button type="button" id="clear_bg_btn" class="btn btn-link btn-sm text-danger d-none" onclick="clearBackground()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <input type="hidden" id="active_background" name="active_background">
+</div>
+
+<!-- Background Selection Modal -->
+<div class="modal fade" id="backgroundModal" tabindex="-1" aria-labelledby="backgroundModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="backgroundModalLabel">Select Background</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Nav Tabs -->
+                <ul class="nav nav-tabs mb-3" id="bgTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="images-tab" data-bs-toggle="tab" data-bs-target="#images-content" type="button" role="tab" aria-selected="true">
+                            <i class="fas fa-image me-1"></i> Stock Images
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos-content" type="button" role="tab" aria-selected="false">
+                            <i class="fas fa-video me-1"></i> Stock Videos
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="local-tab" data-bs-toggle="tab" data-bs-target="#local-content" type="button" role="tab" aria-selected="false">
+                            <i class="fas fa-upload me-1"></i> Upload Local
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="bgTabsContent">
+                    <!-- Stock Images Tab -->
+                    <div class="tab-pane fade show active" id="images-content" role="tabpanel">
+                        <div class="input-group mb-3">
+                            <input type="text" id="unsplash_query" class="form-control" placeholder="Search Unsplash images (e.g. nature, stars)">
+                            <button class="btn btn-primary" type="button" onclick="searchUnsplash()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Unsplash Pagination -->
+                        <div id="unsplash_pagination_controls" class="d-flex justify-content-between align-items-center mb-3 d-none">
+                            <button class="btn btn-sm btn-outline-primary" id="prev_page_btn" onclick="changePage(-1)">
+                                <i class="fas fa-chevron-left me-1"></i> Previous
+                            </button>
+                            <span id="current_page_display" class="badge bg-secondary">Page 1</span>
+                            <button class="btn btn-sm btn-outline-primary" id="next_page_btn" onclick="changePage(1)">
+                                Next <i class="fas fa-chevron-right ms-1"></i>
+                            </button>
+                        </div>
+
+                        <div id="unsplash_results" class="row g-2"></div>
+                        
+                        <div id="search_loading" class="text-center d-none my-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stock Videos Tab -->
+                    <div class="tab-pane fade" id="videos-content" role="tabpanel">
+                        <div class="input-group mb-3">
+                            <input type="text" id="pexels_query" class="form-control" placeholder="Search Pexels videos (e.g. nature, timelapse)">
+                            <button class="btn btn-primary" type="button" onclick="searchPexels()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+
+                        <!-- Orientation Filters -->
+                        <div class="mb-3 d-flex justify-content-center">
+                            <div class="btn-group" role="group" aria-label="Orientation filter">
+                                <input type="radio" class="btn-check" name="pexels_orientation" id="orientation_any" value="any" autocomplete="off">
+                                <label class="btn btn-outline-secondary btn-sm" for="orientation_any">Any</label>
+
+                                <input type="radio" class="btn-check" name="pexels_orientation" id="orientation_landscape" value="landscape" autocomplete="off">
+                                <label class="btn btn-outline-secondary btn-sm" for="orientation_landscape">Landscape</label>
+
+                                <input type="radio" class="btn-check" name="pexels_orientation" id="orientation_portrait" value="portrait" autocomplete="off" checked>
+                                <label class="btn btn-outline-secondary btn-sm" for="orientation_portrait">Portrait</label>
+                                
+                                <input type="radio" class="btn-check" name="pexels_orientation" id="orientation_square" value="square" autocomplete="off">
+                                <label class="btn btn-outline-secondary btn-sm" for="orientation_square">Square</label>
+                            </div>
+                        </div>
+
+                        <!-- Pexels Pagination -->
+                        <div id="pexels_pagination_controls" class="d-flex justify-content-between align-items-center mb-3 d-none">
+                            <button class="btn btn-sm btn-outline-primary" id="pexels_prev_page_btn" onclick="changePexelsPage(-1)">
+                                <i class="fas fa-chevron-left me-1"></i> Previous
+                            </button>
+                            <span id="pexels_current_page_display" class="badge bg-secondary">Page 1</span>
+                            <button class="btn btn-sm btn-outline-primary" id="pexels_next_page_btn" onclick="changePexelsPage(1)">
+                                Next <i class="fas fa-chevron-right ms-1"></i>
+                            </button>
+                        </div>
+
+                        <div id="pexels_results" class="row g-2"></div>
+
+                        <div id="pexels_loading" class="text-center d-none my-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Local Tab -->
+                    <div class="tab-pane fade" id="local-content" role="tabpanel">
+                        <div class="mb-4">
+                            <h6>Upload Image/Video</h6>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="local_bg_input" accept="image/*,video/*">
+                                <button class="btn btn-primary" type="button" onclick="uploadLocalBackground()">Upload</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Unsplash Logic ---
+    let currentUnsplashPage = 1;
+    let currentUnsplashQuery = '';
+
+    async function searchUnsplash(page = 1) {
+        const queryInput = document.getElementById('unsplash_query');
+        const query = queryInput.value || currentUnsplashQuery;
+        
+        if (!query) return;
+        
+        currentUnsplashQuery = query;
+        currentUnsplashPage = page;
+
+        const resultsDiv = document.getElementById('unsplash_results');
+        const loading = document.getElementById('search_loading');
+        const paginationControls = document.getElementById('unsplash_pagination_controls');
+        const prevBtn = document.getElementById('prev_page_btn');
+        const pageDisplay = document.getElementById('current_page_display');
+
+        resultsDiv.innerHTML = '';
+        loading.classList.remove('d-none');
+        paginationControls.classList.add('d-none');
+
+        try {
+            const response = await fetch(`/unsplash-search?query=${encodeURIComponent(query)}&page=${page}`);
+            const data = await response.json();
+            
+            loading.classList.add('d-none');
+            
+            if (data.length === 0) {
+                resultsDiv.innerHTML = '<div class="col-12 text-center text-muted">No results found.</div>';
+                return;
+            }
+
+            data.forEach(img => {
+                const col = document.createElement('div');
+                col.className = 'col-md-3 col-sm-4 col-6';
+                col.innerHTML = `
+                    <div class="card h-100 cursor-pointer border-0 shadow-sm" onclick="selectUnsplashImage('${img.urls.full}', '${img.id}.jpg')">
+                        <img src="${img.urls.thumb}" class="card-img-top rounded" alt="Unsplash image" style="height: 120px; object-fit: cover;">
+                    </div>
+                `;
+                resultsDiv.appendChild(col);
+            });
+
+            // Update Pagination UI
+            paginationControls.classList.remove('d-none');
+            pageDisplay.innerText = `Page ${currentUnsplashPage}`;
+            if (currentUnsplashPage > 1) {
+                prevBtn.classList.remove('d-none');
+            } else {
+                prevBtn.classList.add('d-none');
+            }
+
+            // Scroll to top of results
+            document.querySelector('#backgroundModal .modal-body').scrollTop = 0;
+
+        } catch (error) {
+            console.error('Search failed:', error);
+            loading.classList.add('d-none');
+            resultsDiv.innerHTML = '<div class="col-12 text-center text-danger">Search failed.</div>';
+        }
+    }
+
+    // --- Pexels Logic ---
+    let currentPexelsPage = 1;
+    let currentPexelsQuery = '';
+
+    async function searchPexels(page = 1) {
+        const queryInput = document.getElementById('pexels_query');
+        const query = queryInput.value || currentPexelsQuery;
+        const orientation = document.querySelector('input[name="pexels_orientation"]:checked').value;
+        
+        if (!query) return;
+        
+        currentPexelsQuery = query;
+        currentPexelsPage = page;
+
+        const resultsDiv = document.getElementById('pexels_results');
+        const loading = document.getElementById('pexels_loading');
+        const paginationControls = document.getElementById('pexels_pagination_controls');
+        const prevBtn = document.getElementById('pexels_prev_page_btn');
+        const pageDisplay = document.getElementById('pexels_current_page_display');
+
+        resultsDiv.innerHTML = '';
+        loading.classList.remove('d-none');
+        paginationControls.classList.add('d-none');
+
+        try {
+            let url = `/pexels-search?query=${encodeURIComponent(query)}&page=${page}`;
+            if (orientation && orientation !== "any") {
+                url += `&orientation=${orientation}`;
+            }
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            loading.classList.add('d-none');
+            
+            if (data.length === 0) {
+                resultsDiv.innerHTML = '<div class="col-12 text-center text-muted">No results found.</div>';
+                return;
+            }
+
+            data.forEach(vid => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4 col-sm-6';
+                col.innerHTML = `
+                    <div class="card h-100 cursor-pointer border-0 shadow-sm">
+                        <div class="position-relative">
+                            <img src="${vid.preview}" class="card-img-top rounded" alt="Pexels video" style="height: 120px; object-fit: cover;">
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <i class="fas fa-play-circle text-white fa-2x opacity-75"></i>
+                            </div>
+                            <span class="position-absolute bottom-0 end-0 badge bg-dark m-1">${vid.duration}s</span>
+                        </div>
+                        <button class="btn btn-sm btn-primary w-100 mt-1" onclick="selectPexelsVideo('${vid.video_url}', '${vid.id}.mp4')">
+                            Select
+                        </button>
+                    </div>
+                `;
+                resultsDiv.appendChild(col);
+            });
+
+            // Update Pagination UI
+            paginationControls.classList.remove('d-none');
+            pageDisplay.innerText = `Page ${currentPexelsPage}`;
+            if (currentPexelsPage > 1) {
+                prevBtn.classList.remove('d-none');
+            } else {
+                prevBtn.classList.add('d-none');
+            }
+
+        } catch (error) {
+            console.error('Search failed:', error);
+            loading.classList.add('d-none');
+            resultsDiv.innerHTML = '<div class="col-12 text-center text-danger">Search failed.</div>';
+        }
+    }
+
+    function changePexelsPage(delta) {
+        const newPage = currentPexelsPage + delta;
+        if (newPage >= 1) {
+            searchPexels(newPage);
+        }
+    }
+
+    async function selectPexelsVideo(url, filename) {
+        const btn = event.currentTarget;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Downloading...';
+        btn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('url', url);
+        formData.append('filename', filename);
+
+        try {
+            const response = await fetch('/download-pexels-video', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                updateActiveBackground(data.path, filename);
+                bootstrap.Modal.getInstance(document.getElementById('backgroundModal')).hide();
+            } else {
+                alert('Failed to download video.');
+            }
+        } catch (error) {
+            console.error('Download failed:', error);
+            alert('Download failed. See console.');
+        } finally {
+            btn.innerHTML = 'Select';
+            btn.disabled = false;
+        }
+    }
+
+    function changePage(delta) {
+        const newPage = currentUnsplashPage + delta;
+        if (newPage >= 1) {
+            searchUnsplash(newPage);
+        }
+    }
+
+    async function selectUnsplashImage(url, filename) {
+        const btn = event.currentTarget;
+        btn.style.opacity = '0.5';
+        btn.style.pointerEvents = 'none';
+
+        const formData = new FormData();
+        formData.append('url', url);
+        formData.append('filename', filename);
+
+        try {
+            const response = await fetch('/download-unsplash', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                updateActiveBackground(data.path, filename);
+                bootstrap.Modal.getInstance(document.getElementById('backgroundModal')).hide();
+            } else {
+                alert('Failed to download image.');
+            }
+        } catch (error) {
+            console.error('Download failed:', error);
+        } finally {
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+        }
+    }
+
+    async function uploadLocalBackground() {
+        const fileInput = document.getElementById('local_bg_input');
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/upload-background', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            
+            if (data.path) {
+                updateActiveBackground(data.path, data.filename);
+                bootstrap.Modal.getInstance(document.getElementById('backgroundModal')).hide();
+            }
+        } catch (error) {
+            console.error('Upload failed:', error);
+        }
+    }
+
+    function updateActiveBackground(path, name) {
+        document.getElementById('active_background').value = path;
+        document.getElementById('selected_bg_name').innerText = name;
+        document.getElementById('selected_bg_name').classList.remove('text-muted');
+        document.getElementById('selected_bg_name').classList.add('text-primary', 'fw-bold');
+        document.getElementById('clear_bg_btn').classList.remove('d-none');
+        
+        const formData = new FormData();
+        formData.append('path', path);
+        fetch('/set-active-background', { method: 'POST', body: formData });
+    }
+
+    function clearBackground() {
+        document.getElementById('active_background').value = '';
+        document.getElementById('selected_bg_name').innerText = '';
+        document.getElementById('selected_bg_name').classList.remove('text-primary', 'fw-bold');
+        document.getElementById('selected_bg_name').classList.add('text-muted');
+        document.getElementById('clear_bg_btn').classList.add('d-none');
+        
+        fetch('/clear-active-background', { method: 'POST' });
+    }
+</script>

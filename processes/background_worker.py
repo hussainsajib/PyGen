@@ -4,7 +4,7 @@ from db.database import async_session
 import asyncio
 import logging
 import json
-from processes.processes import create_surah_video, manual_upload_to_youtube, manual_upload_to_facebook, create_wbw_video_job
+from processes.processes import create_surah_video, manual_upload_to_youtube, manual_upload_to_facebook, create_wbw_video_job, create_mushaf_video_job
 from fastapi.concurrency import run_in_threadpool
 
 logger = logging.getLogger(__name__)
@@ -48,6 +48,17 @@ async def job_worker():
                             end_verse=job.end_verse,
                             reciter=job.reciter,
                             is_short=bool(job.is_short),
+                            upload_after_generation=bool(job.upload_after_generation),
+                            playlist_id=job.playlist_id,
+                            custom_title=job.custom_title
+                        )
+                    elif job.job_type == "mushaf_video":
+                        # Mushaf video generation job
+                        await create_mushaf_video_job(
+                            surah=job.surah_number,
+                            reciter=job.reciter,
+                            is_short=bool(job.is_short),
+                            background_path=job.background_path,
                             upload_after_generation=bool(job.upload_after_generation),
                             playlist_id=job.playlist_id,
                             custom_title=job.custom_title

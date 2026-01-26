@@ -31,6 +31,7 @@ def get_wbw_timestamps(db_path: str, surah_number: int, start_ayah: int, end_aya
         cursor.execute(query, (surah_number, start_ayah, end_ayah))
         rows = cursor.fetchall()
         
+        print(f"[DEBUG] get_wbw_timestamps: Found {len(rows)} rows for Surah {surah_number}", flush=True)
         wbw_data = {}
         for row in rows:
             ayah_num, segments_json = row
@@ -38,10 +39,12 @@ def get_wbw_timestamps(db_path: str, surah_number: int, start_ayah: int, end_aya
                 segments = json.loads(segments_json)
                 # Filter out segments that don't have start/end times (e.g. [[1]])
                 valid_segments = [s for s in segments if len(s) == 3]
-                wbw_data[ayah_num] = valid_segments
+                if valid_segments:
+                    wbw_data[ayah_num] = valid_segments
             except json.JSONDecodeError:
                 print(f"Error decoding segments JSON for Surah {surah_number}, Ayah {ayah_num}")
-                
+        
+        print(f"[DEBUG] get_wbw_timestamps: Returning data for {len(wbw_data)} ayahs", flush=True)
         return wbw_data
     except Exception as e:
         print(f"Error querying WBW database: {e}")

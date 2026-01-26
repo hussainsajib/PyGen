@@ -23,28 +23,19 @@ def render_mushaf_text_to_image(text: str, font_path: str, font_size: int, color
     Renders Arabic Mushaf text to a numpy array (image) using Pillow.
     This is often more reliable for PUA glyphs than MoviePy's TextClip.
     """
-    # Create a transparent image
     img = Image.new('RGBA', size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
-    
     try:
         font = ImageFont.truetype(font_path, font_size)
     except Exception as e:
         print(f"DEBUG: PIL failed to load font {font_path}: {e}")
         font = ImageFont.load_default()
-
-    # Calculate text position (centered)
-    # Using textbbox for Pillow 10+
     bbox = draw.textbbox((0, 0), text, font=font)
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
-    
     x = (size[0] - text_width) // 2
     y = (size[1] - text_height) // 2
-    
-    # Draw text
     draw.text((x, y), text, font=font, fill=color)
-    
     return np.array(img)
 
 def generate_image_background(background_image_url: str, duration: int, is_short: bool):
@@ -150,7 +141,7 @@ def generate_wbw_interlinear_text_clip(words: list, translations: list, is_short
         wrapped_trans_config["size"] = (target_tw, None)
         wrapped_trans_config["method"] = "caption"
         tc = TextClip(trans, **wrapped_trans_config)
-        block_w = max(ac.w, tc.w)
+        block_w = max(ac.w, tc.w, 0)
         color_str = COMMON["arabic_textbox_config"]["color"]
         if isinstance(color_str, str) and color_str.startswith("rgb("):
             try:
@@ -228,7 +219,6 @@ def generate_brand_clip(brand_name: str, is_short: bool, duration: int) -> TextC
 def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, duration: float) -> CompositeVideoClip:
     """
     Generates a CompositeVideoClip for a Mushaf page.
-    Renders multiple lines and highlights the active one based on timestamps.
     """
     resolution = get_resolution(is_short)
     width, height = resolution
@@ -241,7 +231,6 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     line_height = usable_height / 15
     clips = []
     
-    # Parse FONT_COLOR (which might be "rgb(r,g,b)")
     color = FONT_COLOR
     if isinstance(color, str) and color.startswith("rgb("):
         try:
@@ -255,17 +244,9 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
             continue
         y_pos = top_margin + (i * line_height)
         font_size = int(line_height * 0.7)
-        
-        # Use Pillow to render the text for better PUA support
-        img_array = render_mushaf_text_to_image(
-            text, 
-            font_path, 
-            font_size, 
-            color, 
-            (int(width * 0.9), int(line_height))
-        )
+        img_array = render_mushaf_text_to_image(text, font_path, font_size, color, (int(width * 0.9), int(line_height)))
         t_clip = ImageClip(img_array).set_duration(duration).set_position(('center', y_pos))
-        
+        clips.append(t_clip)
         start_ms = line.get("start_ms")
         end_ms = line.get("end_ms")
         if start_ms is not None and end_ms is not None:
@@ -275,10 +256,10 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
                 if start_sec < duration:
                     h_duration = min(end_sec - start_sec, duration - start_sec)
                     if h_duration > 0.05:
-                        print(f"[DEBUG] Highlight: start={start_sec}, duration={h_duration}", flush=True)
                         h_clip = ColorClip(size=(int(width * 0.95), int(line_height)), color=(255, 255, 0)).set_opacity(0.3).set_start(start_sec).set_duration(h_duration).set_position(('center', y_pos))
                         clips.append(h_clip)
             except (ValueError, TypeError):
                 pass
-        clips.append(t_clip)
+    if not clips:
+        return ColorClip(size=resolution, color=(0,0,0)).set_opacity(0).set_duration(duration)
     return CompositeVideoClip(clips, size=resolution).set_duration(duration)
