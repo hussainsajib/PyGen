@@ -22,5 +22,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Mushaf Layout Data Analysis**
+- [x] **Track: Mushaf Layout Data Analysis**
 *Link: [./tracks/mushaf_layout_analysis_20260125/](./tracks/mushaf_layout_analysis_20260125/)*
