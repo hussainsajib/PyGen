@@ -21,15 +21,15 @@ This plan outlines the implementation of a new video generation engine that rend
     - [x] Implement the route in `app.py`.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Process Orchestration & API' (Protocol in workflow.md) 17dc452
 
-## Phase 3: Frontend Interface Integration
-- [~] Task: Implement the Mushaf Video Creator page.
-    - [ ] Create `templates/mushaf_video.html` extending `base.html`.
-    - [ ] Add Surah and Reciter selection dropdowns.
-    - [ ] Add a configuration input for "Visible Lines per Scene".
-- [ ] Task: Integrate the Background Selection Module.
-    - [ ] Extract the background selector from `wbw.html` into a reusable snippet or include it.
-    - [ ] Ensure Unsplash/Pexels/Upload functionality works within the new page.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Frontend Interface' (Protocol in workflow.md)
+## Phase 3: Frontend Interface Integration [checkpoint: fd0873d]
+- [x] Task: Implement the Mushaf Video Creator page. 01e3051
+    - [x] Create `templates/mushaf_video.html` extending `base.html`.
+    - [x] Add Surah and Reciter selection dropdowns.
+    - [x] Add a configuration input for "Visible Lines per Scene".
+- [x] Task: Integrate the Background Selection Module. 01e3051
+    - [x] Extract the background selector from `wbw.html` into a reusable snippet or include it.
+    - [x] Ensure Unsplash/Pexels/Upload functionality works within the new page.
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Frontend Interface' (Protocol in workflow.md) fd0873d
 
 ## Phase 4: Final Integration & Verification
 - [ ] Task: Perform end-to-end manual verification.
