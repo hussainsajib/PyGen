@@ -162,8 +162,8 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                     return int(width * max(0.0, min(1.0, p)))
 
                 progress_bar_fg = ColorClip(size=(width, 5), color=(0, 200, 0))
-                # Resize usage: clip.resize(width=lambda t: w(t))
-                progress_bar_fg = progress_bar_fg.resize(width=lambda t: max(1, get_progress_width(t)))
+                # Resize usage: clip.resize(newsize=lambda t: (w(t), h)) to preserve height
+                progress_bar_fg = progress_bar_fg.resize(newsize=lambda t: (max(1, get_progress_width(t)), 5))
                 progress_bar_fg = progress_bar_fg.set_opacity(0.8).set_duration(chunk_duration_sec).set_position(('left', height-5))
                 overlays.append(progress_bar_fg)
 
