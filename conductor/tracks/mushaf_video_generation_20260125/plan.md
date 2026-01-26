@@ -31,9 +31,9 @@ This plan outlines the implementation of a new video generation engine that rend
     - [x] Ensure Unsplash/Pexels/Upload functionality works within the new page.
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Frontend Interface' (Protocol in workflow.md) fd0873d
 
-## Phase 4: Final Integration & Verification
-- [ ] Task: Perform end-to-end manual verification.
-    - [ ] Generate a 15-line Mushaf video and verify sync/highlighting.
-    - [ ] Generate a 5-line Mushaf video and verify paging/scrolling behavior.
-    - [ ] Confirm all overlays (Header, Footer, Progress) render correctly.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Final Integration & Verification' (Protocol in workflow.md)
+## Phase 4: Final Integration & Verification [checkpoint: 329476b]
+- [x] Task: Perform end-to-end manual verification. 329476b
+    - [x] Generate a 15-line Mushaf video and verify sync/highlighting.
+    - [x] Generate a 5-line Mushaf video and verify paging/scrolling behavior.
+    - [x] Confirm all overlays (Header, Footer, Progress) render correctly.
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Final Integration & Verification' (Protocol in workflow.md) 329476b
