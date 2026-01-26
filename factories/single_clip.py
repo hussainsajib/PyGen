@@ -222,9 +222,13 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     """
     resolution = get_resolution(is_short)
     width, height = resolution
-    font_path = os.path.abspath(os.path.join("QPC_V2_Font.ttf", f"p{page_number}.ttf"))
-    if not os.path.exists(font_path):
-        font_path = "Arial" 
+    font_path_page = os.path.abspath(os.path.join("QPC_V2_Font.ttf", f"p{page_number}.ttf"))
+    font_path_bsml = os.path.abspath(os.path.join("QPC_V2_Font.ttf", "QCF_BSML.TTF"))
+    font_path_sura = os.path.abspath(os.path.join("QPC_V2_Font.ttf", "QCF_SURA.TTF"))
+
+    if not os.path.exists(font_path_page):
+        font_path_page = "Arial" 
+
     top_margin = height * 0.1
     bottom_margin = height * 0.1
     usable_height = height - top_margin - bottom_margin
@@ -242,11 +246,35 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         # Reverse words for RTL rendering
         words = line.get("words", [])
         text = "".join([w["text"] for w in reversed(words)])
+        
+        # Determine font based on line type
+        l_type = line.get("line_type", "ayah")
+        current_font_path = font_path_page
+        
+        if l_type == "basmallah":
+            current_font_path = font_path_bsml
+            # For Bismillah, the text in DB might be standard Arabic, 
+            # but the font might map specific codepoints or handle it nicely.
+            # If the text is missing in DB for basmallah lines (which happens in some DBs), 
+            # we might need to hardcode the special char if the font requires it.
+            # However, assuming the DB has the correct text or the font works with standard text.
+            if not text:
+                 # Fallback if text is empty but type is basmallah, usually it's "بسم الله الرحمن الرحيم"
+                 text = "بسم الله الرحمن الرحيم"
+        elif l_type == "surah_name":
+            current_font_path = font_path_sura
+            # Similarly for Surah Name
+
         if not text:
             continue
+            
         y_pos = top_margin + (i * line_height)
         font_size = int(line_height * 0.7)
-        img_array = render_mushaf_text_to_image(text, font_path, font_size, color, (int(width * 0.9), int(line_height)))
+        
+        # Adjust font size/y_pos for headers if needed? 
+        # Usually headers are same line height.
+        
+        img_array = render_mushaf_text_to_image(text, current_font_path, font_size, color, (int(width * 0.9), int(line_height)))
         t_clip = ImageClip(img_array).set_duration(duration).set_position(('center', y_pos))
         clips.append(t_clip)
         start_ms = line.get("start_ms")

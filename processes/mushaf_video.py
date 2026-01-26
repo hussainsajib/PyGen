@@ -141,15 +141,31 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                     ).set_duration(chunk_duration_sec).set_position(('center', height * 0.02))
                     overlays.append(bismillah_clip)
 
-                if config_manager.get("ENABLE_RECITER_INFO") == "True":
+                if config_manager.get("ENABLE_RECITER_INFO", "True") == "True":
                     overlays.append(generate_reciter_name_clip(reciter_display_name, is_short, chunk_duration_sec))
-                if config_manager.get("ENABLE_SURAH_INFO") == "True":
+                if config_manager.get("ENABLE_SURAH_INFO", "True") == "True":
                     overlays.append(generate_surah_info_clip(surah_display_name, 0, is_short, chunk_duration_sec, language=current_language))
-                if config_manager.get("ENABLE_CHANNEL_INFO") == "True":
+                if config_manager.get("ENABLE_CHANNEL_INFO", "True") == "True":
                     overlays.append(generate_brand_clip(brand_name, is_short, chunk_duration_sec))
 
+                # Progress Bar
+                start_ratio = chunk_start_ms / total_audio_ms
+                end_ratio = chunk_end_ms / total_audio_ms
+                
                 progress_bar_bg = ColorClip(size=(width, 5), color=(100, 100, 100)).set_opacity(0.3).set_duration(chunk_duration_sec).set_position(('center', height-5))
                 overlays.append(progress_bar_bg)
+                
+                # Dynamic Progress Bar Foreground
+                def get_progress_width(t):
+                    if chunk_duration_sec <= 0: return 0
+                    p = start_ratio + (end_ratio - start_ratio) * (t / chunk_duration_sec)
+                    return int(width * max(0.0, min(1.0, p)))
+
+                progress_bar_fg = ColorClip(size=(width, 5), color=(0, 200, 0))
+                # Resize usage: clip.resize(width=lambda t: w(t))
+                progress_bar_fg = progress_bar_fg.resize(width=lambda t: max(1, get_progress_width(t)))
+                progress_bar_fg = progress_bar_fg.set_opacity(0.8).set_duration(chunk_duration_sec).set_position(('left', height-5))
+                overlays.append(progress_bar_fg)
 
                 # Compose Chunk
                 bg_clip = generate_background(background_path, chunk_duration_sec, is_short)
