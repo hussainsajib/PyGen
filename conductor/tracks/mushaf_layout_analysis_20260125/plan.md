@@ -2,12 +2,12 @@
 
 This track involves investigating the schema and data alignment between `word_by_word_qpc-v2.db` and `qpc-v2-15-lines.db` to enable a 15-line Mushaf view.
 
-## Phase 1: Database Investigation
+## Phase 1: Database Investigation [checkpoint: cf28f26]
 - [x] Task: Create a script to inspect and document the schemas of both databases.
     - [x] Sub-task: Write unit tests for the schema inspection utility (e.g., ensuring it can connect and list tables).
     - [x] Sub-task: Implement the inspection utility using `sqlite3`.
     - [x] Sub-task: Run the utility and record the table structures and column types in a markdown report.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Database Investigation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Database Investigation' (Protocol in workflow.md) cf28f26
 
 ## Phase 2: Logic Development & Prototype
 - [ ] Task: Develop the matching logic to align words with line boundaries.
