@@ -24,5 +24,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Add Mushaf to Navbar**
+- [x] **Track: Add Mushaf to Navbar**
 *Link: [./tracks/add_mushaf_to_navbar_20260125/](./tracks/add_mushaf_to_navbar_20260125/)*
