@@ -224,7 +224,7 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     width, height = resolution
     font_path_page = os.path.abspath(os.path.join("QPC_V2_Font.ttf", f"p{page_number}.ttf"))
     font_path_bsml = os.path.abspath(os.path.join("QPC_V2_Font.ttf", "QCF_BSML.TTF"))
-    font_path_sura = os.path.abspath(os.path.join("QPC_V2_Font.ttf", "QCF_SURA.TTF"))
+    font_path_sura = os.path.abspath(os.path.join("QPC_V2_Font.ttf", "QCF_SurahHeader_COLOR-Regular.ttf"))
 
     if not os.path.exists(font_path_page):
         font_path_page = "Arial" 
@@ -267,13 +267,11 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
                 try:
                     from processes.Classes.surah import Surah
                     s_obj = Surah(line["surah_number"])
-                    if s_obj.arabic_name:
-                        # Reverse words for RTL rendering
-                        text = " ".join(reversed(s_obj.arabic_name.split()))
-                    else:
-                        text = s_obj.english_name
+                    # For SurahHeader fonts, often the glyph is mapped to the surah number as a character
+                    # We try the character mapping first for this specific font
+                    text = chr(line["surah_number"]) 
                 except Exception as e:
-                    print(f"Error fetching surah name: {e}")
+                    print(f"Error mapping surah number to char: {e}")
                     text = str(line["surah_number"])
 
         if not text:
@@ -289,10 +287,15 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         img_array = render_mushaf_text_to_image(text, current_font_path, font_size, color, (int(width * 0.9), int(line_height)))
         
         # Check if render produced anything visible (alpha channel check)
-        # If QCF_SURA.TTF failed (e.g. wrong mapping), fallback to standard font (Arial)
-        # because pX.ttf fonts usually don't support standard Unicode Arabic.
+        # If QCF_SurahHeader... failed with character mapping, try Arabic Name with Arial
         if l_type == "surah_name" and not np.any(img_array[..., 3] > 0):
-            print(f"[DEBUG] QCF_SURA.TTF failed to render '{text}'. Falling back to Arial.")
+            print(f"[DEBUG] Surah header font failed for char {ord(text) if text else 'N/A'}. Trying Arabic Name with Arial.")
+            try:
+                from processes.Classes.surah import Surah
+                s_obj = Surah(line["surah_number"])
+                text = " ".join(reversed(s_obj.arabic_name.split())) if s_obj.arabic_name else s_obj.english_name
+            except:
+                text = str(line["surah_number"])
             img_array = render_mushaf_text_to_image(text, "arial.ttf", font_size, color, (int(width * 0.9), int(line_height)))
             
         t_clip = ImageClip(img_array).set_duration(duration).set_position(('center', y_pos))
