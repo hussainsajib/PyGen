@@ -13,10 +13,13 @@ This plan outlines the steps to implement a traditional 15-line Mushaf layout on
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Backend Data & API' (Protocol in workflow.md) 3c25132
 
 ## Phase 2: Frontend Template & Dynamic Fonts
-- [ ] Task: Create the Mushaf base template.
-    - [ ] Create `templates/mushaf.html` with the 15-line container structure.
-    - [ ] Implement CSS for the "Mushaf aesthetic" (cream background, specific line heights, centered text).
-- [ ] Task: Implement dynamic font loading.
+- [x] Task: Create the Mushaf base template. c5663a0
+    - [x] Create `templates/mushaf.html` with the 15-line container structure.
+    - [x] Implement CSS for the "Mushaf aesthetic" (cream background, specific line heights, centered text).
+- [x] Task: Implement dynamic font loading. c5663a0
+    - [x] Add a JavaScript/Jinja2 mechanism to inject the correct `@font-face` declaration for the current page.
+    - [x] Ensure words are rendered using the `PageFont` family.
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: Frontend Template & Dynamic Fonts' (Protocol in workflow.md)
     - [ ] Add a JavaScript/Jinja2 mechanism to inject the correct `@font-face` declaration for the current page.
     - [ ] Ensure words are rendered using the `PageFont` family.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Frontend Template & Dynamic Fonts' (Protocol in workflow.md)
