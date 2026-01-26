@@ -2,7 +2,7 @@
 
 This plan outlines the implementation of a new video generation engine that renders Mushaf-style layouts with active line highlighting and integrated background selection.
 
-## Phase 1: Data Alignment & Core Rendering
+## Phase 1: Data Alignment & Core Rendering [checkpoint: 70de69a]
 - [x] Task: Implement a utility to map WBW timestamps to Mushaf lines. 50f892e
     - [x] Write unit tests for timestamp alignment (ensuring correct start/end times per line).
     - [x] Implement `get_mushaf_line_timestamps` in `db_ops/crud_mushaf.py`.
