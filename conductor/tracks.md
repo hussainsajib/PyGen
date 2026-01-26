@@ -21,7 +21,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Link: [./tracks/shorts_duration_validation_20260125/](./tracks/shorts_duration_validation_20260125/)*
 
 
----
-
-- [x] **Track: Mushaf Web View Feature**
-*Link: [./tracks/mushaf_web_view_20260125/](./tracks/mushaf_web_view_20260125/)*
