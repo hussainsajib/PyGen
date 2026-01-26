@@ -3,13 +3,13 @@
 This plan outlines the implementation of a new video generation engine that renders Mushaf-style layouts with active line highlighting and integrated background selection.
 
 ## Phase 1: Data Alignment & Core Rendering
-- [~] Task: Implement a utility to map WBW timestamps to Mushaf lines.
-    - [ ] Write unit tests for timestamp alignment (ensuring correct start/end times per line).
-    - [ ] Implement `get_mushaf_line_timestamps` in `db_ops/crud_mushaf.py`.
-- [ ] Task: Create the core Mushaf clip generator using MoviePy.
-    - [ ] Write unit tests for the clip generator (mocking MoviePy components).
-    - [ ] Implement `generate_mushaf_page_clip` in `factories/single_clip.py` or a new factory.
-    - [ ] Add logic for semi-transparent line highlighting/glow based on active timestamps.
+- [x] Task: Implement a utility to map WBW timestamps to Mushaf lines. 50f892e
+    - [x] Write unit tests for timestamp alignment (ensuring correct start/end times per line).
+    - [x] Implement `get_mushaf_line_timestamps` in `db_ops/crud_mushaf.py`.
+- [x] Task: Create the core Mushaf clip generator using MoviePy. 245de8d
+    - [x] Write unit tests for the clip generator (mocking MoviePy components).
+    - [x] Implement `generate_mushaf_page_clip` in `factories/single_clip.py` or a new factory.
+    - [x] Add logic for semi-transparent line highlighting/glow based on active timestamps.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Data Alignment & Core Rendering' (Protocol in workflow.md)
 
 ## Phase 2: Process Orchestration & API
