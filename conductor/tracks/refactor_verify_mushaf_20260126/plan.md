@@ -9,16 +9,16 @@ This plan outlines the refactoring of `scripts/verify_mushaf_rendering.py` to in
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Data Access' (Protocol in workflow.md) 9d88086
 
 ## Phase 2: Core Rendering Logic Refactor
-- [ ] Task: Implement dynamic font selection and loading.
-    - [ ] Write unit tests for font path resolution.
-    - [ ] Implement logic to select fonts based on `line_type` (BSML, SURA, page font).
-- [ ] Task: Implement RTL word sequencing.
-    - [ ] Write unit tests for RTL string construction.
-    - [ ] Refactor word joining to reverse word order before rendering.
-- [ ] Task: Integrate Pillow-based text rendering.
-    - [ ] Implement/Update `render_mushaf_text_to_image` within the script.
-    - [ ] Add fallback mechanism for decorative fonts.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Rendering' (Protocol in workflow.md)
+- [x] Task: Implement dynamic font selection and loading. 6334762
+    - [x] Write unit tests for font path resolution.
+    - [x] Implement logic to select fonts based on `line_type` (BSML, SURA, page font).
+- [x] Task: Implement RTL word sequencing. 6334762
+    - [x] Write unit tests for RTL string construction.
+    - [x] Refactor word joining to reverse word order before rendering.
+- [x] Task: Integrate Pillow-based text rendering. 6334762
+    - [x] Implement/Update `render_mushaf_text_to_image` within the script.
+    - [x] Add fallback mechanism for decorative fonts.
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Core Rendering' (Protocol in workflow.md) 6334762
 
 ## Phase 3: Integration and Bug Fixes
 - [ ] Task: Refactor the main verification loop.
