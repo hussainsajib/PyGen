@@ -263,41 +263,58 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
                  text = "بسم الله الرحمن الرحيم"
         elif l_type == "surah_name":
             current_font_path = font_path_sura
-            if not text:
-                try:
-                    from processes.Classes.surah import Surah
-                    s_obj = Surah(line["surah_number"])
-                    # For QCF Surah Header font, surah headers are usually mapped to PUA range starting at 0xE900
-                    # Surah 1 -> 0xE901, Surah 2 -> 0xE902, etc.
-                    text = chr(0xE900 + int(line["surah_number"]))
-                except Exception as e:
-                    print(f"Error mapping surah number to char: {e}")
-                    text = str(line["surah_number"])
+            # We will determine the text inside the render loop to allow retries with different mappings
+            text = None 
 
-        if not text:
+        if not text and l_type != "surah_name":
             continue
             
         y_pos = top_margin + (i * line_height)
         font_size = int(line_height * 0.7)
+        size_tuple = (int(width * 0.9), int(line_height))
         
-        # Adjust font size/y_pos for headers if needed? 
-        # Usually headers are same line height.
-        
-        # Render
-        img_array = render_mushaf_text_to_image(text, current_font_path, font_size, color, (int(width * 0.9), int(line_height)))
-        
-        # Check if render produced anything visible (alpha channel check)
-        # If QCF_SurahHeader... failed with character mapping, try Arabic Name with Arial
-        if l_type == "surah_name" and not np.any(img_array[..., 3] > 0):
-            print(f"[DEBUG] Surah header font failed for char {ord(text) if text else 'N/A'}. Trying Arabic Name with Arial.")
-            try:
-                from processes.Classes.surah import Surah
-                s_obj = Surah(line["surah_number"])
-                text = " ".join(reversed(s_obj.arabic_name.split())) if s_obj.arabic_name else s_obj.english_name
-            except:
-                text = str(line["surah_number"])
-            img_array = render_mushaf_text_to_image(text, "arial.ttf", font_size, color, (int(width * 0.9), int(line_height)))
+        if l_type == "surah_name":
+            # Strategies to try for Surah Header font
+            surah_num = int(line["surah_number"])
+            strategies = [
+                chr(0xE900 + surah_num), # PUA E9xx
+                chr(0xF300 + surah_num), # PUA F3xx
+                str(surah_num),          # ASCII Number
+                f"{surah_num:03d}"       # ASCII 3-digit Number
+            ]
             
+            img_array = None
+            success = False
+            
+            # Helper to check if image is .notdef (box)
+            # We create a "missing" image once for comparison
+            img_missing = render_mushaf_text_to_image(chr(0x0000), current_font_path, font_size, color, size_tuple)
+            
+            for s_text in strategies:
+                candidate_img = render_mushaf_text_to_image(s_text, current_font_path, font_size, color, size_tuple)
+                # Check if visible AND not identical to the missing glyph box
+                if np.any(candidate_img[..., 3] > 0) and not np.array_equal(candidate_img, img_missing):
+                    img_array = candidate_img
+                    text = s_text # Just for logging/debug
+                    success = True
+                    # print(f"[DEBUG] Found Surah glyph using strategy: {s_text!r} (Hex: {hex(ord(s_text[0])) if len(s_text)==1 else 'str'})")
+                    break
+            
+            if not success:
+                # Fallback to Arial with Arabic Name
+                print(f"[DEBUG] Surah header font failed all mappings. Falling back to Arial.")
+                try:
+                    from processes.Classes.surah import Surah
+                    s_obj = Surah(surah_num)
+                    text = " ".join(reversed(s_obj.arabic_name.split())) if s_obj.arabic_name else s_obj.english_name
+                except:
+                    text = str(surah_num)
+                img_array = render_mushaf_text_to_image(text, "arial.ttf", font_size, color, size_tuple)
+        
+        else:
+            # Standard render for non-surah lines
+            img_array = render_mushaf_text_to_image(text, current_font_path, font_size, color, size_tuple)
+
         t_clip = ImageClip(img_array).set_duration(duration).set_position(('center', y_pos))
         clips.append(t_clip)
         start_ms = line.get("start_ms")
