@@ -305,8 +305,8 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     clips = []
     
     # 1. Generate Authentic Static Border
-    # Dimensions: FIXED 90% width for consistency
-    border_w = int(width * 0.90)
+    # Dimensions: FIXED 50% width for consistency
+    border_w = int(width * 0.50)
     border_h = int(usable_height + 60) # Generous height to encompass all slots
     border_color = (212, 197, 161) # Authentic Gold/Bronze
     border_thickness = 8

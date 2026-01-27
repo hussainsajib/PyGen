@@ -1,4 +1,4 @@
-# Track mushaf_video_authentic_border_20260127 Context
+# Track mushaf_video_50pct_border_20260127 Context
 
 - [Specification](./spec.md)
 - [Implementation Plan](./plan.md)
