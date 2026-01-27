@@ -246,6 +246,26 @@ def generate_brand_clip(brand_name: str, is_short: bool, duration: int) -> TextC
     brand_pos = COMMON["f_channel_info_position"](is_short, brand_name_clip.w)
     return brand_name_clip.set_position(brand_pos, relative=True).set_duration(duration)
 
+def generate_mushaf_border_clip(size: tuple, thickness: int, radius: int, color: tuple, padding: int, duration: float) -> ImageClip:
+    """
+    Generates a static border clip with rounded corners using Pillow.
+    """
+    # Create a canvas with an alpha channel
+    img = Image.new('RGBA', size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    
+    # Calculate the bounding box for the rounded rectangle
+    # We subtract thickness/2 to ensure the border stays within the canvas
+    half_th = thickness // 2
+    rect_box = [half_th, half_th, size[0] - half_th, size[1] - half_th]
+    
+    # Draw the rounded rectangle border
+    draw.rounded_rectangle(rect_box, radius=radius, outline=color, width=thickness)
+    
+    # Convert to MoviePy ImageClip
+    img_arr = np.array(img)
+    return ImageClip(img_arr).set_duration(duration)
+
 def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, duration: float) -> CompositeVideoClip:
     """
     Generates a CompositeVideoClip for a Mushaf page.
@@ -265,6 +285,28 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     line_height = usable_height / 15
     clips = []
     
+    # 1. Generate Static Border
+    # Dimensions: 95% width, covering the usable height area
+    border_w = int(width * 0.95)
+    border_h = int(usable_height + 40) # Add a bit of padding for visual comfort
+    border_color = (212, 197, 161) # Gold/Bronze-ish color matching physical Mushaf
+    border_thickness = 6
+    border_radius = 20
+    
+    border_clip = generate_mushaf_border_clip(
+        size=(border_w, border_h),
+        thickness=border_thickness,
+        radius=border_radius,
+        color=border_color,
+        padding=20,
+        duration=duration
+    )
+    
+    # Position the border to encompass the 15 lines
+    # Vertical center should be at top_margin + usable_height / 2
+    border_y = top_margin + (usable_height / 2) - (border_h / 2)
+    clips.append(border_clip.set_position(('center', border_y)))
+
     color = FONT_COLOR
     if isinstance(color, str) and color.startswith("rgb("):
         try:
