@@ -22,7 +22,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Mushaf Basmallah Resize**
+- [x] **Track: Mushaf Basmallah Resize**
 *Link: [./tracks/mushaf_basmallah_resize_20260126/](./tracks/mushaf_basmallah_resize_20260126/)*
 
 

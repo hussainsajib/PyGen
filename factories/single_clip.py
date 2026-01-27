@@ -309,8 +309,8 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
                 # 15% of frame width provides direct parity.
                 font_size = int(width * 0.15)
             else:
-                # Basmallah requested even smaller (standard text is 0.7)
-                font_size = int(line_height * 1.0)
+                # Basmallah should be smaller, matching web ratio of ~1.9x standard text (0.7 * 1.9 = 1.33)
+                font_size = int(line_height * 1.3)
             
             if l_type == "surah_name":
                 # Use ligature data from ligatures.json
