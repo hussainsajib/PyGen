@@ -303,8 +303,14 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         y_pos = top_margin + (i * line_height)
         
         if l_type in ["surah_name", "basmallah"]:
-            # Moderately larger font size to capture detail, but trimming ensures it fits
-            font_size = int(line_height * 2.5)
+            # Capture detail, but trimming ensures it fits
+            if l_type == "surah_name":
+                # Web uses 15cqw (~15% of width). 
+                # 15% of frame width provides direct parity.
+                font_size = int(width * 0.15)
+            else:
+                # Basmallah requested even smaller (standard text is 0.7)
+                font_size = int(line_height * 1.0)
             
             if l_type == "surah_name":
                 # Use ligature data from ligatures.json
@@ -319,6 +325,10 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
             # Position centered vertically on the line slot
             visual_h = img_array.shape[0]
             y_centered = y_pos + (line_height / 2) - (visual_h / 2)
+            
+            # Add margin after the header by shifting it UP in its slot
+            if l_type == "surah_name":
+                y_centered -= (line_height * 0.3)
             
             # Apply timing logic if timestamps are provided
             start_ms = line.get("start_ms")
