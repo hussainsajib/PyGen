@@ -128,6 +128,13 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                 if idx == 0:
                     current_lines = chunk_for_rendering.copy()
                     
+                    # Determine timing for injected lines: match the first Ayah's end_ms
+                    first_ayah_end_ms = chunk_duration_sec * 1000
+                    for line in current_lines:
+                        if line.get("line_type") == "ayah" and line.get("end_ms") is not None:
+                            first_ayah_end_ms = line["end_ms"]
+                            break
+
                     # 1. Inject Header if missing
                     has_header = any(l.get("line_type") == "surah_name" for l in current_lines)
                     if not has_header:
@@ -139,7 +146,7 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                             "surah_number": surah_number,
                             "words": [],
                             "start_ms": 0,
-                            "end_ms": chunk_duration_sec * 1000 
+                            "end_ms": first_ayah_end_ms
                         }
                         chunk_for_rendering.insert(0, header_line)
 
@@ -157,7 +164,7 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                                 "surah_number": surah_number,
                                 "words": [],
                                 "start_ms": 0,
-                                "end_ms": chunk_duration_sec * 1000 
+                                "end_ms": first_ayah_end_ms
                              }
                              chunk_for_rendering.insert(insert_idx, bsml_line)
 

@@ -29,8 +29,9 @@ def generate_verification_video(page_number, output_name):
     print(f"Done. Please check {output_path}.")
 
 def generate_mock_injection_test(output_name):
-    print("Generating Mock Injection Test...")
-    # Create a fake page with an injected header
+    print("Generating Mock Injection Test with Timing...")
+    # Create a fake page with an injected header and bismillah
+    # They should disappear after 2 seconds
     lines = [
         {
             "page_number": 100,
@@ -40,11 +41,21 @@ def generate_mock_injection_test(output_name):
             "surah_number": 100, # Al-Adiyat
             "words": [],
             "start_ms": 0,
-            "end_ms": 5000
+            "end_ms": 2000
         },
         {
             "page_number": 100,
             "line_number": 1,
+            "line_type": "basmallah",
+            "is_centered": True,
+            "surah_number": 100,
+            "words": [],
+            "start_ms": 0,
+            "end_ms": 2000
+        },
+        {
+            "page_number": 100,
+            "line_number": 2,
             "line_type": "ayah",
             "is_centered": False,
             "surah_number": 100,

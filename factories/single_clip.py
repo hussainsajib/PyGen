@@ -9,6 +9,17 @@ from config_manager import config_manager
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import os
+import json
+
+# Load ligature data for Mushaf headers
+LIGATURE_DATA = {}
+try:
+    ligature_path = os.path.abspath(os.path.join("databases", "text", "ligatures.json"))
+    if os.path.exists(ligature_path):
+        with open(ligature_path, "r", encoding="utf-8") as f:
+            LIGATURE_DATA = json.load(f)
+except Exception as e:
+    print(f"[ERROR] Failed to load ligatures.json: {e}")
 
 def get_font_path(font_name: str) -> str:
     """Checks for a font in a local 'fonts' directory, otherwise returns the name."""
@@ -277,9 +288,9 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
             if not text:
                  text = "بسم الله الرحمن الرحيم"
             
-            # Authenticity Refinement: QCF_BSML.TTF uses U+FC20 for the full calligraphy
+            # Authenticity Refinement: QCF_BSML.TTF uses U+00F3 for the full calligraphy
             if "QCF_BSML" in current_font_path:
-                text = "ﰠ" # U+FC20
+                text = "\u00F3" # U+00F3
 
         elif l_type == "surah_name":
             current_font_path = font_path_sura
@@ -296,25 +307,10 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
             font_size = int(line_height * 2.5)
             
             if l_type == "surah_name":
-                # Strategies to try for Surah Header font
+                # Use ligature data from ligatures.json
                 surah_num = int(line["surah_number"])
-                
-                # Exact mapping extracted from QCF_SurahHeader_COLOR-Regular.ttf
-                qcf_header_map = [
-                    0xFC45, 0xFC46, 0xFC47, 0xFC4A, 0xFC4B, 0xFC4E, 0xFC4F, 0xFC51, 0xFC52, 0xFC53, 
-                    0xFC55, 0xFC56, 0xFC58, 0xFC5A, 0xFC5B, 0xFC5C, 0xFC5D, 0xFC5E, 0xFC61, 0xFC62, 0xFC64, # 1-21
-                    0xFB51, 0xFB52, 0xFB54, 0xFB55, 0xFB57, 0xFB58, 0xFB5A, 0xFB5B, 0xFB5D, 0xFB5E, 0xFB60, 
-                    0xFB61, 0xFB63, 0xFB64, 0xFB66, 0xFB67, 0xFB69, 0xFB6A, 0xFB6C, 0xFB6D, 0xFB6F, 0xFB70, 
-                    0xFB72, 0xFB73, 0xFB75, 0xFB76, 0xFB78, 0xFB79, 0xFB7B, 0xFB7C, 0xFB7E, 0xFB7E, 0xFB81, 
-                    0xFB82, 0xFB84, 0xFB85, 0xFB87, 0xFB88, 0xFB8A, 0xFB8B, 0xFB8D, 0xFB8E, 0xFB90, 0xFB91, 
-                    0xFB93, 0xFB94, 0xFB96, 0xFB97, 0xFB99, 0xFB9A, 0xFB9C, 0xFB9D, 0xFB9F, 0xFBA0, 0xFBA2, 
-                    0xFBA3, 0xFBA5, 0xFBA6, 0xFBA8, 0xFBA9, 0xFBAB, 0xFBAC, 0xFBAE, 0xFBAF, 0xFBB1, 0xFBB2, 
-                    0xFBB4, 0xFBB5, 0xFBB7, 0xFBB8, 0xFBBA, 0xFBBB, 0xFBBD, 0xFBBE, 0xFBC0, 0xFBC1, 0xFBD3, 
-                    0xFBD4, 0xFBD6, 0xFBD7, 0xFBD9, 0xFBDA, 0xFBDC, 0xFBDD, 0xFBDF, 0xFBE0, 0xFBE2, 0xFBE3, 
-                    0xFBE5, 0xFBE6, 0xFBE8, 0xFBE9, 0xFBEB # 22-114
-                ]
-                
-                text_candidate = chr(qcf_header_map[surah_num - 1]) if 1 <= surah_num <= 114 else str(surah_num)
+                key = f"surah-{surah_num}"
+                text_candidate = LIGATURE_DATA.get(key, str(surah_num))
                 img_array = render_mushaf_text_to_image(text_candidate, current_font_path, font_size, color, (width, font_size))
             else:
                 # Basmallah
@@ -323,7 +319,23 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
             # Position centered vertically on the line slot
             visual_h = img_array.shape[0]
             y_centered = y_pos + (line_height / 2) - (visual_h / 2)
-            t_clip = ImageClip(img_array).set_duration(duration).set_position(('center', y_centered))
+            
+            # Apply timing logic if timestamps are provided
+            start_ms = line.get("start_ms")
+            end_ms = line.get("end_ms")
+            
+            t_clip = ImageClip(img_array).set_position(('center', y_centered))
+            
+            if start_ms is not None and end_ms is not None:
+                start_sec = max(0, float(start_ms) / 1000.0)
+                end_sec = min(duration, float(end_ms) / 1000.0)
+                line_duration = end_sec - start_sec
+                if line_duration > 0:
+                    t_clip = t_clip.set_start(start_sec).set_duration(line_duration)
+                else:
+                    t_clip = t_clip.set_duration(duration)
+            else:
+                t_clip = t_clip.set_duration(duration)
         else:
             font_size = int(line_height * 0.7)
             img_array = render_mushaf_text_to_image(text, current_font_path, font_size, color, (int(width * 0.9), int(line_height)))
