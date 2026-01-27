@@ -2,7 +2,7 @@
   "track_id": "mushaf_video_multi_page_fix_20260127",
   "type": "bug",
   "status": "new",
-  "created_at": "2026-01-27T12:07:00Z",
-  "updated_at": "2026-01-27T12:07:00Z",
-  "description": "i create a mushaf video of surah 87 which spans over two pages. the first page has 4 lines which in the video works fine but the second page never loaded but the recitation continued. this should work for any number of pages. when the recitation moves to the next page display the next (without the surah header and bismillah if that's the case)"
+  "created_at": "2026-01-27T13:10:00Z",
+  "updated_at": "2026-01-27T13:10:00Z",
+  "description": "in mushaf video second page isn't shown in the video the recitation continues"
 }

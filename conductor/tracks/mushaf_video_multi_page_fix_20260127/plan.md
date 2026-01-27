@@ -3,6 +3,8 @@
 This plan details the architectural changes to the Mushaf video chunking logic to support seamless multi-page transitions.
 
 ## Phase 1: Engine Refactoring
+- [x] Task: Fix `get_surah_page_range` in `db_ops/crud_mushaf.py`.
+    - It should correctly identify all pages containing any Ayah of the Surah, not just the page with the Surah header.
 - [x] Task: Modify `processes/mushaf_video.py` to implement page-aware chunking.
     - Group `all_aligned_lines` by `page_number` first.
     - Apply `lines_per_page` chunking within each page group.

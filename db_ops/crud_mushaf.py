@@ -6,19 +6,32 @@ DB_WBW = "databases/text/word_by_word_qpc-v2.db"
 
 def get_surah_page_range(surah_number: int):
     """
-    Returns the start and end page for a given surah.
+    Returns the start and end page for a given surah by resolving word ID boundaries.
     """
-    conn = sqlite3.connect(DB_15_LINES)
+    conn_wbw = sqlite3.connect(DB_WBW)
     try:
-        cursor = conn.cursor()
-        cursor.execute("""
+        cursor_wbw = conn_wbw.cursor()
+        cursor_wbw.execute("SELECT MIN(id), MAX(id) FROM words WHERE surah = ?", (surah_number,))
+        start_word_id, end_word_id = cursor_wbw.fetchone()
+    finally:
+        conn_wbw.close()
+        
+    if start_word_id is None:
+        return (None, None)
+
+    conn_15line = sqlite3.connect(DB_15_LINES)
+    try:
+        cursor_15line = conn_15line.cursor()
+        # Find pages where the word range overlaps with the Surah's word range
+        cursor_15line.execute("""
             SELECT MIN(page_number), MAX(page_number)
             FROM pages
-            WHERE surah_number = ?
-        """, (surah_number,))
-        return cursor.fetchone()
+            WHERE first_word_id != '' AND last_word_id != ''
+              AND NOT (last_word_id < ? OR first_word_id > ?)
+        """, (start_word_id, end_word_id))
+        return cursor_15line.fetchone()
     finally:
-        conn.close()
+        conn_15line.close()
 
 def get_mushaf_page_data(page_number: int):
     """
