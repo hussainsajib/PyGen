@@ -25,11 +25,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Mushaf Video Area Border**
 *Link: [./tracks/mushaf_video_border_20260127/](./tracks/mushaf_video_border_20260127/)*
 
----
-
-- [x] **Track: Unified Video Customizable Backgrounds**
-*Link: [./tracks/unified_video_backgrounds_20260127/](./tracks/unified_video_backgrounds_20260127/)*
-
 
 
 
