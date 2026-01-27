@@ -13,12 +13,21 @@ class ConfigManager:
     """
     _instance = None
     _config: List[Dict[str, Any]] = [] # Changed to List of Dicts
+    _overrides: Dict[str, Any] = {} # New: Local overrides
     _lock = asyncio.Lock()
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(ConfigManager, cls).__new__(cls)
         return cls._instance
+
+    def set_local_override(self, key: str, value: Any):
+        """Sets a temporary local override for a config key."""
+        self._overrides[key] = value
+
+    def clear_local_overrides(self):
+        """Clears all local overrides."""
+        self._overrides = {}
 
     async def load_from_db(self, db_session: AsyncSession, reload: bool = False):
         """Loads all configuration key-value pairs from the database."""
@@ -39,7 +48,10 @@ class ConfigManager:
         return sorted(self._config.copy(), key=lambda item: item['id'])
 
     def get(self, key: str, default: Any = None) -> Any:
-        """Gets a value from the configuration cache."""
+        """Gets a value from the configuration cache, respecting local overrides."""
+        if key in self._overrides:
+            return self._overrides[key]
+            
         for item in self._config:
             if item["key"] == key:
                 return item["value"]

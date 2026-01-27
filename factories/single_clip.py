@@ -259,29 +259,38 @@ def generate_brand_clip(brand_name: str, is_short: bool, duration: int) -> TextC
     brand_pos = COMMON["f_channel_info_position"](is_short, brand_name_clip.w)
     return brand_name_clip.set_position(brand_pos, relative=True).set_duration(duration)
 
-def generate_mushaf_border_clip(size: tuple, thickness: int, radius: int, color: tuple, padding: int, duration: float) -> ImageClip:
+def generate_mushaf_border_clip(size: tuple, thickness: int, radius: int, color: tuple, padding: int, duration: float, bg_mode: str = "Solid", bg_color: str = "#FFFDF5") -> ImageClip:
     """
     Generates an authentic multi-layered Mushaf border clip with rounded corners.
-    Includes a double border (thick outer, thin inner) and a subtle textured background.
+    Includes a double border (thick outer, thin inner) and a customizable background.
     """
     # 1. Create Canvas
     img = Image.new('RGBA', size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     
-    # 2. Fill Background (Simulate Paper)
-    # Using a warm cream color as base
-    cream_color = (255, 253, 245, 255)
-    draw.rounded_rectangle([0, 0, size[0], size[1]], radius=radius, fill=cream_color)
+    # 2. Handle Background Mode
+    # Default to Solid Cream if mode not recognized
+    opacity = 255
+    if bg_mode == "Transparent":
+        opacity = 0
+    elif bg_mode == "Semi-Transparent":
+        opacity = 128
     
-    # 3. Apply Subtle Paper Texture (Noise)
-    # Convert to numpy to apply lightweight noise
-    arr = np.array(img)
-    noise = np.random.randint(-5, 5, (size[1], size[0], 3), dtype='int16')
-    # Only apply to non-transparent pixels (the paper area)
-    mask = arr[..., 3] > 0
-    arr[mask, :3] = np.clip(arr[mask, :3] + noise[mask], 0, 255).astype('uint8')
-    img = Image.fromarray(arr)
-    draw = ImageDraw.Draw(img)
+    if opacity > 0:
+        fill_rgb = hex_to_rgb(bg_color)
+        fill_rgba = fill_rgb + (opacity,)
+        draw.rounded_rectangle([0, 0, size[0], size[1]], radius=radius, fill=fill_rgba)
+    
+    # 3. Apply Subtle Paper Texture (Noise) - ONLY IN SOLID MODE
+    if bg_mode == "Solid":
+        # Convert to numpy to apply lightweight noise
+        arr = np.array(img)
+        noise = np.random.randint(-5, 5, (size[1], size[0], 3), dtype='int16')
+        # Only apply to non-transparent pixels (the paper area)
+        mask = arr[..., 3] > 0
+        arr[mask, :3] = np.clip(arr[mask, :3] + noise[mask], 0, 255).astype('uint8')
+        img = Image.fromarray(arr)
+        draw = ImageDraw.Draw(img)
 
     # 4. Draw Outer Thick Border
     half_th = thickness // 2
@@ -317,6 +326,10 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     line_height = usable_height / 15
     clips = []
     
+    # Get internal Mushaf background settings from config
+    bg_mode = config_manager.get("MUSHAF_PAGE_BACKGROUND_MODE", "Solid")
+    bg_color = config_manager.get("MUSHAF_PAGE_BACKGROUND_COLOR", "#FFFDF5")
+
     # 1. Generate Authentic Static Border
     # Dimensions: FIXED 50% width for consistency
     border_w = int(width * 0.50)
@@ -331,9 +344,10 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         radius=border_radius,
         color=border_color,
         padding=25,
-        duration=duration
-    )
-    
+        duration=duration,
+        bg_mode=bg_mode,
+        bg_color=bg_color
+    )    
     # Position the border centered vertically on the Mushaf grid
     border_y = top_margin + (usable_height / 2) - (border_h / 2)
     clips.append(border_clip.set_position(('center', border_y)))

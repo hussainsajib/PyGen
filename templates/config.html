@@ -85,6 +85,17 @@
                     <select name="{{ item.key }}" id="wbw_full_translation_source_select" class="form-control">
                         {# Options will be populated by JavaScript #}
                     </select>
+                {% elif item.key == 'MUSHAF_PAGE_BACKGROUND_MODE' %}
+                    <select name="{{ item.key }}" class="form-control">
+                        <option value="Solid" {% if item.value == 'Solid' %}selected{% endif %}>Solid</option>
+                        <option value="Semi-Transparent" {% if item.value == 'Semi-Transparent' %}selected{% endif %}>Semi-Transparent</option>
+                        <option value="Transparent" {% if item.value == 'Transparent' %}selected{% endif %}>Transparent</option>
+                    </select>
+                {% elif item.key == 'MUSHAF_PAGE_BACKGROUND_COLOR' %}
+                    <div class="d-flex align-items-center">
+                        <input type="color" id="mushaf_bg_color_picker" class="form-control form-control-color me-2" value="{{ item.value }}">
+                        <input type="text" name="{{ item.key }}" id="mushaf_bg_color_value" value="{{ item.value }}" class="form-control">
+                    </div>
                 {% else %}
                     <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="form-control">
                 {% endif %}
@@ -261,6 +272,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const rgb = hexToRgb(this.value);
             if (rgb) {
                 bgColorValue.value = `(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            }
+        });
+    }
+
+    // --- MUSHAF_PAGE_BACKGROUND_COLOR Picker ---
+    const mushafBgColorPicker = document.getElementById('mushaf_bg_color_picker');
+    const mushafBgColorValue = document.getElementById('mushaf_bg_color_value');
+
+    if (mushafBgColorPicker && mushafBgColorValue) {
+        mushafBgColorPicker.addEventListener('change', function() {
+            mushafBgColorValue.value = this.value.toUpperCase();
+        });
+        mushafBgColorValue.addEventListener('input', function() {
+            const val = this.value;
+            if (val.length === 7 && val.startsWith('#')) {
+                mushafBgColorPicker.value = val;
             }
         });
     }

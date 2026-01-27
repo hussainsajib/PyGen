@@ -216,19 +216,15 @@ async def mushaf_video_interface(
             seen_playlists.add(r.playlist_id)
             
     for r in db_reciters:
-        # Note: Mushaf video also needs WBW timestamps for highlighting
-        if r.wbw_database: 
-            reciters.append({
-                "english_name": r.english_name,
-                "key": r.reciter_key
-            })
-    reciters.sort(key=lambda x: x["english_name"])
-    
-    upload_to_youtube = config.get("UPLOAD_TO_YOUTUBE", "False") == "True"
+        upload_to_youtube = config.get("UPLOAD_TO_YOUTUBE", "False") == "True"
     enable_facebook_upload = config.get("ENABLE_FACEBOOK_UPLOAD", "False") == "True"
     default_language = config.get("DEFAULT_LANGUAGE", "bengali")
     bg_rgb = config.get("BACKGROUND_RGB", "(0,0,0)")
     font_color = config.get("FONT_COLOR", "white")
+    
+    mushaf_bg_mode = config.get("MUSHAF_PAGE_BACKGROUND_MODE", "Solid")
+    mushaf_bg_color = config.get("MUSHAF_PAGE_BACKGROUND_COLOR", "#FFFDF5")
+    
     languages = await get_all_languages(db)
     
     context = {
@@ -240,6 +236,8 @@ async def mushaf_video_interface(
         "default_language": default_language,
         "bg_rgb": bg_rgb,
         "font_color": font_color,
+        "mushaf_bg_mode": mushaf_bg_mode,
+        "mushaf_bg_color": mushaf_bg_color,
         "languages": languages,
         "playlists": playlists
     }

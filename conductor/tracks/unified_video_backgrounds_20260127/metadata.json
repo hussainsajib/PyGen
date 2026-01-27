@@ -1,8 +1,0 @@
-{
-  "track_id": "unified_video_backgrounds_20260127",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-01-27T17:59:00Z",
-  "updated_at": "2026-01-27T17:59:00Z",
-  "description": "in mushaf video, remove any backgroun. the user should be able to select an image/video background or choose a solid color background. keep the borders. use the same background selection and solid selection process for word-by-word video generation"
-}

@@ -78,6 +78,21 @@
                                         {% endfor %}
                                     </select>
                                 </div>
+                                <div class="col-12">
+                                    <label for="bg_mode_select" class="form-label small fw-bold">Page Background Mode:</label>
+                                    <select id="bg_mode_select" name="mushaf_bg_mode" class="form-select form-select-sm" onchange="updateGlobalConfig('MUSHAF_PAGE_BACKGROUND_MODE', this.value); toggleColorPicker(this.value)">
+                                        <option value="Solid" {% if mushaf_bg_mode == 'Solid' %}selected{% endif %}>Solid (Physical Paper)</option>
+                                        <option value="Semi-Transparent" {% if mushaf_bg_mode == 'Semi-Transparent' %}selected{% endif %}>Semi-Transparent</option>
+                                        <option value="Transparent" {% if mushaf_bg_mode == 'Transparent' %}selected{% endif %}>Transparent (Show Media)</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 {% if mushaf_bg_mode == 'Transparent' %}d-none{% endif %}" id="page_color_group">
+                                    <label for="bg_color_input" class="form-label small fw-bold">Page Color:</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="color" id="bg_color_picker" class="form-control form-control-color" value="{{ mushaf_bg_color }}" title="Choose page color" onchange="updateGlobalConfig('MUSHAF_PAGE_BACKGROUND_COLOR', this.value)">
+                                        <input type="text" class="form-control" value="{{ mushaf_bg_color }}" readonly>
+                                    </div>
+                                </div>
                                 <div class="col-6">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" id="upload_to_youtube_checkbox" {% if upload_to_youtube %}checked{% endif %} onchange="updateGlobalConfig('UPLOAD_TO_YOUTUBE', this.checked ? 'True' : 'False')">
@@ -132,6 +147,15 @@
 </div>
 
 <script>
+    function toggleColorPicker(mode) {
+        const group = document.getElementById("page_color_group");
+        if (mode === "Transparent") {
+            group.classList.add("d-none");
+        } else {
+            group.classList.remove("d-none");
+        }
+    }
+
     function toggleTitleInput() {
         const isShort = document.getElementById("is_short_true").checked;
         const titleGroup = document.getElementById("title_input_group");

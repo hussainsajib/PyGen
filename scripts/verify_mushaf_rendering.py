@@ -1,6 +1,7 @@
 from factories.single_clip import generate_mushaf_page_clip, generate_background
 from db_ops.crud_mushaf import get_mushaf_page_data
 from moviepy.editor import ColorClip, CompositeVideoClip
+from config_manager import config_manager
 import os
 import sys
 
@@ -74,12 +75,20 @@ def generate_mock_injection_test(output_name):
     print(f"Done. Please check {output_path}.")
 
 if __name__ == "__main__":
-    # Test with Page 1 (Fatiha) and Page 2 (Baqarah start)
-    # Using a custom color for Page 1 to verify Phase 1
-    generate_verification_video(1, "verify_page_1", background_input="#2c3e50")
-    generate_verification_video(2, "verify_page_2")
-    generate_verification_video(3, "verify_page_3")
-    generate_verification_video(187, "verify_page_187")
-    generate_verification_video(591, "verify_page_591")
-    generate_verification_video(602, "verify_page_602")
+    # 1. Test Transparent Mode with a Color
+    config_manager.set_local_override("MUSHAF_PAGE_BACKGROUND_MODE", "Transparent")
+    generate_verification_video(1, "verify_bg_transparent", background_input="#2c3e50")
+    
+    # 2. Test Semi-Transparent Mode with a Color
+    config_manager.set_local_override("MUSHAF_PAGE_BACKGROUND_MODE", "Semi-Transparent")
+    config_manager.set_local_override("MUSHAF_PAGE_BACKGROUND_COLOR", "#FFFFFF") # White semi-transparent
+    generate_verification_video(2, "verify_bg_semi", background_input="#1a1a1a")
+    
+    # 3. Test Solid Mode (Default)
+    config_manager.set_local_override("MUSHAF_PAGE_BACKGROUND_MODE", "Solid")
+    config_manager.set_local_override("MUSHAF_PAGE_BACKGROUND_COLOR", "#FFFDF5")
+    generate_verification_video(3, "verify_bg_solid", background_input="#000000")
+
+    # Cleanup overrides
+    config_manager.clear_local_overrides()
     generate_mock_injection_test("verify_injection")
