@@ -1,0 +1,5 @@
+# Track authentic_mushaf_rendering_20260126 Context
+
+- [Specification](./spec.md)
+- [Implementation Plan](./plan.md)
+- [Metadata](./metadata.json)

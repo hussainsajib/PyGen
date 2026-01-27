@@ -1,0 +1,8 @@
+{
+  "track_id": "authentic_mushaf_rendering_20260126",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-26T19:11:00Z",
+  "updated_at": "2026-01-26T19:11:00Z",
+  "description": "modify the mushaf feature in the app (not the mushaf video). use these rules: Query the pages table in the layout SQLite database to retrieve the necessary details for each line on the page (including the page_number, line_number, line_type, etc.). For each line, based on the line_type, determine the content to render: If the line_type is surah_name, render the Surah name on this line. surah_number filed contain the surah id you need to render . If the line_type is ayah, retrieve the words between first_word_id and last_word_id from the words table and render those words in order(or concatenate them to form the single string and render it). If the line_type is basmallah, display the Bismillah on this line. Ensure that the text for each line is aligned correctly (centered or justified, align the line based on the is_centered field). Repeat this process for each line on the page until all lines are rendered. for the bismillah use this font: QCF_BSML.TTF for surah name: QCF_SURA.TTF for design header: QCF_SurahHeader_COLOR-Regular.ttf"
+}
