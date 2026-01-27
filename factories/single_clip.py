@@ -248,19 +248,38 @@ def generate_brand_clip(brand_name: str, is_short: bool, duration: int) -> TextC
 
 def generate_mushaf_border_clip(size: tuple, thickness: int, radius: int, color: tuple, padding: int, duration: float) -> ImageClip:
     """
-    Generates a static border clip with rounded corners using Pillow.
+    Generates an authentic multi-layered Mushaf border clip with rounded corners.
+    Includes a double border (thick outer, thin inner) and a subtle textured background.
     """
-    # Create a canvas with an alpha channel
+    # 1. Create Canvas
     img = Image.new('RGBA', size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     
-    # Calculate the bounding box for the rounded rectangle
-    # We subtract thickness/2 to ensure the border stays within the canvas
-    half_th = thickness // 2
-    rect_box = [half_th, half_th, size[0] - half_th, size[1] - half_th]
+    # 2. Fill Background (Simulate Paper)
+    # Using a warm cream color as base
+    cream_color = (255, 253, 245, 255)
+    draw.rounded_rectangle([0, 0, size[0], size[1]], radius=radius, fill=cream_color)
     
-    # Draw the rounded rectangle border
-    draw.rounded_rectangle(rect_box, radius=radius, outline=color, width=thickness)
+    # 3. Apply Subtle Paper Texture (Noise)
+    # Convert to numpy to apply lightweight noise
+    arr = np.array(img)
+    noise = np.random.randint(-5, 5, (size[1], size[0], 3), dtype='int16')
+    # Only apply to non-transparent pixels (the paper area)
+    mask = arr[..., 3] > 0
+    arr[mask, :3] = np.clip(arr[mask, :3] + noise[mask], 0, 255).astype('uint8')
+    img = Image.fromarray(arr)
+    draw = ImageDraw.Draw(img)
+
+    # 4. Draw Outer Thick Border
+    half_th = thickness // 2
+    outer_box = [half_th, half_th, size[0] - half_th, size[1] - half_th]
+    draw.rounded_rectangle(outer_box, radius=radius, outline=color, width=thickness)
+    
+    # 5. Draw Inner Thin Border
+    # Inset by a reasonable margin (e.g., 12px)
+    inset = thickness + 6
+    inner_box = [inset, inset, size[0] - inset, size[1] - inset]
+    draw.rounded_rectangle(inner_box, radius=max(0, radius - inset), outline=color, width=2)
     
     # Convert to MoviePy ImageClip
     img_arr = np.array(img)
@@ -285,25 +304,24 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     line_height = usable_height / 15
     clips = []
     
-    # 1. Generate Static Border
-    # Dimensions: 95% width, covering the usable height area
-    border_w = int(width * 0.95)
-    border_h = int(usable_height + 40) # Add a bit of padding for visual comfort
-    border_color = (212, 197, 161) # Gold/Bronze-ish color matching physical Mushaf
-    border_thickness = 6
-    border_radius = 20
+    # 1. Generate Authentic Static Border
+    # Dimensions: FIXED 90% width for consistency
+    border_w = int(width * 0.90)
+    border_h = int(usable_height + 60) # Generous height to encompass all slots
+    border_color = (212, 197, 161) # Authentic Gold/Bronze
+    border_thickness = 8
+    border_radius = 25
     
     border_clip = generate_mushaf_border_clip(
         size=(border_w, border_h),
         thickness=border_thickness,
         radius=border_radius,
         color=border_color,
-        padding=20,
+        padding=25,
         duration=duration
     )
     
-    # Position the border to encompass the 15 lines
-    # Vertical center should be at top_margin + usable_height / 2
+    # Position the border centered vertically on the Mushaf grid
     border_y = top_margin + (usable_height / 2) - (border_h / 2)
     clips.append(border_clip.set_position(('center', border_y)))
 
