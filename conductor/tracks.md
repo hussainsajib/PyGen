@@ -22,11 +22,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Mushaf Video Header Sync**
-*Link: [./tracks/mushaf_video_header_sync_20260126/](./tracks/mushaf_video_header_sync_20260126/)*
-
----
-
 - [ ] **Track: Mushaf Basmallah Resize**
 *Link: [./tracks/mushaf_basmallah_resize_20260126/](./tracks/mushaf_basmallah_resize_20260126/)*
 
