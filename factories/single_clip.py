@@ -21,22 +21,41 @@ def get_font_path(font_name: str) -> str:
 def render_mushaf_text_to_image(text: str, font_path: str, font_size: int, color: str, size: tuple):
     """
     Renders Arabic Mushaf text to a numpy array (image) using Pillow.
-    This is often more reliable for PUA glyphs than MoviePy's TextClip.
+    Automatically trims empty space around the rendered text.
     """
-    img = Image.new('RGBA', size, (0, 0, 0, 0))
+    # Create a large enough canvas to avoid initial clipping
+    canvas_w = max(size[0], font_size * 10)
+    canvas_h = max(size[1], font_size * 2)
+    img = Image.new('RGBA', (canvas_w, canvas_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     try:
         font = ImageFont.truetype(font_path, font_size)
     except Exception as e:
         print(f"DEBUG: PIL failed to load font {font_path}: {e}")
         font = ImageFont.load_default()
+    
     bbox = draw.textbbox((0, 0), text, font=font)
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
-    x = (size[0] - text_width) // 2
-    y = (size[1] - text_height) // 2
+    
+    # Draw centered on our temporary large canvas
+    x = (canvas_w - text_width) // 2
+    y = (canvas_h - text_height) // 2
     draw.text((x, y), text, font=font, fill=color)
-    return np.array(img)
+    
+    # Trim empty space
+    img_arr = np.array(img)
+    alpha = img_arr[..., 3]
+    coords = np.argwhere(alpha > 0)
+    if coords.size > 0:
+        y_min, x_min = coords.min(axis=0)
+        y_max, x_max = coords.max(axis=0)
+        img_arr = img_arr[y_min:y_max+1, x_min:x_max+1]
+    else:
+        # Return a 1x1 transparent pixel if blank
+        img_arr = np.zeros((1, 1, 4), dtype=np.uint8)
+        
+    return img_arr
 
 def generate_image_background(background_image_url: str, duration: int, is_short: bool):
     resolution = get_resolution(is_short)
@@ -255,12 +274,13 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
             current_font_path = font_path_bsml
             # For Bismillah, the text in DB might be standard Arabic, 
             # but the font might map specific codepoints or handle it nicely.
-            # If the text is missing in DB for basmallah lines (which happens in some DBs), 
-            # we might need to hardcode the special char if the font requires it.
-            # However, assuming the DB has the correct text or the font works with standard text.
             if not text:
-                 # Fallback if text is empty but type is basmallah, usually it's "بسم الله الرحمن الرحيم"
                  text = "بسم الله الرحمن الرحيم"
+            
+            # Authenticity Refinement: QCF_BSML.TTF uses U+FC20 for the full calligraphy
+            if "QCF_BSML" in current_font_path:
+                text = "ﰠ" # U+FC20
+
         elif l_type == "surah_name":
             current_font_path = font_path_sura
             # We will determine the text inside the render loop to allow retries with different mappings
@@ -270,82 +290,48 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
             continue
             
         y_pos = top_margin + (i * line_height)
-        font_size = int(line_height * 0.7)
-        size_tuple = (int(width * 0.9), int(line_height))
         
-        if l_type == "surah_name":
-            # Strategies to try for Surah Header font
-            surah_num = int(line["surah_number"])
+        if l_type in ["surah_name", "basmallah"]:
+            # Moderately larger font size to capture detail, but trimming ensures it fits
+            font_size = int(line_height * 2.5)
             
-            # Exact mapping extracted from QCF_SurahHeader_COLOR-Regular.ttf
-            # The font maps surahs to non-contiguous uniXXXX glyphs.
-            qcf_header_map = [
-                0xFC45, 0xFC46, 0xFC47, 0xFC4A, 0xFC4B, 0xFC4E, 0xFC4F, 0xFC51, 0xFC52, 0xFC53, 
-                0xFC55, 0xFC56, 0xFC58, 0xFC5A, 0xFC5B, 0xFC5C, 0xFC5D, 0xFC5E, 0xFC61, 0xFC62, 0xFC64, # 1-21
-                0xFB51, 0xFB52, 0xFB54, 0xFB55, 0xFB57, 0xFB58, 0xFB5A, 0xFB5B, 0xFB5D, 0xFB5E, 0xFB60, 
-                0xFB61, 0xFB63, 0xFB64, 0xFB66, 0xFB67, 0xFB69, 0xFB6A, 0xFB6C, 0xFB6D, 0xFB6F, 0xFB70, 
-                0xFB72, 0xFB73, 0xFB75, 0xFB76, 0xFB78, 0xFB79, 0xFB7B, 0xFB7C, 0xFB7E, 0xFB7F, 0xFB81, 
-                0xFB82, 0xFB84, 0xFB85, 0xFB87, 0xFB88, 0xFB8A, 0xFB8B, 0xFB8D, 0xFB8E, 0xFB90, 0xFB91, 
-                0xFB93, 0xFB94, 0xFB96, 0xFB97, 0xFB99, 0xFB9A, 0xFB9C, 0xFB9D, 0xFB9F, 0xFBA0, 0xFBA2, 
-                0xFBA3, 0xFBA5, 0xFBA6, 0xFBA8, 0xFBA9, 0xFBAB, 0xFBAC, 0xFBAE, 0xFBAF, 0xFBB1, 0xFBB2, 
-                0xFBB4, 0xFBB5, 0xFBB7, 0xFBB8, 0xFBBA, 0xFBBB, 0xFBBD, 0xFBBE, 0xFBC0, 0xFBC1, 0xFBD3, 
-                0xFBD4, 0xFBD6, 0xFBD7, 0xFBD9, 0xFBDA, 0xFBDC, 0xFBDD, 0xFBDF, 0xFBE0, 0xFBE2, 0xFBE3, 
-                0xFBE5, 0xFBE6, 0xFBE8, 0xFBE9, 0xFBEB # 22-114
-            ]
-            
-            strategies = []
-            if 1 <= surah_num <= 114:
-                strategies.append(chr(qcf_header_map[surah_num - 1]))
-            
-            # Fallbacks
-            strategies.extend([
-                f"surah{surah_num:03d}",
-                chr(surah_num + 32),
-                chr(0xF300 + surah_num),
-                chr(0xE900 + surah_num),
-                str(surah_num)
-            ])
-            
-            img_array = None
-            success = False
-            
-            # Helper to check if image is .notdef (box)
-            # We check against a few likely missing characters to be sure
-            missing_chars = [chr(0x0000), chr(0xFFFF), chr(0x0001)]
-            img_missings = [render_mushaf_text_to_image(c, current_font_path, font_size, color, size_tuple) for c in missing_chars]
-            
-            for s_text in strategies:
-                candidate_img = render_mushaf_text_to_image(s_text, current_font_path, font_size, color, size_tuple)
-                # Check if visible
-                if not np.any(candidate_img[..., 3] > 0):
-                    continue
+            if l_type == "surah_name":
+                # Strategies to try for Surah Header font
+                surah_num = int(line["surah_number"])
                 
-                # Check if it matches any of the missing glyph signatures
-                is_box = any(np.array_equal(candidate_img, m) for m in img_missings)
+                # Exact mapping extracted from QCF_SurahHeader_COLOR-Regular.ttf
+                qcf_header_map = [
+                    0xFC45, 0xFC46, 0xFC47, 0xFC4A, 0xFC4B, 0xFC4E, 0xFC4F, 0xFC51, 0xFC52, 0xFC53, 
+                    0xFC55, 0xFC56, 0xFC58, 0xFC5A, 0xFC5B, 0xFC5C, 0xFC5D, 0xFC5E, 0xFC61, 0xFC62, 0xFC64, # 1-21
+                    0xFB51, 0xFB52, 0xFB54, 0xFB55, 0xFB57, 0xFB58, 0xFB5A, 0xFB5B, 0xFB5D, 0xFB5E, 0xFB60, 
+                    0xFB61, 0xFB63, 0xFB64, 0xFB66, 0xFB67, 0xFB69, 0xFB6A, 0xFB6C, 0xFB6D, 0xFB6F, 0xFB70, 
+                    0xFB72, 0xFB73, 0xFB75, 0xFB76, 0xFB78, 0xFB79, 0xFB7B, 0xFB7C, 0xFB7E, 0xFB7E, 0xFB81, 
+                    0xFB82, 0xFB84, 0xFB85, 0xFB87, 0xFB88, 0xFB8A, 0xFB8B, 0xFB8D, 0xFB8E, 0xFB90, 0xFB91, 
+                    0xFB93, 0xFB94, 0xFB96, 0xFB97, 0xFB99, 0xFB9A, 0xFB9C, 0xFB9D, 0xFB9F, 0xFBA0, 0xFBA2, 
+                    0xFBA3, 0xFBA5, 0xFBA6, 0xFBA8, 0xFBA9, 0xFBAB, 0xFBAC, 0xFBAE, 0xFBAF, 0xFBB1, 0xFBB2, 
+                    0xFBB4, 0xFBB5, 0xFBB7, 0xFBB8, 0xFBBA, 0xFBBB, 0xFBBD, 0xFBBE, 0xFBC0, 0xFBC1, 0xFBD3, 
+                    0xFBD4, 0xFBD6, 0xFBD7, 0xFBD9, 0xFBDA, 0xFBDC, 0xFBDD, 0xFBDF, 0xFBE0, 0xFBE2, 0xFBE3, 
+                    0xFBE5, 0xFBE6, 0xFBE8, 0xFBE9, 0xFBEB # 22-114
+                ]
                 
-                if not is_box:
-                    img_array = candidate_img
-                    text = s_text 
-                    success = True
-                    print(f"[DEBUG] Selected strategy for Surah {surah_num}: {s_text!r} (Hex: {hex(ord(s_text[0])) if len(s_text)==1 else 'str'})")
-                    break
+                text_candidate = chr(qcf_header_map[surah_num - 1]) if 1 <= surah_num <= 114 else str(surah_num)
+                img_array = render_mushaf_text_to_image(text_candidate, current_font_path, font_size, color, (width, font_size))
+            else:
+                # Basmallah
+                img_array = render_mushaf_text_to_image(text, current_font_path, font_size, color, (width, font_size))
             
-            if not success:
-                # Fallback to Arial with Arabic Name
-                print(f"[DEBUG] Surah header font failed all mappings. Falling back to Arial.")
-                try:
-                    from processes.Classes.surah import Surah
-                    s_obj = Surah(surah_num)
-                    text = " ".join(reversed(s_obj.arabic_name.split())) if s_obj.arabic_name else s_obj.english_name
-                except:
-                    text = str(surah_num)
-                img_array = render_mushaf_text_to_image(text, "arial.ttf", font_size, color, size_tuple)
-        
+            # Position centered vertically on the line slot
+            visual_h = img_array.shape[0]
+            y_centered = y_pos + (line_height / 2) - (visual_h / 2)
+            t_clip = ImageClip(img_array).set_duration(duration).set_position(('center', y_centered))
         else:
-            # Standard render for non-surah lines
-            img_array = render_mushaf_text_to_image(text, current_font_path, font_size, color, size_tuple)
+            font_size = int(line_height * 0.7)
+            img_array = render_mushaf_text_to_image(text, current_font_path, font_size, color, (int(width * 0.9), int(line_height)))
+            
+            visual_h = img_array.shape[0]
+            y_centered = y_pos + (line_height / 2) - (visual_h / 2)
+            t_clip = ImageClip(img_array).set_duration(duration).set_position(('center', y_centered))
 
-        t_clip = ImageClip(img_array).set_duration(duration).set_position(('center', y_pos))
         clips.append(t_clip)
         start_ms = line.get("start_ms")
         end_ms = line.get("end_ms")

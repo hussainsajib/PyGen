@@ -124,6 +124,43 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                         line_copy["end_ms"] -= chunk_start_ms
                     chunk_for_rendering.append(line_copy)
 
+                # Inject Surah Header if missing in the first chunk
+                if idx == 0:
+                    current_lines = chunk_for_rendering.copy()
+                    
+                    # 1. Inject Header if missing
+                    has_header = any(l.get("line_type") == "surah_name" for l in current_lines)
+                    if not has_header:
+                        header_line = {
+                            "page_number": chunk[0]["page_number"],
+                            "line_number": 0,
+                            "line_type": "surah_name",
+                            "is_centered": True,
+                            "surah_number": surah_number,
+                            "words": [],
+                            "start_ms": 0,
+                            "end_ms": chunk_duration_sec * 1000 
+                        }
+                        chunk_for_rendering.insert(0, header_line)
+
+                    # 2. Inject Bismillah if missing (and not Surah 9)
+                    if surah_number != 9:
+                        has_basmallah = any(l.get("line_type") == "basmallah" for l in chunk_for_rendering)
+                        if not has_basmallah:
+                             # Insert after Header (which is now index 0 if it exists/was added)
+                             insert_idx = 1 if (chunk_for_rendering[0].get("line_type") == "surah_name") else 0
+                             bsml_line = {
+                                "page_number": chunk[0]["page_number"],
+                                "line_number": 0, # Virtual
+                                "line_type": "basmallah",
+                                "is_centered": True,
+                                "surah_number": surah_number,
+                                "words": [],
+                                "start_ms": 0,
+                                "end_ms": chunk_duration_sec * 1000 
+                             }
+                             chunk_for_rendering.insert(insert_idx, bsml_line)
+
                 # 5. Generate Clips
                 mushaf_clip = generate_mushaf_page_clip(chunk_for_rendering, chunk[0]["page_number"], is_short, chunk_duration_sec)
                 
@@ -132,14 +169,7 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                 surah_display_name = surah_p.bangla_name if current_language == "bengali" else surah_p.english_name
                 
                 overlays = []
-                if idx == 0 and surah_number not in [1, 9]:
-                    bismillah_clip = TextClip(
-                        "بسم الله الرحمن الرحيم",
-                        fontsize=int(height * 0.05),
-                        color=FONT_COLOR,
-                        font="Arial"
-                    ).set_duration(chunk_duration_sec).set_position(('center', height * 0.02))
-                    overlays.append(bismillah_clip)
+                # Removed redundant manual Bismillah clip since we now inject it as a proper line
 
                 if config_manager.get("ENABLE_RECITER_INFO", "True") == "True":
                     overlays.append(generate_reciter_name_clip(reciter_display_name, is_short, chunk_duration_sec))
