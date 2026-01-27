@@ -123,6 +123,7 @@ async def create_video(
     start_verse: int, 
     end_verse: int, 
     reciter: str,
+    active_background: str = None,
     is_short: bool = False,
     job_type: str = "standard",
     upload_after_generation: bool = False,
@@ -131,6 +132,7 @@ async def create_video(
     db: AsyncSession = Depends(get_db),
     config: ConfigManager = Depends(get_config_manager)
 ):
+    background_path = active_background
     with open("data/surah_data.json", "r", encoding="utf-8") as f:
         data = json.load(f)
         surah_name = data[str(surah)]["english_name"]
@@ -156,7 +158,8 @@ async def create_video(
         is_short=is_short,
         upload_after_generation=final_upload,
         playlist_id=playlist_id,
-        custom_title=custom_title
+        custom_title=custom_title,
+        background_path=background_path
     )
     if job_type == "wbw":
         return RedirectResponse(request.url_for("wbw"))

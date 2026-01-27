@@ -38,6 +38,11 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="solid-tab" data-bs-toggle="tab" data-bs-target="#solid-content" type="button" role="tab" aria-selected="false">
+                            <i class="fas fa-palette me-1"></i> Solid Color
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
                         <button class="nav-link" id="local-tab" data-bs-toggle="tab" data-bs-target="#local-content" type="button" role="tab" aria-selected="false">
                             <i class="fas fa-upload me-1"></i> Upload Local
                         </button>
@@ -120,6 +125,23 @@
                         </div>
                     </div>
 
+                    <!-- Solid Color Tab -->
+                    <div class="tab-pane fade" id="solid-content" role="tabpanel">
+                        <div class="row justify-content-center py-4">
+                            <div class="col-md-6 text-center">
+                                <label for="color_picker" class="form-label d-block fw-bold mb-3">Choose Background Color:</label>
+                                <input type="color" class="form-control form-control-color w-100 mb-3" id="color_picker" value="#000000" title="Choose your color" onchange="updateHexFromPicker(this.value)">
+                                <div class="input-group">
+                                    <span class="input-group-text">#</span>
+                                    <input type="text" id="color_hex" class="form-control" placeholder="000000" oninput="updatePickerFromHex(this.value)">
+                                    <button class="btn btn-success" type="button" onclick="selectSolidColor()">
+                                        Confirm Color
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Upload Local Tab -->
                     <div class="tab-pane fade" id="local-content" role="tabpanel">
                         <div class="mb-4">
@@ -137,6 +159,25 @@
 </div>
 
 <script>
+    // --- Solid Color Logic ---
+    function updateHexFromPicker(val) {
+        document.getElementById('color_hex').value = val.substring(1);
+    }
+
+    function updatePickerFromHex(val) {
+        if (val.length === 6 || val.length === 3) {
+            document.getElementById('color_picker').value = '#' + val;
+        }
+    }
+
+    function selectSolidColor() {
+        let hex = document.getElementById('color_hex').value;
+        if (!hex.startsWith('#')) hex = '#' + hex;
+        
+        updateActiveBackground(hex, `Solid Color (${hex})`);
+        bootstrap.Modal.getInstance(document.getElementById('backgroundModal')).hide();
+    }
+
     // --- Unsplash Logic ---
     let currentUnsplashPage = 1;
     let currentUnsplashQuery = '';

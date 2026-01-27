@@ -1,4 +1,4 @@
-# Track mushaf_video_50pct_border_20260127 Context
+# Track unified_video_backgrounds_20260127 Context
 
 - [Specification](./spec.md)
 - [Implementation Plan](./plan.md)

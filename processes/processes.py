@@ -151,9 +151,10 @@ async def create_wbw_video_job(surah: int, start_verse: int, end_verse:int,
                         reciter: str, is_short:bool = False, 
                         upload_after_generation: bool = False,
                         playlist_id: str = None,
-                        custom_title: str = None):
+                        custom_title: str = None,
+                        background_path: str = None):
     """Generates a WBW video and optionally uploads it to YouTube."""
-    video_details = await generate_video(surah, start_verse, end_verse, reciter, is_short, custom_title=custom_title)
+    video_details = await generate_video(surah, start_verse, end_verse, reciter, is_short, custom_title=custom_title, background_path=background_path)
     
     if not video_details:
         raise Exception("Error generating video")

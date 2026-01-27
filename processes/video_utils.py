@@ -23,7 +23,7 @@ from processes.surah_video import create_ayah_clip, create_wbw_ayah_clip, create
 from db_ops.crud_language import fetch_localized_metadata
 from factories.composite_clip import generate_intro, generate_outro
 
-async def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_key: str, is_short: bool, custom_title: str = None):
+async def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_key: str, is_short: bool, custom_title: str = None, background_path: str = None):
     # Fetch localized metadata (reciter, lang_obj, surah_obj)
     async with async_session() as session:
         reciter_db_obj, lang_obj, surah_db_obj = await fetch_localized_metadata(session, surah_number, reciter_key, config_manager)
@@ -70,7 +70,7 @@ async def generate_video(surah_number: int, start_verse: int, end_verse: int, re
         db_path = os.path.join("databases", "word-by-word", reciter.wbw_database)
         wbw_data = get_wbw_timestamps(db_path, surah_number, start_verse, end_verse)
 
-    active_background = config_manager.get("ACTIVE_BACKGROUND")
+    active_background = background_path if background_path else config_manager.get("ACTIVE_BACKGROUND")
     
     clips = []
     

@@ -50,7 +50,8 @@ async def job_worker():
                             is_short=bool(job.is_short),
                             upload_after_generation=bool(job.upload_after_generation),
                             playlist_id=job.playlist_id,
-                            custom_title=job.custom_title
+                            custom_title=job.custom_title,
+                            background_path=job.background_path
                         )
                     elif job.job_type == "mushaf_video":
                         # Mushaf video generation job

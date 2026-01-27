@@ -1,4 +1,4 @@
-from factories.single_clip import generate_mushaf_page_clip
+from factories.single_clip import generate_mushaf_page_clip, generate_background
 from db_ops.crud_mushaf import get_mushaf_page_data
 from moviepy.editor import ColorClip, CompositeVideoClip
 import os
@@ -7,7 +7,7 @@ import sys
 # Add project root to path for local imports if needed
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-def generate_verification_video(page_number, output_name):
+def generate_verification_video(page_number, output_name, background_input=None):
     print(f"Fetching data for Page {page_number}...")
     lines = get_mushaf_page_data(page_number)
     
@@ -19,8 +19,8 @@ def generate_verification_video(page_number, output_name):
     # Note: This uses Page font (p{page_number}.ttf) if available in QPC_V2_Font.ttf/
     clip = generate_mushaf_page_clip(lines, page_number=page_number, is_short=False, duration=5.0)
 
-    # Overlay on a dark background to make it visible
-    bg = ColorClip(size=clip.size, color=(20, 20, 20)).set_duration(5.0)
+    # Use generate_background to support color/media
+    bg = generate_background(background_input, duration=5.0, is_short=False)
     final = CompositeVideoClip([bg, clip])
 
     output_path = f"{output_name}.mp4"
@@ -66,7 +66,7 @@ def generate_mock_injection_test(output_name):
     ]
     
     clip = generate_mushaf_page_clip(lines, page_number=100, is_short=False, duration=5.0)
-    bg = ColorClip(size=clip.size, color=(20, 20, 20)).set_duration(5.0)
+    bg = generate_background("#1a1a1a", duration=5.0, is_short=False)
     final = CompositeVideoClip([bg, clip])
     
     output_path = f"{output_name}.mp4"
@@ -75,7 +75,8 @@ def generate_mock_injection_test(output_name):
 
 if __name__ == "__main__":
     # Test with Page 1 (Fatiha) and Page 2 (Baqarah start)
-    generate_verification_video(1, "verify_page_1")
+    # Using a custom color for Page 1 to verify Phase 1
+    generate_verification_video(1, "verify_page_1", background_input="#2c3e50")
     generate_verification_video(2, "verify_page_2")
     generate_verification_video(3, "verify_page_3")
     generate_verification_video(187, "verify_page_187")

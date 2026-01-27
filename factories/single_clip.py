@@ -99,15 +99,28 @@ def generate_video_background(video_path: str, duration: int, is_short: bool):
         clip = clip.set_duration(duration)
     return clip
 
-def generate_solid_background(duration: int, resolution: tuple):
-    return ColorClip(size=resolution, color=BACKGROUND_RGB).set_duration(duration)
+def hex_to_rgb(hex_color: str):
+    """Converts a hex color string to an RGB tuple."""
+    hex_color = hex_color.lstrip('#')
+    if len(hex_color) == 3:
+        hex_color = ''.join([c*2 for c in hex_color])
+    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
 
-def generate_background(background_image_url: str, duration: int, is_short: bool):
+def generate_solid_background(duration: int, resolution: tuple, color=None):
+    if color is None:
+        color = BACKGROUND_RGB
+    elif isinstance(color, str) and color.startswith('#'):
+        color = hex_to_rgb(color)
+    return ColorClip(size=resolution, color=color).set_duration(duration)
+
+def generate_background(background_input: str, duration: int, is_short: bool):
     resolution = get_resolution(is_short)
-    if background_image_url:
-        if background_image_url.lower().endswith(('.mp4', '.mov', '.avi', '.mkv')):
-            return generate_video_background(background_image_url, duration, is_short)
-        return generate_image_background(background_image_url, duration, is_short)
+    if background_input:
+        if background_input.startswith('#'):
+            return generate_solid_background(duration, resolution, color=background_input)
+        if background_input.lower().endswith(('.mp4', '.mov', '.avi', '.mkv')):
+            return generate_video_background(background_input, duration, is_short)
+        return generate_image_background(background_input, duration, is_short)
     return generate_solid_background(duration, resolution)
 
 def generate_arabic_text_clip(text: str, is_short: bool, duration: int) -> TextClip:
