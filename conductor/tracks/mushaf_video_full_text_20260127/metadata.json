@@ -1,8 +1,0 @@
-{
-  "track_id": "mushaf_video_full_text_20260127",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-01-27T09:06:00Z",
-  "updated_at": "2026-01-27T09:06:00Z",
-  "description": "in the mushaf video only the highlighted texts are shown other texts are not show currently. this should not be the case. all texts should be shown but only the line that is being recited should be highlighted"
-}

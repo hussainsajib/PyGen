@@ -20,6 +20,11 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Duration Validation for YouTube Shorts**
 *Link: [./tracks/shorts_duration_validation_20260125/](./tracks/shorts_duration_validation_20260125/)*
 
+---
+
+- [x] **Track: Basmallah Suppression for Surah 1 and Surah 9**
+*Link: [./tracks/basmallah_suppression_20260127/](./tracks/basmallah_suppression_20260127/)*
+
 
 
 

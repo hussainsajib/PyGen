@@ -152,8 +152,8 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                         }
                         chunk_for_rendering.insert(0, header_line)
 
-                    # 2. Inject Bismillah if missing (and not Surah 9)
-                    if surah_number != 9:
+                    # 2. Inject Bismillah if missing (and not Surah 1 or 9)
+                    if surah_number not in [1, 9]:
                         has_basmallah = any(l.get("line_type") == "basmallah" for l in chunk_for_rendering)
                         if not has_basmallah:
                              # Insert after Header (which is now index 0 if it exists/was added)

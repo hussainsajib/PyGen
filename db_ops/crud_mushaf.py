@@ -46,6 +46,10 @@ def get_mushaf_page_data(page_number: int):
         for line in lines:
             page_num, line_num, l_type, centered, start_id, end_id, surah_num = line
             
+            # Global Suppression: Surah 1 (Basmallah is Ayah 1) and Surah 9 (No Basmallah)
+            if l_type == 'basmallah' and surah_num in [1, 9]:
+                continue
+
             words = []
             if start_id != '' and end_id != '':
                 # 2. Fetch words for this line
@@ -108,6 +112,10 @@ def get_mushaf_page_data_structured(page_number: int):
         for line in lines:
             page_num, line_num, l_type, centered, start_id, end_id, surah_num = line
             
+            # Global Suppression: Surah 1 (Basmallah is Ayah 1) and Surah 9 (No Basmallah)
+            if l_type == 'basmallah' and surah_num in [1, 9]:
+                continue
+
             concatenated_text = ""
             if l_type == 'ayah' and start_id is not None and end_id is not None:
                 cursor_wbw.execute("""
