@@ -41,6 +41,10 @@ from net_ops.download_file import download_file
 load_dotenv()
 IMAGEMAGICK_BINARY=os.getenv("IMAGEMAGICK_BINARY")
 
+ligature_data = {}
+with open("databases/text/ligatures.json", "r", encoding="utf-8") as f:
+    ligature_data = json.load(f)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
@@ -68,13 +72,14 @@ change_settings({"IMAGEMAGICK_BINARY": IMAGEMAGICK_BINARY})
 @app.get("/mushaf", name="mushaf", response_class=HTMLResponse)
 async def view_mushaf(request: Request, page: int = 1):
     # Fetch page data
-    page_data = await run_in_threadpool(crud_mushaf.get_mushaf_page_data, page)
+    page_data = await run_in_threadpool(crud_mushaf.get_mushaf_page_data_structured, page)
     
     context = {
         "request": request,
         "page_data": page_data,
         "current_page": page,
-        "total_pages": 604
+        "total_pages": 604,
+        "ligature_data": ligature_data
     }
     return templates.TemplateResponse("mushaf.html", context)
 

@@ -10,6 +10,27 @@
         src: url('/mushaf-fonts/p{{ current_page }}.ttf');
     }
 
+    @font-face {
+        font-family: 'QCF_BSML';
+        src: url('/mushaf-fonts/QCF_BSML.TTF');
+    }
+
+    @font-face {
+        font-family: 'QCF_SURA';
+        src: url('/mushaf-fonts/QCF_SURA.TTF');
+    }
+
+    @font-face {
+        font-family: 'SurahNameV2';
+        src: url('/mushaf-fonts/surah-name-v2.ttf');
+    }
+
+    @font-face {
+      font-family: 'surah-header';
+      src: url('/mushaf-fonts/QCF_SurahHeader_COLOR-Regular.ttf') format('truetype');
+      font-display: swap;
+    }
+
     .mushaf-container {
         background-color: rgb(255, 255, 245);
         border: 2px solid #d4c5a1;
@@ -18,7 +39,6 @@
         max-width: 850px;
         margin: 0 auto;
         box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        font-family: 'MushafPageFont', serif;
         direction: rtl; /* Arabic is RTL */
     }
 
@@ -26,31 +46,65 @@
         height: 65px;
         display: flex;
         align-items: center;
-        justify-content: center;
         font-size: 42px;
         color: #2c2c2c;
         border-bottom: 1px solid rgba(212, 197, 161, 0.2);
         white-space: nowrap;
+        position: relative;
+    }
+
+    .mushaf-line.centered {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .mushaf-line.justified {
+        justify-content: space-between;
+        text-align: justify;
+        /* Note: Justification in flexbox usually requires pseudo-elements or specific layout tricks, 
+           but since we use space-between for words, it effectively spreads them. */
     }
 
     .mushaf-line:last-child {
         border-bottom: none;
     }
 
-    .mushaf-word {
-        margin: 0 3px;
+    .line-type-ayah {
+        font-family: 'MushafPageFont', serif;
     }
 
-    .line-type-surah_name {
-        font-weight: bold;
-        color: #8b4513;
-        background-color: rgba(212, 197, 161, 0.15);
-        font-family: 'Arial', sans-serif; /* Use standard font for surah name text if glyphs not mapped */
-        font-size: 24px;
+    .mushaf-line.line-type-surah_name {
+        position: relative; /* Establish positioning context */
+        height: 120px;
+        border-bottom: none;
+        margin: 10px 0;
+        display: flex; /* Use flexbox for basic container alignment */
+        align-items: center;
+        justify-content: center;
+    }
+
+    .surah-name-text {
+        font-family: 'SurahNameV2';
+        font-size: 50px;
+        color: #2c2c2c;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* Centering with transform */
+        z-index: 2;
+        line-height: 1;
+        white-space: nowrap; /* Prevent wrapping */
     }
     
     .line-type-basmallah {
-        color: #2c2c2c;
+        font-family: 'QCF_BSML';
+        font-size: 80px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 90px;
+        border-bottom: none;
+        white-space: nowrap; /* Prevent wrapping */
     }
 
     .page-controls {
@@ -99,13 +153,17 @@
 
 <div class="mushaf-container">
     {% for line in page_data %}
-    <div class="mushaf-line line-type-{{ line.line_type }}">
-        {% if line.words %}
-            {% for word in line.words %}
-            <span class="mushaf-word" title="{{ word.location }}">{{ word.text }}</span>
-            {% endfor %}
-        {% else %}
-            <span class="mushaf-header text-muted small">[{{ line.line_type | replace('_', ' ') | upper }}]</span>
+    <div class="mushaf-line line-type-{{ line.line_type }} {{ 'centered' if line.is_centered else 'justified' }}">
+        {% if line.line_type == 'ayah' %}
+            {{ line.text }}
+        {% elif line.line_type == 'surah_name' %}
+            <span style="font-family: 'surah-header'; font-size: 15cqw; margin-left: 10px;">
+                {% set key = "surah-" ~ line.surah_number %}
+                {{ ligature_data[key] | safe if key in ligature_data else '' }}
+            </span>
+        {% elif line.line_type == 'basmallah' %}
+            {# QCF_BSML maps U+00F3 to the full calligraphy based on user feedback #}
+            &#x00F3;
         {% endif %}
     </div>
     {% endfor %}

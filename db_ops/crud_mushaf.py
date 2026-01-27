@@ -82,6 +82,59 @@ def get_mushaf_page_data(page_number: int):
         
     return lines_data
 
+def get_mushaf_page_data_structured(page_number: int):
+    """
+    Retrieves the structured page data for the 15-line Mushaf layout, 
+    with concatenated words for ayah lines.
+    """
+    conn_15line = sqlite3.connect(DB_15_LINES)
+    conn_wbw = sqlite3.connect(DB_WBW)
+    
+    lines_data = []
+    
+    try:
+        cursor_15line = conn_15line.cursor()
+        cursor_wbw = conn_wbw.cursor()
+        
+        cursor_15line.execute("""
+            SELECT page_number, line_number, line_type, is_centered, first_word_id, last_word_id, surah_number
+            FROM pages
+            WHERE page_number = ?
+            ORDER BY line_number
+        """, (page_number,))
+        
+        lines = cursor_15line.fetchall()
+        
+        for line in lines:
+            page_num, line_num, l_type, centered, start_id, end_id, surah_num = line
+            
+            concatenated_text = ""
+            if l_type == 'ayah' and start_id is not None and end_id is not None:
+                cursor_wbw.execute("""
+                    SELECT text
+                    FROM words
+                    WHERE id BETWEEN ? AND ?
+                    ORDER BY id
+                """, (start_id, end_id))
+                
+                words_raw = cursor_wbw.fetchall()
+                concatenated_text = " ".join([w[0] for w in words_raw])
+            
+            lines_data.append({
+                "page_number": page_num,
+                "line_number": line_num,
+                "line_type": l_type,
+                "is_centered": bool(centered),
+                "surah_number": surah_num,
+                "text": concatenated_text
+            })
+            
+    finally:
+        conn_15line.close()
+        conn_wbw.close()
+        
+    return lines_data
+
 def align_mushaf_lines_with_timestamps(page_data: list, wbw_timestamps: dict):
     """
     Calculates start and end timestamps for each Mushaf line based on word-level timing.
