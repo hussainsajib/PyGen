@@ -1,0 +1,8 @@
+{
+  "track_id": "mushaf_video_header_20260126",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-26T23:23:00Z",
+  "updated_at": "2026-01-26T23:23:00Z",
+  "description": "use the basmallah and surah header rending data from /mushaf endpoint and use that in mushaf video generation. when I generate a video I want to see the basmallah and the surah header if the situation meets the requirements i.e. if it's the beginning of a surah"
+}
