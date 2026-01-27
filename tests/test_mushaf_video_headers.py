@@ -2,12 +2,13 @@ import pytest
 from unittest.mock import MagicMock, patch, AsyncMock
 from contextlib import ExitStack
 from processes.mushaf_video import generate_mushaf_video
+from factories.single_clip import generate_mushaf_page_clip
 
 @pytest.mark.asyncio
-async def test_mushaf_header_and_bsml_injection_timing():
+async def test_mushaf_header_and_bsml_persistent_visibility():
     """
     Test that Surah header and Basmallah are injected into the first chunk
-    and their end_ms matches the first Ayah's end_ms (timed visibility).
+    and their end_ms matches the full chunk duration.
     """
     with ExitStack() as stack:
         # Mock dependencies
@@ -80,7 +81,57 @@ async def test_mushaf_header_and_bsml_injection_timing():
         assert chunk_passed[0]["line_type"] == "surah_name"
         assert chunk_passed[1]["line_type"] == "basmallah"
         
-        # CHECK TIMING: Should match first ayah's end_ms (2000ms)
-        # Current implementation sets it to full chunk duration (10000ms)
-        assert chunk_passed[0]["end_ms"] == 2000
-        assert chunk_passed[1]["end_ms"] == 2000
+        # CHECK TIMING: Should match full chunk duration (10000ms in this mock setup)
+        assert chunk_passed[0]["end_ms"] == 10000.0
+        assert chunk_passed[1]["end_ms"] == 10000.0
+
+def test_mushaf_bsml_highlighting_disabled():
+    """
+    Test that Basmallah and Surah Headers do NOT result in ColorClip highlighting.
+    """
+    lines = [
+        {
+            "line_type": "surah_name",
+            "start_ms": 0,
+            "end_ms": 5000,
+            "page_number": 1,
+            "surah_number": 1,
+            "words": []
+        },
+        {
+            "line_type": "basmallah",
+            "start_ms": 0,
+            "end_ms": 5000,
+            "page_number": 1,
+            "surah_number": 1,
+            "words": []
+        },
+        {
+            "line_type": "ayah",
+            "start_ms": 0,
+            "end_ms": 5000,
+            "page_number": 1,
+            "surah_number": 1,
+            "words": [{"text": "text"}]
+        }
+    ]
+    
+    with ExitStack() as stack:
+        mock_image_clip = stack.enter_context(patch("factories.single_clip.ImageClip"))
+        mock_color_clip = stack.enter_context(patch("factories.single_clip.ColorClip"))
+        mock_composite = stack.enter_context(patch("factories.single_clip.CompositeVideoClip"))
+        stack.enter_context(patch("factories.single_clip.render_mushaf_text_to_image", return_value=MagicMock()))
+        
+        # Mock ImageClip behavior to avoid shape errors
+        mock_image_instance = MagicMock()
+        mock_image_instance.set_position.return_value = mock_image_instance
+        mock_image_instance.set_start.return_value = mock_image_instance
+        mock_image_instance.set_duration.return_value = mock_image_instance
+        mock_image_clip.return_value = mock_image_instance
+
+        generate_mushaf_page_clip(lines, page_number=1, is_short=False, duration=5.0)
+        
+        # ColorClip should ONLY be called for the 'ayah' line, not for surah_name or basmallah
+        # Actually, let's check how many times it was called.
+        # It should be called 1 time.
+        assert mock_color_clip.call_count == 1

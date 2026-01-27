@@ -29,9 +29,9 @@ def generate_verification_video(page_number, output_name):
     print(f"Done. Please check {output_path}.")
 
 def generate_mock_injection_test(output_name):
-    print("Generating Mock Injection Test with Timing...")
+    print("Generating Mock Injection Test with Persistent Visibility...")
     # Create a fake page with an injected header and bismillah
-    # They should disappear after 2 seconds
+    # They should NOT disappear
     lines = [
         {
             "page_number": 100,
@@ -41,7 +41,7 @@ def generate_mock_injection_test(output_name):
             "surah_number": 100, # Al-Adiyat
             "words": [],
             "start_ms": 0,
-            "end_ms": 2000
+            "end_ms": 5000
         },
         {
             "page_number": 100,
@@ -51,7 +51,7 @@ def generate_mock_injection_test(output_name):
             "surah_number": 100,
             "words": [],
             "start_ms": 0,
-            "end_ms": 2000
+            "end_ms": 5000
         },
         {
             "page_number": 100,
@@ -78,4 +78,5 @@ if __name__ == "__main__":
     generate_verification_video(1, "verify_page_1")
     generate_verification_video(2, "verify_page_2")
     generate_verification_video(3, "verify_page_3")
+    generate_verification_video(602, "verify_page_602")
     generate_mock_injection_test("verify_injection")

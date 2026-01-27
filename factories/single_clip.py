@@ -329,45 +329,42 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
             # Add margin after the header by shifting it UP in its slot
             if l_type == "surah_name":
                 y_centered -= (line_height * 0.3)
-            
-            # Apply timing logic if timestamps are provided
-            start_ms = line.get("start_ms")
-            end_ms = line.get("end_ms")
-            
-            t_clip = ImageClip(img_array).set_position(('center', y_centered))
-            
-            if start_ms is not None and end_ms is not None:
-                start_sec = max(0, float(start_ms) / 1000.0)
-                end_sec = min(duration, float(end_ms) / 1000.0)
-                line_duration = end_sec - start_sec
-                if line_duration > 0:
-                    t_clip = t_clip.set_start(start_sec).set_duration(line_duration)
-                else:
-                    t_clip = t_clip.set_duration(duration)
-            else:
-                t_clip = t_clip.set_duration(duration)
         else:
             font_size = int(line_height * 0.7)
             img_array = render_mushaf_text_to_image(text, current_font_path, font_size, color, (int(width * 0.9), int(line_height)))
             
             visual_h = img_array.shape[0]
             y_centered = y_pos + (line_height / 2) - (visual_h / 2)
-            t_clip = ImageClip(img_array).set_duration(duration).set_position(('center', y_centered))
 
-        clips.append(t_clip)
+        t_clip = ImageClip(img_array).set_position(('center', y_centered))
+        
+        # Apply timing logic if timestamps are provided
         start_ms = line.get("start_ms")
         end_ms = line.get("end_ms")
+        
         if start_ms is not None and end_ms is not None:
-            try:
-                start_sec = float(start_ms) / 1000.0
-                end_sec = float(end_ms) / 1000.0
-                if start_sec < duration:
-                    h_duration = min(end_sec - start_sec, duration - start_sec)
-                    if h_duration > 0.05:
-                        h_clip = ColorClip(size=(int(width * 0.95), int(line_height)), color=(255, 255, 0)).set_opacity(0.3).set_start(start_sec).set_duration(h_duration).set_position(('center', y_pos))
-                        clips.append(h_clip)
-            except (ValueError, TypeError):
-                pass
+            start_sec = max(0, float(start_ms) / 1000.0)
+            end_sec = min(duration, float(end_ms) / 1000.0)
+            line_duration = end_sec - start_sec
+            if line_duration > 0:
+                t_clip = t_clip.set_start(start_sec).set_duration(line_duration)
+            else:
+                t_clip = t_clip.set_duration(duration)
+            
+            # Apply highlighting logic - EXCLUDING Basmallah and Surah Headers
+            if l_type not in ["basmallah", "surah_name"]:
+                try:
+                    if start_sec < duration:
+                        h_duration = min(end_sec - start_sec, duration - start_sec)
+                        if h_duration > 0.05:
+                            h_clip = ColorClip(size=(int(width * 0.95), int(line_height)), color=(255, 255, 0)).set_opacity(0.3).set_start(start_sec).set_duration(h_duration).set_position(('center', y_pos))
+                            clips.append(h_clip)
+                except (ValueError, TypeError):
+                    pass
+        else:
+            t_clip = t_clip.set_duration(duration)
+
+        clips.append(t_clip)
     if not clips:
         return ColorClip(size=resolution, color=(0,0,0)).set_opacity(0).set_duration(duration)
     return CompositeVideoClip(clips, size=resolution).set_duration(duration)

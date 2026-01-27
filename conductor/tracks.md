@@ -20,6 +20,11 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Duration Validation for YouTube Shorts**
 *Link: [./tracks/shorts_duration_validation_20260125/](./tracks/shorts_duration_validation_20260125/)*
 
+---
+
+- [x] **Track: Mushaf Video Visibility Fix**
+*Link: [./tracks/mushaf_video_visibility_fix_20260126/](./tracks/mushaf_video_visibility_fix_20260126/)*
+
 
 
 
