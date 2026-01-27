@@ -1,0 +1,8 @@
+{
+  "track_id": "mushaf_video_dynamic_highlight_20260127",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-27T11:06:00Z",
+  "updated_at": "2026-01-27T11:06:00Z",
+  "description": "in mushaf video, rather than highlighting the whole width of the the video for the currently recited line, highlight only the text portion of the line"
+}

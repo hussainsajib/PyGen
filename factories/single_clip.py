@@ -351,7 +351,9 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
                     if start_sec < duration:
                         h_duration = min(end_sec - start_sec, duration - start_sec)
                         if h_duration > 0.05:
-                            h_clip = ColorClip(size=(int(width * 0.95), int(line_height)), color=(255, 255, 0)).set_opacity(0.3).set_start(start_sec).set_duration(h_duration).set_position(('center', y_pos))
+                            # Dynamic highlight width based on text image + padding
+                            h_width = img_array.shape[1] + 20
+                            h_clip = ColorClip(size=(h_width, int(line_height)), color=(255, 255, 0)).set_opacity(0.3).set_start(start_sec).set_duration(h_duration).set_position(('center', y_pos))
                             clips.append(h_clip)
                 except (ValueError, TypeError):
                     pass
