@@ -91,10 +91,15 @@
                         <option value="Semi-Transparent" {% if item.value == 'Semi-Transparent' %}selected{% endif %}>Semi-Transparent</option>
                         <option value="Transparent" {% if item.value == 'Transparent' %}selected{% endif %}>Transparent</option>
                     </select>
-                {% elif item.key == 'MUSHAF_PAGE_BACKGROUND_COLOR' %}
+                                    {% elif item.key == 'MUSHAF_PAGE_COLOR' %}
                     <div class="d-flex align-items-center">
                         <input type="color" id="mushaf_bg_color_picker" class="form-control form-control-color me-2" value="{{ item.value }}">
                         <input type="text" name="{{ item.key }}" id="mushaf_bg_color_value" value="{{ item.value }}" class="form-control">
+                    </div>
+                {% elif item.key == 'MUSHAF_PAGE_OPACITY' %}
+                    <div class="d-flex align-items-center">
+                        <input type="range" class="form-range flex-grow-1 me-2" min="0" max="100" id="mushaf_opacity_range" value="{{ item.value }}" oninput="document.getElementById('mushaf_opacity_value').value = this.value">
+                        <input type="number" name="{{ item.key }}" id="mushaf_opacity_value" class="form-control" style="width: 80px;" value="{{ item.value }}" min="0" max="100" oninput="document.getElementById('mushaf_opacity_range').value = this.value">
                     </div>
                 {% else %}
                     <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="form-control">
@@ -276,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- MUSHAF_PAGE_BACKGROUND_COLOR Picker ---
+    // --- MUSHAF_PAGE_COLOR Picker ---
     const mushafBgColorPicker = document.getElementById('mushaf_bg_color_picker');
     const mushafBgColorValue = document.getElementById('mushaf_bg_color_value');
 

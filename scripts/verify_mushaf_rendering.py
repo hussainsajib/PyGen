@@ -81,12 +81,12 @@ if __name__ == "__main__":
     
     # 2. Test Semi-Transparent Mode with a Color
     config_manager.set_local_override("MUSHAF_PAGE_BACKGROUND_MODE", "Semi-Transparent")
-    config_manager.set_local_override("MUSHAF_PAGE_BACKGROUND_COLOR", "#FFFFFF") # White semi-transparent
+    config_manager.set_local_override("MUSHAF_PAGE_COLOR", "#FFFFFF") # White semi-transparent
     generate_verification_video(2, "verify_bg_semi", background_input="#1a1a1a")
     
     # 3. Test Solid Mode (Default)
     config_manager.set_local_override("MUSHAF_PAGE_BACKGROUND_MODE", "Solid")
-    config_manager.set_local_override("MUSHAF_PAGE_BACKGROUND_COLOR", "#FFFDF5")
+        config_manager.set_local_override("MUSHAF_PAGE_COLOR", "#FFFDF5")
     generate_verification_video(3, "verify_bg_solid", background_input="#000000")
 
     # Cleanup overrides

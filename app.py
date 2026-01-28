@@ -231,7 +231,7 @@ async def mushaf_video_interface(
     font_color = config.get("FONT_COLOR", "white")
     
     mushaf_bg_mode = config.get("MUSHAF_PAGE_BACKGROUND_MODE", "Solid")
-    mushaf_bg_color = config.get("MUSHAF_PAGE_BACKGROUND_COLOR", "#FFFDF5")
+    mushaf_bg_color = config.get("MUSHAF_PAGE_COLOR", "#FFFDF5")
     
     languages = await get_all_languages(db)
     

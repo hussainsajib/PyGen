@@ -89,7 +89,7 @@
                                 <div class="col-12 {% if mushaf_bg_mode == 'Transparent' %}d-none{% endif %}" id="page_color_group">
                                     <label for="bg_color_input" class="form-label small fw-bold">Page Color:</label>
                                     <div class="input-group input-group-sm">
-                                        <input type="color" id="bg_color_picker" class="form-control form-control-color" value="{{ mushaf_bg_color }}" title="Choose page color" onchange="updateGlobalConfig('MUSHAF_PAGE_BACKGROUND_COLOR', this.value)">
+                                        <input type="color" id="bg_color_picker" class="form-control form-control-color" value="{{ mushaf_bg_color }}" title="Choose page color" onchange="updateGlobalConfig('MUSHAF_PAGE_COLOR', this.value)">
                                         <input type="text" class="form-control" value="{{ mushaf_bg_color }}" readonly>
                                     </div>
                                 </div>

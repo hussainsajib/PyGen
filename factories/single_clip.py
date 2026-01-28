@@ -346,7 +346,7 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     
     # Get internal Mushaf background settings from config
     bg_mode = config_manager.get("MUSHAF_PAGE_BACKGROUND_MODE", "Solid")
-    bg_color = config_manager.get("MUSHAF_PAGE_BACKGROUND_COLOR", "#FFFDF5")
+    bg_color = config_manager.get("MUSHAF_PAGE_COLOR", "#FFFDF5")
 
     # 1. Generate Authentic Static Border
     # Dimensions: FIXED 50% width for consistency
