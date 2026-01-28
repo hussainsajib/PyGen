@@ -13,6 +13,6 @@
 - [ ] Task: Conductor - User Manual Verification 'Implementation (TDD)' (Protocol in workflow.md)
 
 ## Phase 3: Integration and Final Verification [checkpoint: ]
-- [ ] Task: Generate sample frames for a full Mushaf page and a partial page (end of Surah).
-- [ ] Task: Verify visual centering and header spacing in both portrait (Shorts) and landscape formats.
-- [ ] Task: Conductor - User Manual Verification 'Integration and Final Verification' (Protocol in workflow.md)
+- [x] Task: Generate sample frames for a full Mushaf page and a partial page (end of Surah).
+- [x] Task: Verify visual centering and header spacing in both portrait (Shorts) and landscape formats.
+- [x] Task: Conductor - User Manual Verification 'Integration and Final Verification' (Protocol in workflow.md)
