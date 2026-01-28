@@ -6,10 +6,10 @@
 - [ ] Task: Conductor - User Manual Verification 'Research and Math Verification' (Protocol in workflow.md)
 
 ## Phase 2: Implementation (TDD) [checkpoint: ]
-- [ ] Task: Write failing unit tests for the vertical centering calculation (mocking screen height and content height).
-- [ ] Task: Implement the dynamic vertical centering logic in `generate_mushaf_page_clip`.
-- [ ] Task: Implement the specific +20px gap between the Surah Header and Bismillah.
-- [ ] Task: Verify the tests pass and handle potential edge cases (e.g., extremely long pages that shouldn't move).
+- [x] Task: Write failing unit tests for the vertical centering calculation (mocking screen height and content height).
+- [x] Task: Implement the dynamic vertical centering logic in `generate_mushaf_page_clip`.
+- [x] Task: Implement the specific +20px gap between the Surah Header and Bismillah.
+- [x] Task: Verify the tests pass and handle potential edge cases (e.g., extremely long pages that shouldn't move).
 - [ ] Task: Conductor - User Manual Verification 'Implementation (TDD)' (Protocol in workflow.md)
 
 ## Phase 3: Integration and Final Verification [checkpoint: ]

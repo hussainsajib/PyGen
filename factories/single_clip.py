@@ -319,6 +319,26 @@ def generate_mushaf_border_clip(size: tuple, thickness: int, radius: int, color:
     img_arr = np.array(img)
     return ImageClip(img_arr).set_duration(duration)
 
+def calculate_mushaf_content_y_positions(height: int, num_lines: int, has_header_gap: bool) -> list:
+    """
+    Calculates the Y positions for Mushaf lines to ensure the content block is centered.
+    """
+    line_height = (height * 0.8) / 15
+    gap = 20 if has_header_gap else 0
+    
+    total_content_height = (num_lines * line_height) + gap
+    start_y = (height / 2) - (total_content_height / 2)
+    
+    positions = []
+    current_y = start_y
+    for i in range(num_lines):
+        positions.append(current_y)
+        current_y += line_height
+        if i == 0 and has_header_gap:
+            current_y += gap
+            
+    return positions
+
 def calculate_centered_y(y_pos: float, line_height: float, visual_h: int, l_type: str) -> float:
     """
     Calculates the Y position to center text within its slot.
@@ -372,6 +392,25 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         opacity_percent = 90
     bg_opacity = int((opacity_percent / 100) * 255)
 
+    # Calculate positions
+    has_header = any(l.get("line_type") == "surah_name" for l in lines)
+    has_bsml = any(l.get("line_type") == "basmallah" for l in lines)
+    has_header_gap = has_header and has_bsml
+    
+    # Filter renderable lines to ensure accurate centering count
+    renderable_lines = []
+    for line in lines:
+        l_type = line.get("line_type", "ayah")
+        words = line.get("words", [])
+        text = "".join([w["text"] for w in reversed(words)])
+        if l_type == "basmallah" and not text:
+            text = "\u00F3"
+        if not text and l_type != "surah_name":
+            continue
+        renderable_lines.append(line)
+
+    line_positions = calculate_mushaf_content_y_positions(height, len(renderable_lines), has_header_gap)
+
     # 1. Generate Authentic Static Border
     # Dimensions: FIXED 50% width for consistency
     border_w = int(width * 0.50)
@@ -391,8 +430,8 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         bg_color=bg_color,
         bg_opacity=bg_opacity
     )    
-    # Position the border centered vertically on the Mushaf grid
-    border_y = top_margin + (usable_height / 2) - (border_h / 2)
+    # Position the border centered vertically on the frame
+    border_y = (height / 2) - (border_h / 2)
     clips.append(border_clip.set_position(('center', border_y)))
 
     color = FONT_COLOR
@@ -402,7 +441,7 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         except:
             color = (255, 255, 255)
 
-    for i, line in enumerate(lines):
+    for i, line in enumerate(renderable_lines):
         # Reverse words for RTL rendering
         words = line.get("words", [])
         text = "".join([w["text"] for w in reversed(words)])
@@ -427,10 +466,7 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
             # We will determine the text inside the render loop to allow retries with different mappings
             text = None 
 
-        if not text and l_type != "surah_name":
-            continue
-            
-        y_pos = top_margin + (i * line_height)
+        y_pos = line_positions[i]
         
         if l_type in ["surah_name", "basmallah"]:
             # Capture detail, but trimming ensures it fits
