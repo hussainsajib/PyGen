@@ -1,6 +1,6 @@
 # Plan: Mushaf Video Vertical Centering and Spacing
 
-## Phase 1: Research and Math Verification [checkpoint: ]
+## Phase 1: Research and Math Verification [checkpoint: db709a4]
 - [x] Task: Identify the current calculation logic for `top_margin`, `line_height`, and individual line positioning in `generate_mushaf_page_clip`.
 - [x] Task: Determine the effective "content height" for different scenarios (full page, partial page).
 - [ ] Task: Conductor - User Manual Verification 'Research and Math Verification' (Protocol in workflow.md)
