@@ -1,6 +1,6 @@
 # Plan: Mushaf Video Layered Background Refinement
 
-## Phase 1: Configuration and Renaming [checkpoint: ]
+## Phase 1: Configuration and Renaming [checkpoint: 7ca0f1b]
 - [x] Task: Perform a global find-and-replace for `MUSHAF_PAGE_BACKGROUND_COLOR` to `MUSHAF_PAGE_COLOR`.
 - [x] Task: Add `MUSHAF_PAGE_OPACITY` to the default configuration (e.g., in `config_manager.py` or initial setup).
 - [x] Task: Update the frontend configuration UI to include the `MUSHAF_PAGE_OPACITY` slider (0-100).
