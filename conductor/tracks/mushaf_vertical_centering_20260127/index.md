@@ -1,4 +1,4 @@
-# Track mushaf_layered_bg_20260127 Context
+# Track mushaf_vertical_centering_20260127 Context
 
 - [Specification](./spec.md)
 - [Implementation Plan](./plan.md)
