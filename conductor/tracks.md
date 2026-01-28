@@ -24,3 +24,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Mushaf Video Area Border**
 *Link: [./tracks/mushaf_video_border_20260127/](./tracks/mushaf_video_border_20260127/)*
+
+---
+
+- [~] **Track: in mushaf video, make the normal text 20% smaller compared to now**
+*Link: [./tracks/mushaf_text_scaling_20260127/](./tracks/mushaf_text_scaling_20260127/)*
