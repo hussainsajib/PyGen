@@ -1,6 +1,6 @@
 # Plan: Mushaf Video Text Scaling Refinement
 
-## Phase 1: Configuration and UI [checkpoint: ]
+## Phase 1: Configuration and UI [checkpoint: 1de40dd]
 - [x] Task: Add `MUSHAF_FONT_SCALE` to the default configuration set in the database (default: 0.8).
 - [x] Task: Update `templates/config.html` to include a numerical input field for `MUSHAF_FONT_SCALE`.
 - [ ] Task: Conductor - User Manual Verification 'Configuration and UI' (Protocol in workflow.md)
