@@ -498,8 +498,159 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
             visual_h = img_array.shape[0]
             y_centered = calculate_centered_y(y_pos, line_height, visual_h, l_type)
 
+def calculate_mushaf_font_size(width: int, line_height: float, l_type: str, scale_factor: float = 1.0) -> int:
+    """
+    Calculates the font size based on line type and scaling.
+    """
+    if l_type == "surah_name":
+        # Web uses 15cqw (~15% of width).
+        return int(width * 0.15)
+    elif l_type == "basmallah":
+        # Basmallah should be smaller, matching web ratio of ~1.9x standard text (0.7 * 1.9 = 1.33)
+        return int(line_height * 1.3)
+    else:
+        # Standard Ayah text
+        # Baseline was 0.7 * line_height
+        return int(line_height * 0.7 * scale_factor)
+
+def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, duration: float, background_input: str = None) -> CompositeVideoClip:
+    """
+    Generates a CompositeVideoClip for a Mushaf page.
+    """
+    resolution = get_resolution(is_short)
+    width, height = resolution
+    font_path_page = os.path.abspath(os.path.join("QPC_V2_Font.ttf", f"p{page_number}.ttf"))
+    font_path_bsml = os.path.abspath(os.path.join("QPC_V2_Font.ttf", "QCF_BSML.TTF"))
+    font_path_sura = os.path.abspath(os.path.join("QPC_V2_Font.ttf", "QCF_SurahHeader_COLOR-Regular.ttf"))
+
+    if not os.path.exists(font_path_page):
+        font_path_page = "Arial" 
+
+    top_margin = height * 0.1
+    bottom_margin = height * 0.1
+    usable_height = height - top_margin - bottom_margin
+    line_height = usable_height / 15
+    clips = []
+    
+    # 0. Generate Global Background (Bottom-most layer)
+    bg_clip = generate_background(background_input, duration, is_short)
+    if bg_clip:
+        clips.append(bg_clip)
+    
+    # Get internal Mushaf background settings from config
+    bg_mode = config_manager.get("MUSHAF_PAGE_BACKGROUND_MODE", "Solid")
+    bg_color = config_manager.get("MUSHAF_PAGE_COLOR", "#FFFDF5")
+    
+    # Font Scale
+    try:
+        font_scale = float(config_manager.get("MUSHAF_FONT_SCALE", "0.8"))
+    except (ValueError, TypeError):
+        font_scale = 0.8
+    
+    # Calculate alpha for Semi mode
+    try:
+        opacity_percent = int(config_manager.get("MUSHAF_PAGE_OPACITY", "90"))
+    except (ValueError, TypeError):
+        opacity_percent = 90
+    bg_opacity = int((opacity_percent / 100) * 255)
+
+    # ... (Border generation remains the same)
+    
+    # ... (Color logic remains the same)
+
+    # Filter renderable lines to ensure accurate centering count
+    renderable_lines = []
+    for line in lines:
+        l_type = line.get("line_type", "ayah")
+        words = line.get("words", [])
+        text = "".join([w["text"] for w in reversed(words)])
+        if l_type == "basmallah" and not text:
+            text = "\u00F3"
+        if not text and l_type != "surah_name":
+            continue
+        renderable_lines.append(line)
+
+    has_header = any(l.get("line_type") == "surah_name" for l in renderable_lines)
+    has_bsml = any(l.get("line_type") == "basmallah" for l in renderable_lines)
+    has_header_gap = has_header and has_bsml
+    line_positions = calculate_mushaf_content_y_positions(height, len(renderable_lines), has_header_gap)
+
+    # 1. Generate Authentic Static Border
+    # Dimensions: FIXED 50% width for consistency
+    border_w = int(width * 0.50)
+    border_h = int(usable_height + 60) # Generous height to encompass all slots
+    border_color = (212, 197, 161) # Authentic Gold/Bronze
+    border_thickness = 8
+    border_radius = 25
+    
+    border_clip = generate_mushaf_border_clip(
+        size=(border_w, border_h),
+        thickness=border_thickness,
+        radius=border_radius,
+        color=border_color,
+        padding=25,
+        duration=duration,
+        bg_mode=bg_mode,
+        bg_color=bg_color,
+        bg_opacity=bg_opacity
+    )    
+    # Position the border centered vertically on the frame
+    border_y = (height / 2) - (border_h / 2)
+    clips.append(border_clip.set_position(('center', border_y)))
+
+    color = FONT_COLOR
+    if isinstance(color, str) and color.startswith("rgb("):
+        try:
+            color = tuple(map(int, color.replace("rgb(", "").replace(")", "").split(",")))
+        except:
+            color = (255, 255, 255)
+
+    for i, line in enumerate(renderable_lines):
+        # Reverse words for RTL rendering
+        words = line.get("words", [])
+        text = "".join([w["text"] for w in reversed(words)])
+        
+        # Determine font based on line type
+        l_type = line.get("line_type", "ayah")
+        current_font_path = font_path_page
+        
+        if l_type == "basmallah":
+            current_font_path = font_path_bsml
+            # For Bismillah, the text in DB might be standard Arabic, 
+            # but the font might map specific codepoints or handle it nicely.
+            if not text:
+                 text = "بسم الله الرحمن الرحيم"
+            
+            # Authenticity Refinement: QCF_BSML.TTF uses U+00F3 for the full calligraphy
+            if "QCF_BSML" in current_font_path:
+                text = "\u00F3" # U+00F3
+
+        elif l_type == "surah_name":
+            current_font_path = font_path_sura
+            # We will determine the text inside the render loop to allow retries with different mappings
+            text = None 
+
+        y_pos = line_positions[i]
+        
+        font_size = calculate_mushaf_font_size(width, line_height, l_type, font_scale)
+        
+        if l_type == "surah_name":
+            # Use ligature data from ligatures.json
+            surah_num = int(line["surah_number"])
+            key = f"surah-{surah_num}"
+            text_candidate = LIGATURE_DATA.get(key, str(surah_num))
+            img_array = render_mushaf_text_to_image(text_candidate, current_font_path, font_size, color, (width, font_size))
+        elif l_type == "basmallah":
+            img_array = render_mushaf_text_to_image(text, current_font_path, font_size, color, (width, font_size))
+        else:
+            # Ayah
+            img_array = render_mushaf_text_to_image(text, current_font_path, font_size, color, (int(width * 0.9), int(line_height)))
+        
+        # Position centered vertically on the line slot
+        visual_h = img_array.shape[0]
+        y_centered = calculate_centered_y(y_pos, line_height, visual_h, l_type)
+
         t_clip = ImageClip(img_array).set_position(('center', int(y_centered))).set_duration(duration)
-        # print(f"DEBUG: {l_type} at y_centered={y_centered}")
         
         # Apply highlighting logic ONLY if timestamps are provided and it's an ayah
         start_ms = line.get("start_ms")

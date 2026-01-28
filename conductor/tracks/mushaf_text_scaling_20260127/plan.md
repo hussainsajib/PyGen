@@ -6,9 +6,9 @@
 - [ ] Task: Conductor - User Manual Verification 'Configuration and UI' (Protocol in workflow.md)
 
 ## Phase 2: Implementation (TDD) [checkpoint: ]
-- [ ] Task: Write failing unit tests for the font size calculation logic in `factories/single_clip.py` to ensure the scaling factor is applied.
-- [ ] Task: Implement the `MUSHAF_FONT_SCALE` multiplier in the `generate_mushaf_page_clip` function.
-- [ ] Task: Verify the tests pass.
+- [x] Task: Write failing unit tests for the font size calculation logic in `factories/single_clip.py` to ensure the scaling factor is applied.
+- [x] Task: Implement the `MUSHAF_FONT_SCALE` multiplier in the `generate_mushaf_page_clip` function.
+- [x] Task: Verify the tests pass.
 - [ ] Task: Conductor - User Manual Verification 'Implementation (TDD)' (Protocol in workflow.md)
 
 ## Phase 3: Final Verification [checkpoint: ]
