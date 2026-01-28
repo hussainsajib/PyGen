@@ -173,7 +173,7 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                                  chunk_for_rendering.insert(insert_idx, bsml_line)
 
                     # Generate Clip
-                    mushaf_clip = generate_mushaf_page_clip(chunk_for_rendering, page_num, is_short, chunk_duration_sec)
+                    mushaf_clip = generate_mushaf_page_clip(chunk_for_rendering, page_num, is_short, chunk_duration_sec, background_input=background_path)
                     
                     # Add Overlays
                     reciter_display_name = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name
@@ -205,8 +205,7 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                     overlays.append(progress_bar_fg)
 
                     # Compose Chunk
-                    bg_clip = generate_background(background_path, chunk_duration_sec, is_short)
-                    all_chunk_clips = [bg_clip, mushaf_clip] + overlays
+                    all_chunk_clips = [mushaf_clip] + overlays
                     valid_chunk_clips = [c for c in all_chunk_clips if c is not None]
                     
                     final_chunk_clip = CompositeVideoClip(valid_chunk_clips, size=resolution).set_duration(chunk_duration_sec)

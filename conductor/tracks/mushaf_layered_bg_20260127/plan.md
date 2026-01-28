@@ -8,11 +8,11 @@
 - [ ] Task: Conductor - User Manual Verification 'Configuration and Renaming' (Protocol in workflow.md)
 
 ## Phase 2: Backend Rendering Refactor (TDD) [checkpoint: ]
-- [ ] Task: Write unit tests for the updated background selection logic (ACTIVE_BACKGROUND vs BACKGROUND_RGB).
-- [ ] Task: Write unit tests for the inner page fill calculation (Transparent, Semi, Solid).
-- [ ] Task: Modify `generate_mushaf_border_clip` in `factories/single_clip.py` to handle transparency and opacity in its inner fill.
-- [ ] Task: Modify `generate_mushaf_page_clip` in `factories/single_clip.py` to correctly layer the global background (image/video/RGB) beneath the border and page content.
-- [ ] Task: Verify all tests pass and handle edge cases (e.g., missing assets, invalid hex codes).
+- [x] Task: Write unit tests for the updated background selection logic (ACTIVE_BACKGROUND vs BACKGROUND_RGB).
+- [x] Task: Write unit tests for the inner page fill calculation (Transparent, Semi, Solid).
+- [x] Task: Modify `generate_mushaf_border_clip` in `factories/single_clip.py` to handle transparency and opacity in its inner fill.
+- [x] Task: Modify `generate_mushaf_page_clip` in `factories/single_clip.py` to correctly layer the global background (image/video/RGB) beneath the border and page content.
+- [x] Task: Verify all tests pass and handle edge cases (e.g., missing assets, invalid hex codes).
 - [ ] Task: Conductor - User Manual Verification 'Backend Rendering Refactor (TDD)' (Protocol in workflow.md)
 
 ## Phase 3: Integration and Final Verification [checkpoint: ]

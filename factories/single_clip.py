@@ -115,12 +115,22 @@ def generate_solid_background(duration: int, resolution: tuple, color=None):
 
 def generate_background(background_input: str, duration: int, is_short: bool):
     resolution = get_resolution(is_short)
-    if background_input:
-        if background_input.startswith('#'):
-            return generate_solid_background(duration, resolution, color=background_input)
-        if background_input.lower().endswith(('.mp4', '.mov', '.avi', '.mkv')):
-            return generate_video_background(background_input, duration, is_short)
-        return generate_image_background(background_input, duration, is_short)
+    
+    # Use explicitly provided background_input first
+    target_bg = background_input
+    
+    # If not provided, fallback to ACTIVE_BACKGROUND from global config
+    if not target_bg:
+        target_bg = config_manager.get("ACTIVE_BACKGROUND")
+        
+    if target_bg:
+        if target_bg.startswith('#'):
+            return generate_solid_background(duration, resolution, color=target_bg)
+        if target_bg.lower().endswith(('.mp4', '.mov', '.avi', '.mkv')):
+            return generate_video_background(target_bg, duration, is_short)
+        return generate_image_background(target_bg, duration, is_short)
+        
+    # Final fallback to solid BACKGROUND_RGB
     return generate_solid_background(duration, resolution)
 
 def generate_arabic_text_clip(text: str, is_short: bool, duration: int) -> TextClip:
@@ -259,7 +269,7 @@ def generate_brand_clip(brand_name: str, is_short: bool, duration: int) -> TextC
     brand_pos = COMMON["f_channel_info_position"](is_short, brand_name_clip.w)
     return brand_name_clip.set_position(brand_pos, relative=True).set_duration(duration)
 
-def generate_mushaf_border_clip(size: tuple, thickness: int, radius: int, color: tuple, padding: int, duration: float, bg_mode: str = "Solid", bg_color: str = "#FFFDF5") -> ImageClip:
+def generate_mushaf_border_clip(size: tuple, thickness: int, radius: int, color: tuple, padding: int, duration: float, bg_mode: str = "Solid", bg_color: str = "#FFFDF5", bg_opacity: int = 255) -> ImageClip:
     """
     Generates an authentic multi-layered Mushaf border clip with rounded corners.
     Includes a double border (thick outer, thin inner) and a customizable background.
@@ -273,22 +283,24 @@ def generate_mushaf_border_clip(size: tuple, thickness: int, radius: int, color:
     opacity = 255
     if bg_mode == "Transparent":
         opacity = 0
-    elif bg_mode == "Semi-Transparent":
-        opacity = 128
+    elif bg_mode in ["Semi-Transparent", "Semi"]:
+        opacity = bg_opacity
     
     if opacity > 0:
         fill_rgb = hex_to_rgb(bg_color)
         fill_rgba = fill_rgb + (opacity,)
         draw.rounded_rectangle([0, 0, size[0], size[1]], radius=radius, fill=fill_rgba)
     
-    # 3. Apply Subtle Paper Texture (Noise) - ONLY IN SOLID MODE
-    if bg_mode == "Solid":
+    # 3. Apply Subtle Paper Texture (Noise) - ONLY IN SOLID OR SEMI MODE
+    if bg_mode in ["Solid", "Semi-Transparent", "Semi"]:
         # Convert to numpy to apply lightweight noise
         arr = np.array(img)
-        noise = np.random.randint(-5, 5, (size[1], size[0], 3), dtype='int16')
-        # Only apply to non-transparent pixels (the paper area)
-        mask = arr[..., 3] > 0
-        arr[mask, :3] = np.clip(arr[mask, :3] + noise[mask], 0, 255).astype('uint8')
+        # Only apply noise if opacity is significant enough to see it
+        if opacity > 50:
+            noise = np.random.randint(-5, 5, (size[1], size[0], 3), dtype='int16')
+            # Only apply to non-transparent pixels (the paper area)
+            mask = arr[..., 3] > 0
+            arr[mask, :3] = np.clip(arr[mask, :3] + noise[mask], 0, 255).astype('uint8')
         img = Image.fromarray(arr)
         draw = ImageDraw.Draw(img)
 
@@ -325,7 +337,7 @@ def calculate_centered_y(y_pos: float, line_height: float, visual_h: int, l_type
          
     return y_centered
 
-def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, duration: float) -> CompositeVideoClip:
+def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, duration: float, background_input: str = None) -> CompositeVideoClip:
     """
     Generates a CompositeVideoClip for a Mushaf page.
     """
@@ -344,9 +356,21 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     line_height = usable_height / 15
     clips = []
     
+    # 0. Generate Global Background (Bottom-most layer)
+    bg_clip = generate_background(background_input, duration, is_short)
+    if bg_clip:
+        clips.append(bg_clip)
+    
     # Get internal Mushaf background settings from config
     bg_mode = config_manager.get("MUSHAF_PAGE_BACKGROUND_MODE", "Solid")
     bg_color = config_manager.get("MUSHAF_PAGE_COLOR", "#FFFDF5")
+    
+    # Calculate alpha for Semi mode
+    try:
+        opacity_percent = int(config_manager.get("MUSHAF_PAGE_OPACITY", "90"))
+    except (ValueError, TypeError):
+        opacity_percent = 90
+    bg_opacity = int((opacity_percent / 100) * 255)
 
     # 1. Generate Authentic Static Border
     # Dimensions: FIXED 50% width for consistency
@@ -364,7 +388,8 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         padding=25,
         duration=duration,
         bg_mode=bg_mode,
-        bg_color=bg_color
+        bg_color=bg_color,
+        bg_opacity=bg_opacity
     )    
     # Position the border centered vertically on the Mushaf grid
     border_y = top_margin + (usable_height / 2) - (border_h / 2)
@@ -464,17 +489,4 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     if not clips:
         return ColorClip(size=resolution, color=(0,0,0)).set_opacity(0).set_duration(duration)
     
-    # 3. Add consistent background if needed
-    if bg_mode == "Solid":
-         try:
-             # Convert hex to RGB tuple if needed
-             c = bg_color
-             if isinstance(c, str) and c.startswith("#"):
-                 c = tuple(int(c.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
-             bg_clip = ColorClip(size=resolution, color=c).set_duration(duration)
-             clips.insert(0, bg_clip)
-         except Exception as e:
-             print(f"DEBUG: Failed to create background clip: {e}")
-    
-    return CompositeVideoClip(clips, size=resolution).set_duration(duration)
     return CompositeVideoClip(clips, size=resolution).set_duration(duration)
