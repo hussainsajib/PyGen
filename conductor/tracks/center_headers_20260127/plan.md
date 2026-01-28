@@ -13,6 +13,6 @@
 - [ ] Task: Conductor - User Manual Verification 'Implementation (TDD)' (Protocol in workflow.md)
 
 ## Phase 3: Integration and Final Verification [checkpoint: ]
-- [ ] Task: Generate sample Mushaf video frames for Surah 1 and a Surah with a header (e.g., Surah 2) to confirm fixes.
-- [ ] Task: Verify no regressions in text scaling or horizontal centering.
+- [x] Task: Generate sample Mushaf video frames for Surah 1 and a Surah with a header (e.g., Surah 2) to confirm fixes.
+- [x] Task: Verify no regressions in text scaling or horizontal centering.
 - [ ] Task: Conductor - User Manual Verification 'Integration and Final Verification' (Protocol in workflow.md)
