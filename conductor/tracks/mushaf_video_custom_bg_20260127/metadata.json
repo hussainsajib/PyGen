@@ -1,8 +1,0 @@
-{
-  "track_id": "mushaf_video_custom_bg_20260127",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-01-27T18:48:00Z",
-  "updated_at": "2026-01-27T18:48:00Z",
-  "description": "in mushaf video, remove any background color and user should be able to apply an image or video selected using the modal (as in the case of word-by-word video generation). also create config option to switch between transparent, semi-transparent and solid background for within the border. if the user selects a solid color background from the config for within the border, they should also be able to select a color from a color picker"
-}
