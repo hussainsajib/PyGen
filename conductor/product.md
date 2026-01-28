@@ -29,6 +29,10 @@ PyGen is an automated video generation platform designed specifically for creati
         - **Dynamic Highlighting:** Synchronized semi-transparent line-level highlighting driven by word-level timestamps, featuring dynamic width calculation that matches the actual text portion of each line.
         - **Visual Continuity:** Continuous progress tracking via a dynamic, growing progress bar integrated into the video scene.
         - **Integrated Discovery:** Native access to the stock background module (Unsplash/Pexels) directly within the Mushaf creation interface.
+        - **Layered Backgrounds:** Intelligent background system that distinguishes between the global video area and the inner Mushaf page.
+            - **Adaptive Page Rendering:** Inner page area supports "Transparent", "Semi-Transparent", and "Solid" modes.
+            - **Granular Opacity Control:** Precise control over inner page transparency via a 0-100 slider in the configuration dashboard.
+            - **Global Priority Logic:** Automatic prioritization of active background assets (images/videos) over solid color fallbacks for the outer video area.
     - **Multi-Language Support:** Comprehensive support for generating videos in multiple languages (e.g., Bengali, English).
         - **Dynamic Translation Sourcing:** Automated selection of language-specific translation and WBW databases.
         - **Customizable Typography:** Per-language font configuration to ensure correct rendering of special characters (e.g., macron characters in transliterations).
