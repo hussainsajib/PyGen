@@ -5,7 +5,7 @@
 - [x] Task: Determine the effective "content height" for different scenarios (full page, partial page).
 - [ ] Task: Conductor - User Manual Verification 'Research and Math Verification' (Protocol in workflow.md)
 
-## Phase 2: Implementation (TDD) [checkpoint: ]
+## Phase 2: Implementation (TDD) [checkpoint: 9c0db3a]
 - [x] Task: Write failing unit tests for the vertical centering calculation (mocking screen height and content height).
 - [x] Task: Implement the dynamic vertical centering logic in `generate_mushaf_page_clip`.
 - [x] Task: Implement the specific +20px gap between the Surah Header and Bismillah.
