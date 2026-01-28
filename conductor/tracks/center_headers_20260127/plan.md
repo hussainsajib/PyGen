@@ -1,6 +1,6 @@
 # Plan: Vertically Center Bismillah and Surah Header
 
-## Phase 1: Research and Reproduction [checkpoint: ]
+## Phase 1: Research and Reproduction [checkpoint: 690d853]
 - [x] Task: Identify the specific code responsible for drawing Bismillah and Surah Header text in Mushaf videos.
 - [x] Task: Create a reproduction script/test that generates a frame with these headers for visual verification.
 - [x] Task: Analyze current Y-coordinate calculations for these elements.
