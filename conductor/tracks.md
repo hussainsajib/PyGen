@@ -27,5 +27,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: in mushaf video center the main text vertically centered to the screen. put bismillah above and the surah header above that. increase the gap between the header and bismillah a bit. otherwise keep the structure of the texts same.**
+- [x] **Track: in mushaf video center the main text vertically centered to the screen. put bismillah above and the surah header above that. increase the gap between the header and bismillah a bit. otherwise keep the structure of the texts same.**
 *Link: [./tracks/mushaf_vertical_centering_20260127/](./tracks/mushaf_vertical_centering_20260127/)*
