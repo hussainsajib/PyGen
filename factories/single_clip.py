@@ -307,6 +307,24 @@ def generate_mushaf_border_clip(size: tuple, thickness: int, radius: int, color:
     img_arr = np.array(img)
     return ImageClip(img_arr).set_duration(duration)
 
+def calculate_centered_y(y_pos: float, line_height: float, visual_h: int, l_type: str) -> float:
+    """
+    Calculates the Y position to center text within its slot.
+    """
+    y_centered = y_pos + (line_height / 2) - (visual_h / 2)
+    
+    # Authenticity Adjustment: Both QCF_BSML and QCF_SurahHeader have internal 
+    # metrics that make them sit slightly high when visually centered based on bbox.
+    # Shifting down by ~2 pixels for standard line heights provides visual parity.
+    if l_type in ["basmallah", "surah_name"]:
+         # Authenticity Adjustment: These fonts have metrics that make them sit high.
+         # Shifting down by ~1.2% of line_height compensates for this.
+         y_centered += (line_height * 0.012)
+         
+    return y_centered
+         
+    return y_centered
+
 def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, duration: float) -> CompositeVideoClip:
     """
     Generates a CompositeVideoClip for a Mushaf page.
@@ -411,19 +429,16 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
             
             # Position centered vertically on the line slot
             visual_h = img_array.shape[0]
-            y_centered = y_pos + (line_height / 2) - (visual_h / 2)
-            
-            # Add margin after the header by shifting it UP in its slot
-            if l_type == "surah_name":
-                y_centered -= (line_height * 0.3)
+            y_centered = calculate_centered_y(y_pos, line_height, visual_h, l_type)
         else:
             font_size = int(line_height * 0.7)
             img_array = render_mushaf_text_to_image(text, current_font_path, font_size, color, (int(width * 0.9), int(line_height)))
             
             visual_h = img_array.shape[0]
-            y_centered = y_pos + (line_height / 2) - (visual_h / 2)
+            y_centered = calculate_centered_y(y_pos, line_height, visual_h, l_type)
 
-        t_clip = ImageClip(img_array).set_position(('center', y_centered)).set_duration(duration)
+        t_clip = ImageClip(img_array).set_position(('center', int(y_centered))).set_duration(duration)
+        # print(f"DEBUG: {l_type} at y_centered={y_centered}")
         
         # Apply highlighting logic ONLY if timestamps are provided and it's an ayah
         start_ms = line.get("start_ms")
@@ -448,4 +463,18 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         clips.append(t_clip)
     if not clips:
         return ColorClip(size=resolution, color=(0,0,0)).set_opacity(0).set_duration(duration)
+    
+    # 3. Add consistent background if needed
+    if bg_mode == "Solid":
+         try:
+             # Convert hex to RGB tuple if needed
+             c = bg_color
+             if isinstance(c, str) and c.startswith("#"):
+                 c = tuple(int(c.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
+             bg_clip = ColorClip(size=resolution, color=c).set_duration(duration)
+             clips.insert(0, bg_clip)
+         except Exception as e:
+             print(f"DEBUG: Failed to create background clip: {e}")
+    
+    return CompositeVideoClip(clips, size=resolution).set_duration(duration)
     return CompositeVideoClip(clips, size=resolution).set_duration(duration)

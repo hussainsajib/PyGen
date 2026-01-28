@@ -7,9 +7,9 @@
 - [ ] Task: Conductor - User Manual Verification 'Research and Reproduction' (Protocol in workflow.md)
 
 ## Phase 2: Implementation (TDD) [checkpoint: ]
-- [ ] Task: Write failing unit tests for `calculate_vertical_center` or equivalent logic in the rendering module.
-- [ ] Task: Implement the vertical centering fix by adjusting the offset or baseline calculation.
-- [ ] Task: Verify the tests pass.
+- [x] Task: Write failing unit tests for `calculate_vertical_center` or equivalent logic in the rendering module.
+- [x] Task: Implement the vertical centering fix by adjusting the offset or baseline calculation.
+- [x] Task: Verify the tests pass.
 - [ ] Task: Conductor - User Manual Verification 'Implementation (TDD)' (Protocol in workflow.md)
 
 ## Phase 3: Integration and Final Verification [checkpoint: ]

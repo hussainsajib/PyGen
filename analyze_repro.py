@@ -5,51 +5,53 @@ def analyze_image(filename):
     print(f"--- Analyzing {filename} ---")
     img = Image.open(filename).convert("RGBA")
     arr = np.array(img)
-    alpha = arr[..., 3]
+    # Text is white (255,255,255) on black (0,0,0)
+    mask = arr[..., 0] > 128 
     
     # Grid parameters from repro script
-    # width, height = (1080, 1920) for is_short=True
-    # top_margin = height * 0.1 = 192
-    # usable_height = height * 0.8 = 1536
-    # line_height = 1536 / 15 = 102.4
+    height = 1920
+    top_margin = height * 0.1 # 192.0
+    line_height = (height * 0.8) / 15 # 102.4
     
-    # Surah Header is line 0: y_pos = 192
-    # Bismillah is line 1: y_pos = 192 + 102.4 = 294.4
-    
-    line_height = 102.4
     slots = [
-        ("Surah Header", 192, 192 + 102.4),
-        ("Bismillah", 294.4, 294.4 + 102.4)
+        ("Surah Header", top_margin, top_margin + line_height),
+        ("Bismillah", top_margin + line_height, top_margin + 2 * line_height)
     ]
     
     for name, top, bottom in slots:
-        # Crop the slot
-        slot_alpha = alpha[int(top):int(bottom), :]
-        coords = np.argwhere(slot_alpha > 0)
+        # Crop exactly to the slot area for measurement
+        # This prevents picking up neighbor slots
+        slot_mask = mask[int(top):int(bottom), :]
+        
+        coords = np.argwhere(slot_mask)
         if coords.size > 0:
             y_min, x_min = coords.min(axis=0)
             y_max, x_max = coords.max(axis=0)
             
             # These are relative to the top of the slot
-            actual_top = y_min
-            actual_bottom = y_max
-            visual_h = actual_bottom - actual_top
-            
-            # Center of the ink relative to slot
-            visual_center = (actual_top + actual_bottom) / 2
+            visual_h = y_max - y_min
+            visual_center = (y_min + y_max) / 2
             slot_center = (bottom - top) / 2
             
             offset = visual_center - slot_center
-            print(f"{name}: Visual height={visual_h}, Visual center={visual_center:.2f}, Slot center={slot_center:.2f}, Offset={offset:.2f}")
-            if offset < 0:
+            print(f"DEBUG: {name} visual_h={visual_h}, visual_center_in_slot={visual_center:.2f}, slot_center={slot_center:.2f}")
+            print(f"{name}: Visual height={visual_h}, Offset={offset:.2f}")
+            if abs(offset) < 1.0:
+                 print("  Result: Perfectly centered (within 1px)")
+            elif offset < 0:
                 print(f"  Result: Sitting {abs(offset):.2f} pixels TOO HIGH")
-            elif offset > 0:
-                print(f"  Result: Sitting {offset:.2f} pixels TOO LOW")
             else:
-                print("  Result: Perfectly centered")
+                print(f"  Result: Sitting {offset:.2f} pixels TOO LOW")
         else:
-            print(f"{name}: No content found")
+            print(f"{name}: No content found in slot {top}-{bottom}")
 
 if __name__ == "__main__":
-    analyze_image("repro_surah_1.png")
-    analyze_image("repro_surah_114.png")
+    import sys
+    if len(sys.argv) > 1:
+        for arg in sys.argv[1:]:
+            analyze_image(arg)
+    else:
+        # Fallback to defaults if they exist
+        for f in ["repro_surah_1.png", "repro_surah_114.png"]:
+             if os.path.exists(f):
+                 analyze_image(f)
