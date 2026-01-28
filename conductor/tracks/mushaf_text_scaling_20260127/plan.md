@@ -5,7 +5,7 @@
 - [x] Task: Update `templates/config.html` to include a numerical input field for `MUSHAF_FONT_SCALE`.
 - [ ] Task: Conductor - User Manual Verification 'Configuration and UI' (Protocol in workflow.md)
 
-## Phase 2: Implementation (TDD) [checkpoint: ]
+## Phase 2: Implementation (TDD) [checkpoint: 5ea53dc]
 - [x] Task: Write failing unit tests for the font size calculation logic in `factories/single_clip.py` to ensure the scaling factor is applied.
 - [x] Task: Implement the `MUSHAF_FONT_SCALE` multiplier in the `generate_mushaf_page_clip` function.
 - [x] Task: Verify the tests pass.
