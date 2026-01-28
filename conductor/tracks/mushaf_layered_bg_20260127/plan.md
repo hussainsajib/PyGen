@@ -15,7 +15,7 @@
 - [x] Task: Verify all tests pass and handle edge cases (e.g., missing assets, invalid hex codes).
 - [ ] Task: Conductor - User Manual Verification 'Backend Rendering Refactor (TDD)' (Protocol in workflow.md)
 
-## Phase 3: Integration and Final Verification [checkpoint: ]
+## Phase 3: Integration and Final Verification [checkpoint: 6ccd9aa]
 - [x] Task: Generate sample Mushaf video frames for all three modes: Transparent, Semi (with varying opacity), and Solid.
 - [x] Task: Verify that `ACTIVE_BACKGROUND` is correctly prioritized over `BACKGROUND_RGB` for the outer area.
 - [x] Task: Ensure the UI slider correctly updates the configuration and affects the rendered output.
