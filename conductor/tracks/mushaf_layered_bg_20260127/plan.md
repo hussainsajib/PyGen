@@ -7,7 +7,7 @@
 - [x] Task: Update the frontend configuration UI to reflect the renamed `MUSHAF_PAGE_COLOR` field.
 - [ ] Task: Conductor - User Manual Verification 'Configuration and Renaming' (Protocol in workflow.md)
 
-## Phase 2: Backend Rendering Refactor (TDD) [checkpoint: ]
+## Phase 2: Backend Rendering Refactor (TDD) [checkpoint: 2e2174a]
 - [x] Task: Write unit tests for the updated background selection logic (ACTIVE_BACKGROUND vs BACKGROUND_RGB).
 - [x] Task: Write unit tests for the inner page fill calculation (Transparent, Semi, Solid).
 - [x] Task: Modify `generate_mushaf_border_clip` in `factories/single_clip.py` to handle transparency and opacity in its inner fill.
