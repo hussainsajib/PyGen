@@ -12,6 +12,6 @@
 - [ ] Task: Conductor - User Manual Verification 'Implementation (TDD)' (Protocol in workflow.md)
 
 ## Phase 3: Final Verification [checkpoint: ]
-- [ ] Task: Generate a sample Mushaf video frame and compare the Ayah text size with a previous version (or calculate visual pixel height).
-- [ ] Task: Confirm that vertical centering remains accurate with the smaller font.
+- [x] Task: Generate a sample Mushaf video frame and compare the Ayah text size with a previous version (or calculate visual pixel height).
+- [x] Task: Confirm that vertical centering remains accurate with the smaller font.
 - [ ] Task: Conductor - User Manual Verification 'Final Verification' (Protocol in workflow.md)
