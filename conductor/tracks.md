@@ -24,8 +24,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Mushaf Video Area Border**
 *Link: [./tracks/mushaf_video_border_20260127/](./tracks/mushaf_video_border_20260127/)*
-
----
-
-- [x] **Track: Mushaf Video Layered Background Refinement: global background vs inner page background with opacity control.**
-*Link: [./tracks/mushaf_layered_bg_20260127/](./tracks/mushaf_layered_bg_20260127/)*
