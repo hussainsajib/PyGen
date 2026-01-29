@@ -1,6 +1,6 @@
 # Plan: Mushaf Video Configurable Border Width
 
-## Phase 1: Configuration and UI [checkpoint: ]
+## Phase 1: Configuration and UI [checkpoint: 166b91d]
 - [x] Task: Add `MUSHAF_BORDER_WIDTH_PERCENT` to the default configuration in the database (default: 40).
 - [x] Task: Update `templates/config.html` to include a range slider for `MUSHAF_BORDER_WIDTH_PERCENT` (10-90).
 - [ ] Task: Conductor - User Manual Verification 'Configuration and UI' (Protocol in workflow.md)
