@@ -103,6 +103,11 @@
                     </div>
                 {% elif item.key == 'MUSHAF_FONT_SCALE' %}
                     <input type="number" name="{{ item.key }}" class="form-control" value="{{ item.value }}" step="0.1" min="0.1" max="2.0">
+                {% elif item.key == 'MUSHAF_BORDER_WIDTH_PERCENT' %}
+                    <div class="d-flex align-items-center">
+                        <input type="range" class="form-range flex-grow-1 me-2" min="10" max="90" id="mushaf_border_width_range" value="{{ item.value }}" oninput="document.getElementById('mushaf_border_width_value').value = this.value">
+                        <input type="number" name="{{ item.key }}" id="mushaf_border_width_value" class="form-control" style="width: 80px;" value="{{ item.value }}" min="10" max="90" oninput="document.getElementById('mushaf_border_width_range').value = this.value">
+                    </div>
                 {% else %}
                     <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="form-control">
                 {% endif %}
