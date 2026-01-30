@@ -5,11 +5,11 @@
 - [x] Task: Update `templates/config.html` to include a range slider for `MUSHAF_BORDER_WIDTH_PERCENT` (10-90).
 - [ ] Task: Conductor - User Manual Verification 'Configuration and UI' (Protocol in workflow.md)
 
-## Phase 2: Implementation (TDD) [checkpoint: ]
+## Phase 2: Implementation (TDD) [checkpoint: c24c901]
 - [x] Task: Write failing unit tests for the border width calculation logic in `factories/single_clip.py`. c23015d
 - [x] Task: Refactor `generate_mushaf_page_clip` to use the dynamic `MUSHAF_BORDER_WIDTH_PERCENT` value. b10d7db
 - [x] Task: Verify the tests pass. c23015d
-- [ ] Task: Conductor - User Manual Verification 'Implementation (TDD)' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Implementation (TDD)' (Protocol in workflow.md) c24c901
 
 ## Phase 3: Final Verification [checkpoint: ]
 - [x] Task: Generate sample frames with different border width settings (e.g., 20, 40, 60) to verify visual changes.
