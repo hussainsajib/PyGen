@@ -354,8 +354,12 @@ def calculate_centered_y(y_pos: float, line_height: float, visual_h: int, l_type
          y_centered += (line_height * 0.012)
          
     return y_centered
-         
-    return y_centered
+
+def calculate_mushaf_border_width(screen_width: int, border_width_percent: int) -> int:
+    """
+    Calculates the width of the Mushaf border based on screen width and percentage.
+    """
+    return int(screen_width * (border_width_percent / 100))
 
 def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, duration: float, background_input: str = None) -> CompositeVideoClip:
     """
@@ -574,10 +578,14 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     has_bsml = any(l.get("line_type") == "basmallah" for l in renderable_lines)
     has_header_gap = has_header and has_bsml
     line_positions = calculate_mushaf_content_y_positions(height, len(renderable_lines), has_header_gap)
-
     # 1. Generate Authentic Static Border
-    # Dimensions: FIXED 50% width for consistency
-    border_w = int(width * 0.50)
+    # Dimensions: Dynamic width based on config
+    try:
+        border_width_percent = int(config_manager.get("MUSHAF_BORDER_WIDTH_PERCENT", "40"))
+    except (ValueError, TypeError):
+        border_width_percent = 40
+        
+    border_w = calculate_mushaf_border_width(width, border_width_percent)
     border_h = int(usable_height + 60) # Generous height to encompass all slots
     border_color = (212, 197, 161) # Authentic Gold/Bronze
     border_thickness = 8
