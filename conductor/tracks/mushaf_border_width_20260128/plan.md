@@ -6,9 +6,9 @@
 - [ ] Task: Conductor - User Manual Verification 'Configuration and UI' (Protocol in workflow.md)
 
 ## Phase 2: Implementation (TDD) [checkpoint: ]
-- [x] Task: Write failing unit tests for the border width calculation logic in `factories/single_clip.py`.
-- [x] Task: Refactor `generate_mushaf_page_clip` to use the dynamic `MUSHAF_BORDER_WIDTH_PERCENT` value.
-- [x] Task: Verify the tests pass.
+- [x] Task: Write failing unit tests for the border width calculation logic in `factories/single_clip.py`. c23015d
+- [x] Task: Refactor `generate_mushaf_page_clip` to use the dynamic `MUSHAF_BORDER_WIDTH_PERCENT` value. b10d7db
+- [x] Task: Verify the tests pass. c23015d
 - [ ] Task: Conductor - User Manual Verification 'Implementation (TDD)' (Protocol in workflow.md)
 
 ## Phase 3: Final Verification [checkpoint: ]
