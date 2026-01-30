@@ -11,7 +11,7 @@
 - [x] Task: Verify the tests pass. c23015d
 - [x] Task: Conductor - User Manual Verification 'Implementation (TDD)' (Protocol in workflow.md) c24c901
 
-## Phase 3: Final Verification [checkpoint: ]
-- [x] Task: Generate sample frames with different border width settings (e.g., 20, 40, 60) to verify visual changes.
-- [x] Task: Confirm that the default setting (40) results in the expected narrower appearance.
-- [ ] Task: Conductor - User Manual Verification 'Final Verification' (Protocol in workflow.md)
+## Phase 3: Final Verification [checkpoint: 3e7db10]
+- [x] Task: Generate sample frames with different border width settings (e.g., 20, 40, 60) to verify visual changes. 3e7db10
+- [x] Task: Confirm that the default setting (40) results in the expected narrower appearance. 3e7db10
+- [x] Task: Conductor - User Manual Verification 'Final Verification' (Protocol in workflow.md) 3e7db10
