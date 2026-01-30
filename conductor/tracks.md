@@ -27,5 +27,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: make the visible border configurable in the mushaf video genertion. also make the visible border narrower by 20%**
+## [x] **Track: make the visible border configurable in the mushaf video genertion. also make the visible border narrower by 20%**
 *Link: [./tracks/mushaf_border_width_20260128/](./tracks/mushaf_border_width_20260128/)*
