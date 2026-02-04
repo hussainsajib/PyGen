@@ -1,0 +1,17 @@
+# Plan: Mushaf Video Border Toggle
+
+## Phase 1: Configuration and UI
+- [x] Task: Add `MUSHAF_BORDER_ENABLED` to the default configuration in the database (default: "False"). d4dfc94
+- [x] Task: Update `templates/config.html` to include a checkbox for `MUSHAF_BORDER_ENABLED`. 2d6a973
+- [~] Task: Conductor - User Manual Verification 'Configuration and UI' (Protocol in workflow.md)
+
+## Phase 2: Implementation (TDD)
+- [ ] Task: Write failing unit tests in `tests/test_mushaf_border_toggle.py` to verify that border rendering is conditional based on the config.
+- [ ] Task: Update `generate_mushaf_page_clip` in `factories/single_clip.py` to conditionally render the border.
+- [ ] Task: Verify the tests pass.
+- [ ] Task: Conductor - User Manual Verification 'Implementation (TDD)' (Protocol in workflow.md)
+
+## Phase 3: Final Verification
+- [ ] Task: Generate a sample Mushaf video with `MUSHAF_BORDER_ENABLED` set to "False" and verify the border is missing.
+- [ ] Task: Generate a sample Mushaf video with `MUSHAF_BORDER_ENABLED` set to "True" and verify the border is present.
+- [ ] Task: Conductor - User Manual Verification 'Final Verification' (Protocol in workflow.md)
