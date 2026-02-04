@@ -439,31 +439,34 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     line_positions = calculate_mushaf_content_y_positions(height, len(renderable_lines), has_header_gap)
     # 1. Generate Authentic Static Border
     # Dimensions: Dynamic width based on config
-    try:
-        border_width_percent = int(config_manager.get("MUSHAF_BORDER_WIDTH_PERCENT", "40"))
-    except (ValueError, TypeError):
-        border_width_percent = 40
-        
-    border_w = calculate_mushaf_border_width(width, border_width_percent)
-    border_h = int(usable_height + 60) # Generous height to encompass all slots
-    border_color = (212, 197, 161) # Authentic Gold/Bronze
-    border_thickness = 8
-    border_radius = 25
+    border_enabled = config_manager.get("MUSHAF_BORDER_ENABLED", "False") == "True"
     
-    border_clip = generate_mushaf_border_clip(
-        size=(border_w, border_h),
-        thickness=border_thickness,
-        radius=border_radius,
-        color=border_color,
-        padding=25,
-        duration=duration,
-        bg_mode=bg_mode,
-        bg_color=bg_color,
-        bg_opacity=bg_opacity
-    )    
-    # Position the border centered vertically on the frame
-    border_y = (height / 2) - (border_h / 2)
-    clips.append(border_clip.set_position(('center', border_y)))
+    if border_enabled:
+        try:
+            border_width_percent = int(config_manager.get("MUSHAF_BORDER_WIDTH_PERCENT", "40"))
+        except (ValueError, TypeError):
+            border_width_percent = 40
+            
+        border_w = calculate_mushaf_border_width(width, border_width_percent)
+        border_h = int(usable_height + 60) # Generous height to encompass all slots
+        border_color = (212, 197, 161) # Authentic Gold/Bronze
+        border_thickness = 8
+        border_radius = 25
+        
+        border_clip = generate_mushaf_border_clip(
+            size=(border_w, border_h),
+            thickness=border_thickness,
+            radius=border_radius,
+            color=border_color,
+            padding=25,
+            duration=duration,
+            bg_mode=bg_mode,
+            bg_color=bg_color,
+            bg_opacity=bg_opacity
+        )    
+        # Position the border centered vertically on the frame
+        border_y = (height / 2) - (border_h / 2)
+        clips.append(border_clip.set_position(('center', border_y)))
 
     color = FONT_COLOR
     if isinstance(color, str) and color.startswith("rgb("):
