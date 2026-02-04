@@ -34,6 +34,7 @@ PyGen is an automated video generation platform designed specifically for creati
             - **Granular Opacity Control:** Precise control over inner page transparency via a 0-100 slider in the configuration dashboard.
             - **Global Priority Logic:** Automatic prioritization of active background assets (images/videos) over solid color fallbacks for the outer video area.
             - **Dynamic Typography Scaling:** Configurable `MUSHAF_FONT_SCALE` setting to adjust Arabic text size (e.g., 20% smaller) for better whitespace management.
+            - **Configurable Aesthetics:** Toggleable decorative border visibility (`MUSHAF_BORDER_ENABLED`) for both regular videos and Shorts, allowing for a cleaner "borderless" look.
     - **Multi-Language Support:** Comprehensive support for generating videos in multiple languages (e.g., Bengali, English).
         - **Dynamic Translation Sourcing:** Automated selection of language-specific translation and WBW databases.
         - **Customizable Typography:** Per-language font configuration to ensure correct rendering of special characters (e.g., macron characters in transliterations).
