@@ -68,7 +68,7 @@
                         <input type="checkbox" id="enable_facebook_upload_checkbox" class="form-check-input" role="switch" {% if item.value == 'True' %}checked{% endif %}>
                         <input type="hidden" name="{{ item.key }}" id="enable_facebook_upload_value" value="{{ item.value }}">
                     </div>
-                {% elif item.key == 'WBW_FULL_TRANSLATION_ENABLED' or item.key == 'WBW_INTERLINEAR_ENABLED' %}
+                {% elif item.key == 'WBW_FULL_TRANSLATION_ENABLED' or item.key == 'WBW_INTERLINEAR_ENABLED' or item.key == 'MUSHAF_BORDER_ENABLED' %}
                     <div class="form-check form-switch">
                         <input type="checkbox" id="{{ item.key }}_checkbox" class="form-check-input dynamic-switch" role="switch" data-target="{{ item.key }}_value" {% if item.value == 'True' %}checked{% endif %}>
                         <input type="hidden" name="{{ item.key }}" id="{{ item.key }}_value" value="{{ item.value }}">
