@@ -11,7 +11,7 @@
 - [x] Task: Verify the tests pass. f3a1081
 - [x] Task: Conductor - User Manual Verification 'Implementation (TDD)' (Protocol in workflow.md) 0d1508d
 
-## Phase 3: Final Verification
+## Phase 3: Final Verification [checkpoint: f242190]
 - [x] Task: Generate a sample Mushaf video with `MUSHAF_BORDER_ENABLED` set to "False" and verify the border is missing. 62cbbe3
 - [x] Task: Generate a sample Mushaf video with `MUSHAF_BORDER_ENABLED` set to "True" and verify the border is present. 62cbbe3
-- [~] Task: Conductor - User Manual Verification 'Final Verification' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Final Verification' (Protocol in workflow.md) f242190
