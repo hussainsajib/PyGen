@@ -6,7 +6,7 @@ This plan outlines the steps to implement Juz-level video generation, including 
 - [x] Task: Implement Juz metadata service to retrieve boundaries from SQLite. [aa97f19]
     - [ ] Write unit tests for `get_juz_boundaries` in `tests/test_juz_metadata.py`.
     - [ ] Implement query logic in `db_ops/crud_mushaf.py` to fetch start/end Surah/Ayah for a Juz.
-- [ ] Task: Develop the Audio/Timing mapping engine.
+- [x] Task: Develop the Audio/Timing mapping engine. [e908ae3]
     - [ ] Write unit tests for timing offsets (including Basmallah and Surah 9 gaps) in `tests/test_juz_timing.py`.
     - [ ] Implement `prepare_juz_data_package` to concatenate audio streams and re-map word-level timestamps relative to the Juz start.
 - [ ] Task: Conductor - User Manual Verification 'Data Access and Logic Layer' (Protocol in workflow.md)
