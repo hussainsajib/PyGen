@@ -35,3 +35,5 @@ class Job(Base):
     custom_title = Column(String(100), nullable=True)
     background_path = Column(String(255), nullable=True)
     lines_per_page = Column(Integer, default=15)
+    start_page = Column(Integer, nullable=True)
+    end_page = Column(Integer, nullable=True)
