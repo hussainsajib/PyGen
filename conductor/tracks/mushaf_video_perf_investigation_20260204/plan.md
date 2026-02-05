@@ -10,7 +10,7 @@ This plan outlines the steps to profile and analyze the Mushaf video generation 
 
 ## Phase 2: Detailed Profiling
 - [x] Task: Write a profiling test to measure `render_mushaf_text_to_image` execution time across various font sizes and page numbers. [86b01db]
-- [ ] Task: Implement a profiling harness for `generate_mushaf_page_clip` to measure the overhead of `CompositeVideoClip` assembly.
+- [x] Task: Implement a profiling harness for `generate_mushaf_page_clip` to measure the overhead of `CompositeVideoClip` assembly. [6da9b33]
 - [ ] Task: Monitor and record CPU/GPU/Memory utilization during a full video generation run using system tools.
 - [ ] Task: Conductor - User Manual Verification 'Detailed Profiling' (Protocol in workflow.md)
 
