@@ -11,7 +11,7 @@ This plan outlines the steps to implement Juz-level video generation, including 
     - [ ] Implement `prepare_juz_data_package` to concatenate audio streams and re-map word-level timestamps relative to the Juz start.
 - [ ] Task: Conductor - User Manual Verification 'Data Access and Logic Layer' (Protocol in workflow.md)
 
-## Phase 2: Video Generation Engine Enhancements
+## Phase 2: Video Generation Engine Enhancements [checkpoint: b518cdd]
 - [x] Task: Implement multi-Surah Mushaf chunking logic. [8988c01]
     - [ ] Write integration tests for the continuous 15-line flow across Surah boundaries.
     - [ ] Modify or create a variant of `generate_mushaf_video` that iterates through a list of Surahs while maintaining line state.
