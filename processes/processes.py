@@ -7,7 +7,7 @@ from processes.youtube_utils import upload_to_youtube
 from processes.facebook_utils import FacebookClient
 from processes.screenshot import extract_frame
 from processes.surah_video import generate_surah
-from processes.mushaf_video import generate_mushaf_video
+from processes.mushaf_video import generate_mushaf_video, generate_juz_video
 from processes.logger import logger
 from config_manager import config_manager
 from db.database import async_session
@@ -345,14 +345,134 @@ async def manual_upload_to_facebook(video_filename: str, details_filename: str):
         except Exception as e:
             print(f"Error reading info file for Facebook upload: {e}")
 
-    try:
-        video_id = await run_in_threadpool(
-            fb_client.upload_to_facebook,
-            video_path=video_path,
-            title=title,
-            description=description
-        )
-        if video_id:
-            print(f"Manual Facebook upload successful: {video_id}")
-    except Exception as e:
-        print(f"Facebook manual upload failed: {e}")
+        try:
+
+            video_id = await run_in_threadpool(
+
+                fb_client.upload_to_facebook,
+
+                video_path=video_path,
+
+                title=title,
+
+                description=description
+
+            )
+
+            if video_id:
+
+                print(f"Manual Facebook upload successful: {video_id}")
+
+        except Exception as e:
+
+            print(f"Facebook manual upload failed: {e}")
+
+    
+
+    async def create_juz_video_job(juz: int, reciter: str, is_short: bool = False, 
+
+                                 background_path: str = None,
+
+                                 upload_after_generation: bool = False,
+
+                                 playlist_id: str = None,
+
+                                 custom_title: str = None,
+
+                                 lines_per_page: int = 15):
+
+        """Generates a Juz Mushaf-style video and optionally uploads it to YouTube."""
+
+        video_details = await generate_juz_video(juz, reciter, is_short, background_path, custom_title=custom_title, lines_per_page=lines_per_page)
+
+        
+
+        if not video_details:
+
+            raise Exception("Error generating Juz video")
+
+        
+
+        screenshot_path = await run_in_threadpool(extract_frame, video_path=video_details["video"])
+
+        video_details["screenshot"] = screenshot_path
+
+        
+
+        # Persist to database
+
+        await record_media_asset(video_details)
+
+        
+
+        # Check duration for Shorts duration limit (YouTube)
+
+        duration = await run_in_threadpool(get_video_duration, video_details["video"])
+
+        can_upload_to_youtube = True
+
+        if is_short and duration > 60:
+
+            logger.warning(f"Short exceeds 60s ({duration:.2f}s). Skipping YouTube upload.")
+
+            can_upload_to_youtube = False
+
+        
+
+        # Upload to YouTube if requested
+
+        if upload_after_generation and can_upload_to_youtube:
+
+            target_channel_id = await _get_target_youtube_channel_id()
+
+            
+
+            target_playlist_id = None
+
+            if playlist_id == "default":
+
+                target_playlist_id = await _get_playlist_for_reciter(reciter)
+
+            elif playlist_id and playlist_id != "none":
+
+                target_playlist_id = playlist_id
+
+            
+
+            try:
+
+                video_id = await run_in_threadpool(
+
+                    upload_to_youtube,
+
+                    video_details=video_details,
+
+                    target_channel_id=target_channel_id,
+
+                    playlist_id=target_playlist_id
+
+                )
+
+                if video_id:
+
+                    await update_media_asset_upload(video_details["video"], video_id)
+
+            except Exception as e:
+
+                print(f"YouTube upload failed: {e}")
+
+    
+
+        # Sleep for 20 seconds before uploading to Facebook if YouTube upload was attempted/enabled
+
+        if upload_after_generation:
+
+            await asyncio.sleep(20)
+
+    
+
+        # Upload to Facebook if enabled
+
+        await _upload_to_facebook_if_enabled(video_details)
+
+    

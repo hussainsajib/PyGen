@@ -251,6 +251,79 @@ async def mushaf_video_interface(
     }
     return templates.TemplateResponse("mushaf_video.html", context)
 
+@app.get("/juz-video", name="juz_video_creator", response_class=HTMLResponse)
+async def juz_video_interface(
+    request: Request, 
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
+):
+    reciters = []
+    db_reciters = await crud_reciters.get_all_reciters(db)
+    
+    playlists = []
+    seen_playlists = set()
+    for r in db_reciters:
+        if r.playlist_id and r.playlist_id not in seen_playlists:
+            playlists.append({"id": r.playlist_id, "name": f"Playlist {r.playlist_id} ({r.english_name})"})
+            seen_playlists.add(r.playlist_id)
+            
+    for r in db_reciters:
+        # Juz video needs WBW timestamps for highlighting
+        if r.wbw_database and str(r.wbw_database).strip(): 
+            reciters.append({
+                "english_name": r.english_name,
+                "key": r.reciter_key
+            })
+    reciters.sort(key=lambda x: x["english_name"])
+    
+    upload_to_youtube = config.get("UPLOAD_TO_YOUTUBE", "False") == "True"
+    enable_facebook_upload = config.get("ENABLE_FACEBOOK_UPLOAD", "False") == "True"
+    default_language = config.get("DEFAULT_LANGUAGE", "bengali")
+    mushaf_bg_mode = config.get("MUSHAF_PAGE_BACKGROUND_MODE", "Solid")
+    mushaf_bg_color = config.get("MUSHAF_PAGE_COLOR", "#FFFDF5")
+    
+    languages = await get_all_languages(db)
+    
+    context = {
+        "request": request, 
+        "reciters": reciters,
+        "upload_to_youtube": upload_to_youtube,
+        "enable_facebook_upload": enable_facebook_upload,
+        "default_language": default_language,
+        "mushaf_bg_mode": mushaf_bg_mode,
+        "mushaf_bg_color": mushaf_bg_color,
+        "languages": languages,
+        "playlists": playlists
+    }
+    return templates.TemplateResponse("juz_video.html", context)
+
+@app.get("/create-juz-video")
+async def create_juz_video(
+    juz: int,
+    reciter: str,
+    active_background: str = None,
+    is_short: bool = False,
+    playlist_id: str = None,
+    custom_title: str = None,
+    upload_after_generation: bool = False,
+    lines_per_page: int = 15,
+    db: AsyncSession = Depends(get_db)
+):
+    await enqueue_job(
+        db,
+        surah_number=juz, # We overload surah_number for Juz identification in juz_video type
+        surah_name=f"Juz {juz}",
+        reciter=reciter,
+        job_type="juz_video",
+        is_short=is_short,
+        background_path=active_background,
+        playlist_id=playlist_id if playlist_id != "none" else None,
+        custom_title=custom_title,
+        upload_after_generation=upload_after_generation,
+        lines_per_page=lines_per_page
+    )
+    return RedirectResponse(url="/jobs", status_code=303)
+
 @app.get("/word-by-word", name="wbw", response_class=HTMLResponse)
 async def wbw_interface(
     request: Request, 
