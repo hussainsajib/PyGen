@@ -7,7 +7,7 @@ This plan outlines the steps to implement performance optimizations for Mushaf v
     - [ ] Update `generate_juz_video` in `processes/mushaf_video.py` to accept optional `start_ayah` and `end_ayah` overrides.
     - [ ] Add range filtering logic to ensure only specific Ayahs are processed during test runs.
     - [ ] Verify range selection works correctly by generating a 5-Ayah Juz segment.
-- [ ] Task: Implement Font Object Caching.
+- [x] Task: Implement Font Object Caching. [72ab263]
     - [ ] Write a benchmark test `tests/test_font_cache_perf.py` to measure rendering time with and without caching.
     - [ ] Implement a global `FONT_CACHE` dictionary in `factories/single_clip.py`.
     - [ ] Update `render_mushaf_text_to_image` to retrieve fonts from the cache based on path and size.
