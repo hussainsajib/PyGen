@@ -1,8 +1,39 @@
 import sqlite3
 import os
+import json
 
 DB_15_LINES = "databases/text/qpc-v2-15-lines.db"
 DB_WBW = "databases/text/word_by_word_qpc-v2.db"
+DB_JUZ = "databases/text/quran-metadata-juz.sqlite"
+
+def get_juz_boundaries(juz_number: int):
+    """
+    Retrieves the start and end surah/ayah for a given juz.
+    """
+    if not os.path.exists(DB_JUZ):
+        return None
+        
+    conn = sqlite3.connect(DB_JUZ)
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT first_verse_key, last_verse_key, verse_mapping FROM juz WHERE juz_number = ?", (juz_number,))
+        row = cursor.fetchone()
+        if not row:
+            return None
+            
+        first_key, last_key, mapping_str = row
+        start_surah, start_ayah = map(int, first_key.split(":"))
+        end_surah, end_ayah = map(int, last_key.split(":"))
+        
+        return {
+            "start_surah": start_surah,
+            "start_ayah": start_ayah,
+            "end_surah": end_surah,
+            "end_ayah": end_ayah,
+            "verse_mapping": json.loads(mapping_str)
+        }
+    finally:
+        conn.close()
 
 def get_surah_page_range(surah_number: int):
     """
