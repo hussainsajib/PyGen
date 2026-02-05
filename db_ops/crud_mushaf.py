@@ -35,6 +35,50 @@ def get_juz_boundaries(juz_number: int):
     finally:
         conn.close()
 
+def get_ayahs_for_page_range(start_page: int, end_page: int):
+    """
+    Determines the starting surah/ayah and ending surah/ayah for a range of pages.
+    """
+    conn_15line = sqlite3.connect(DB_15_LINES)
+    try:
+        cursor_15line = conn_15line.cursor()
+        cursor_15line.execute("""
+            SELECT MIN(first_word_id), MAX(last_word_id)
+            FROM pages
+            WHERE page_number BETWEEN ? AND ?
+              AND first_word_id != '' AND last_word_id != ''
+        """, (start_page, end_page))
+        start_word_id, end_word_id = cursor_15line.fetchone()
+    finally:
+        conn_15line.close()
+        
+    if start_word_id is None:
+        return None
+
+    conn_wbw = sqlite3.connect(DB_WBW)
+    try:
+        cursor_wbw = conn_wbw.cursor()
+        
+        # Get start surah/ayah
+        cursor_wbw.execute("SELECT surah, ayah FROM words WHERE id = ?", (start_word_id,))
+        start_res = cursor_wbw.fetchone()
+        
+        # Get end surah/ayah
+        cursor_wbw.execute("SELECT surah, ayah FROM words WHERE id = ?", (end_word_id,))
+        end_res = cursor_wbw.fetchone()
+        
+        if not start_res or not end_res:
+            return None
+            
+        return {
+            "start_surah": start_res[0],
+            "start_ayah": start_res[1],
+            "end_surah": end_res[0],
+            "end_ayah": end_res[1]
+        }
+    finally:
+        conn_wbw.close()
+
 def get_surah_page_range(surah_number: int):
     """
     Returns the start and end page for a given surah by resolving word ID boundaries.
