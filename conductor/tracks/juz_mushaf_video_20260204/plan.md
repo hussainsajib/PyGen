@@ -27,7 +27,7 @@ This plan outlines the steps to implement Juz-level video generation, including 
 - [ ] Task: Conductor - User Manual Verification 'Metadata and Integration' (Protocol in workflow.md)
 
 ## Phase 4: Frontend Development
-- [ ] Task: Create the Juz Video generation interface.
+- [x] Task: Create the Juz Video generation interface. [e921309]
     - [ ] Develop `templates/juz_video.html` using Bootstrap 5, mirroring the Mushaf creation layout.
     - [ ] Implement Juz selection (1-30) and integrate the existing background/opacity modules.
 - [ ] Task: Wire the UI to the backend job system.
