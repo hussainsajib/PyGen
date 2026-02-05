@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import os
 import json
+import time
 
 # Load ligature data for Mushaf headers
 LIGATURE_DATA = {}
@@ -34,6 +35,7 @@ def render_mushaf_text_to_image(text: str, font_path: str, font_size: int, color
     Renders Arabic Mushaf text to a numpy array (image) using Pillow.
     Automatically trims empty space around the rendered text.
     """
+    start_time = time.time()
     # Create a large enough canvas to avoid initial clipping
     canvas_w = max(size[0], font_size * 10)
     canvas_h = max(size[1], font_size * 2)
@@ -65,7 +67,8 @@ def render_mushaf_text_to_image(text: str, font_path: str, font_size: int, color
     else:
         # Return a 1x1 transparent pixel if blank
         img_arr = np.zeros((1, 1, 4), dtype=np.uint8)
-        
+    
+    print(f"DEBUG: render_mushaf_text_to_image took {time.time() - start_time:.4f}s")
     return img_arr
 
 def generate_image_background(background_image_url: str, duration: int, is_short: bool):
@@ -367,6 +370,8 @@ def calculate_mushaf_font_size(width: int, line_height: float, l_type: str, scal
     """
     if l_type == "surah_name":
         # Web uses 15cqw (~15% of width).
+        if width == 1080:
+            return int(width * 0.35)
         return int(width * 0.15)
     elif l_type == "basmallah":
         # Basmallah should be smaller, matching web ratio of ~1.9x standard text (0.7 * 1.9 = 1.33)
@@ -380,6 +385,7 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     """
     Generates a CompositeVideoClip for a Mushaf page.
     """
+    page_start_time = time.time()
     resolution = get_resolution(is_short)
     width, height = resolution
     font_path_page = os.path.abspath(os.path.join("QPC_V2_Font.ttf", f"p{page_number}.ttf"))
@@ -396,9 +402,11 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     clips = []
     
     # 0. Generate Global Background (Bottom-most layer)
+    bg_gen_start = time.time()
     bg_clip = generate_background(background_input, duration, is_short)
     if bg_clip:
         clips.append(bg_clip)
+    print(f"DEBUG: Background generation took {time.time() - bg_gen_start:.4f}s")
     
     # Get internal Mushaf background settings from config
     bg_mode = config_manager.get("MUSHAF_PAGE_BACKGROUND_MODE", "Solid")
@@ -416,10 +424,6 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     except (ValueError, TypeError):
         opacity_percent = 90
     bg_opacity = int((opacity_percent / 100) * 255)
-
-    # ... (Border generation remains the same)
-    
-    # ... (Color logic remains the same)
 
     # Filter renderable lines to ensure accurate centering count
     renderable_lines = []
@@ -442,6 +446,7 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     border_enabled = config_manager.get("MUSHAF_BORDER_ENABLED", "False") == "True"
     
     if border_enabled:
+        border_gen_start = time.time()
         try:
             border_width_percent = int(config_manager.get("MUSHAF_BORDER_WIDTH_PERCENT", "40"))
         except (ValueError, TypeError):
@@ -467,6 +472,7 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         # Position the border centered vertically on the frame
         border_y = (height / 2) - (border_h / 2)
         clips.append(border_clip.set_position(('center', border_y)))
+        print(f"DEBUG: Border generation took {time.time() - border_gen_start:.4f}s")
 
     color = FONT_COLOR
     if isinstance(color, str) and color.startswith("rgb("):
@@ -475,6 +481,7 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         except:
             color = (255, 255, 255)
 
+    text_render_total = 0
     for i, line in enumerate(renderable_lines):
         # Reverse words for RTL rendering
         words = line.get("words", [])
@@ -504,6 +511,7 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         
         font_size = calculate_mushaf_font_size(width, line_height, l_type, font_scale)
         
+        tr_start = time.time()
         if l_type == "surah_name":
             # Use ligature data from ligatures.json
             surah_num = int(line["surah_number"])
@@ -515,6 +523,7 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
         else:
             # Ayah
             img_array = render_mushaf_text_to_image(text, current_font_path, font_size, color, (int(width * 0.9), int(line_height)))
+        text_render_total += (time.time() - tr_start)
         
         # Position centered vertically on the line slot
         visual_h = img_array.shape[0]
@@ -543,7 +552,14 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
                     pass
 
         clips.append(t_clip)
+    
+    print(f"DEBUG: Total Text Rendering for page took {text_render_total:.4f}s")
+    
     if not clips:
         return ColorClip(size=resolution, color=(0,0,0)).set_opacity(0).set_duration(duration)
     
-    return CompositeVideoClip(clips, size=resolution).set_duration(duration)
+    composite_start = time.time()
+    result = CompositeVideoClip(clips, size=resolution).set_duration(duration)
+    print(f"DEBUG: CompositeVideoClip assembly took {time.time() - composite_start:.4f}s")
+    print(f"DEBUG: generate_mushaf_page_clip TOTAL took {time.time() - page_start_time:.4f}s")
+    return result

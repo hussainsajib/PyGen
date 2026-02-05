@@ -2,6 +2,7 @@ import os
 import tempfile
 import anyio
 import numpy as np
+import time
 from moviepy.editor import concatenate_videoclips, AudioFileClip, CompositeVideoClip, ColorClip, TextClip
 from db_ops.crud_surah import read_surah_data
 from db_ops.crud_reciters import get_reciter_by_key
@@ -38,6 +39,7 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
         brand_name = lang_obj.brand_name if lang_obj and lang_obj.brand_name else "Taqwa"
         
         # 2. Download Audio
+        audio_start_time = time.time()
         audio_url = read_surah_data(surah_number, reciter_db_obj.database)
         if not audio_url:
             return None
@@ -48,8 +50,10 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             
         full_audio = AudioFileClip(temp_audio)
         total_duration = full_audio.duration
+        print(f"[PERF] Audio Download & Load: {time.time() - audio_start_time:.2f}s")
         
         # 3. Fetch WBW Timestamps
+        data_start_time = time.time()
         wbw_timestamps = {}
         if reciter_db_obj.wbw_database:
             wbw_db_path = os.path.join("databases", "word-by-word", reciter_db_obj.wbw_database)
@@ -86,8 +90,10 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             
             aligned_page = align_mushaf_lines_with_timestamps(filtered_page, wbw_timestamps)
             lines_by_page[page_num] = aligned_page
+        print(f"[PERF] Data Fetch & Grouping: {time.time() - data_start_time:.2f}s")
 
         # 5. Generate Clips with Page-Aware Chunking
+        gen_start_time = time.time()
         global_chunk_idx = 0
         sorted_pages = sorted(lines_by_page.keys())
         
@@ -98,6 +104,7 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             
             for c_idx, chunk in enumerate(page_chunks):
                 try:
+                    chunk_gen_start = time.time()
                     valid_starts = [l["start_ms"] for l in chunk if l["start_ms"] is not None]
                     valid_ends = [l["end_ms"] for l in chunk if l["end_ms"] is not None]
                     
@@ -217,16 +224,19 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                     
                     page_clips.append(final_chunk_clip)
                     global_chunk_idx += 1
+                    print(f"[PERF] Chunk {global_chunk_idx} Generation: {time.time() - chunk_gen_start:.2f}s")
                 except Exception as e:
                     print(f"[ERROR] Page {page_num} Chunk {c_idx} failed: {e}", flush=True)
                     continue
+        print(f"[PERF] Total Clips Generation: {time.time() - gen_start_time:.2f}s")
 
         # 6. Final Assembly
         if not page_clips:
             full_audio.close()
             cleanup_temp_file(temp_audio)
             return None
-            
+        
+        assembly_start_time = time.time()
         final_video = concatenate_videoclips(page_clips, method="compose")
         
         surah_slug = surah_p.english_name.lower().replace(" ", "_")
@@ -247,6 +257,7 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             preset="ultrafast",
             logger="bar"
         )
+        print(f"[PERF] Video Concatenation & Writing: {time.time() - assembly_start_time:.2f}s")
         
         full_audio.close()
         for c in page_clips:
