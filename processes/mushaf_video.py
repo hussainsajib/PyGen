@@ -275,15 +275,29 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             "is_short": is_short
         }
 
-async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool = False, background_path: str = None, custom_title: str = None, lines_per_page: int = 15):
+async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool = False, background_path: str = None, custom_title: str = None, lines_per_page: int = 15, start_ayah: int = None, end_ayah: int = None):
     """
     Orchestrates the generation of a Mushaf-style Juz recitation video.
+    Supports optional Ayah range selection for testing.
     """
     async with async_session() as session:
         # 1. Fetch Juz Boundaries
         boundaries = get_juz_boundaries(juz_number)
         if not boundaries:
             return None
+            
+        # Apply Ayah range overrides if provided
+        if start_ayah is not None:
+            # We assume start_ayah applies to the FIRST surah in the juz for now
+            s_first = str(min(int(s) for s in boundaries["verse_mapping"].keys()))
+            v_range = boundaries["verse_mapping"][s_first].split("-")
+            boundaries["verse_mapping"][s_first] = f"{start_ayah}-{v_range[1]}"
+            
+        if end_ayah is not None:
+            # We assume end_ayah applies to the LAST surah in the juz for now
+            s_last = str(max(int(s) for s in boundaries["verse_mapping"].keys()))
+            v_range = boundaries["verse_mapping"][s_last].split("-")
+            boundaries["verse_mapping"][s_last] = f"{v_range[0]}-{end_ayah}"
             
         start_surah = boundaries["start_surah"]
         end_surah = boundaries["end_surah"]
