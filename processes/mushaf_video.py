@@ -14,7 +14,7 @@ from net_ops.download_file import download_mp3_temp, cleanup_temp_file
 from factories.single_clip import generate_background, generate_mushaf_page_clip, generate_reciter_name_clip, generate_surah_info_clip, generate_brand_clip
 from factories.video import get_resolution
 from processes.video_configs import VIDEO_ENCODING_THREADS, COMMON, FONT_COLOR
-from processes.description import generate_details
+from processes.description import generate_details, generate_juz_details
 from processes.Classes.surah import Surah
 from processes.Classes.reciter import Reciter
 from config_manager import config_manager
@@ -573,8 +573,17 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
         for c in page_clips: c.close()
         for tf in temp_files: cleanup_temp_file(tf)
         
+        details_path = generate_juz_details(
+            juz_number,
+            reciter_p,
+            offsets,
+            is_short,
+            language=current_language
+        )
+        
         return {
             "video": video_path,
+            "info": details_path,
             "juz_number": juz_number,
             "reciter": reciter_key,
             "is_short": is_short
