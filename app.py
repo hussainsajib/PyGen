@@ -279,6 +279,8 @@ async def juz_video_interface(
     upload_to_youtube = config.get("UPLOAD_TO_YOUTUBE", "False") == "True"
     enable_facebook_upload = config.get("ENABLE_FACEBOOK_UPLOAD", "False") == "True"
     default_language = config.get("DEFAULT_LANGUAGE", "bengali")
+    bg_rgb = config.get("BACKGROUND_RGB", "(0,0,0)")
+    font_color = config.get("FONT_COLOR", "white")
     mushaf_bg_mode = config.get("MUSHAF_PAGE_BACKGROUND_MODE", "Solid")
     mushaf_bg_color = config.get("MUSHAF_PAGE_COLOR", "#FFFDF5")
     
@@ -290,6 +292,8 @@ async def juz_video_interface(
         "upload_to_youtube": upload_to_youtube,
         "enable_facebook_upload": enable_facebook_upload,
         "default_language": default_language,
+        "bg_rgb": bg_rgb,
+        "font_color": font_color,
         "mushaf_bg_mode": mushaf_bg_mode,
         "mushaf_bg_color": mushaf_bg_color,
         "languages": languages,
@@ -307,6 +311,8 @@ async def create_juz_video(
     custom_title: str = None,
     upload_after_generation: bool = False,
     lines_per_page: int = 15,
+    start_page: int = None,
+    end_page: int = None,
     db: AsyncSession = Depends(get_db)
 ):
     await enqueue_job(
@@ -320,7 +326,9 @@ async def create_juz_video(
         playlist_id=playlist_id if playlist_id != "none" else None,
         custom_title=custom_title,
         upload_after_generation=upload_after_generation,
-        lines_per_page=lines_per_page
+        lines_per_page=lines_per_page,
+        start_page=start_page,
+        end_page=end_page
     )
     return RedirectResponse(url="/jobs", status_code=303)
 
