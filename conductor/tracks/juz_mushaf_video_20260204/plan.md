@@ -20,7 +20,7 @@ This plan outlines the steps to implement Juz-level video generation, including 
     - [ ] Update the line assembly logic to inject headers and ligatures between Surahs.
 - [ ] Task: Conductor - User Manual Verification 'Video Generation Engine Enhancements' (Protocol in workflow.md)
 
-## Phase 3: Metadata and Integration
+## Phase 3: Metadata and Integration [checkpoint: 74a6d25]
 - [x] Task: Implement automated chapter marker generation. [a612da8]
     - [ ] Write tests for description generation with timestamped Surah names.
     - [ ] Update `processes/description.py` to handle Juz-specific templates and chapter lists.
