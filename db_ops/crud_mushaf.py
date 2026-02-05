@@ -222,3 +222,39 @@ def align_mushaf_lines_with_timestamps(page_data: list, wbw_timestamps: dict):
         
     return page_data
 
+def align_mushaf_lines_with_juz_timestamps(page_data: list, wbw_timestamps: dict):
+    """
+    Variant of alignment that uses composite keys (surah:ayah) for Juz-based timing.
+    """
+    for line in page_data:
+        words = line.get("words", [])
+        if not words:
+            line["start_ms"] = None
+            line["end_ms"] = None
+            continue
+            
+        valid_starts = []
+        valid_ends = []
+        
+        for w in words:
+            # Composite key: "surah:ayah"
+            key = f"{w['surah']}:{w['ayah']}"
+            segments = wbw_timestamps.get(key, [])
+            for seg in segments:
+                if seg[0] == w["word"]:
+                    valid_starts.append(seg[1])
+                    valid_ends.append(seg[2])
+                    break
+        
+        if valid_starts:
+            line["start_ms"] = min(valid_starts)
+        else:
+            line["start_ms"] = None
+            
+        if valid_ends:
+            line["end_ms"] = max(valid_ends)
+        else:
+            line["end_ms"] = None
+        
+    return page_data
+
