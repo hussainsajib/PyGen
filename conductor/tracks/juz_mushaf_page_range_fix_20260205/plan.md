@@ -5,8 +5,8 @@ Identify Surahs and Ayahs for a given Juz page range and calculate precise audio
 
 - [x] Task: Write unit tests for `get_ayahs_for_page_range` in `tests/test_mushaf_metadata.py`. [3c990a9]
 - [x] Task: Implement `get_ayahs_for_page_range` in `db_ops/crud_mushaf.py` to query `mushaf_pages`. [3c990a9]
-- [ ] Task: Write unit tests for audio duration calculation based on word-level timestamps in `tests/test_juz_timing.py`.
-- [ ] Task: Update `prepare_juz_data_package` in `processes/mushaf_video.py` to accept `start_page` and `end_page` and clip data accordingly.
+- [x] Task: Write unit tests for audio duration calculation based on word-level timestamps in `tests/test_juz_timing.py`. [4df691c]
+- [x] Task: Update `prepare_juz_data_package` in `processes/mushaf_video.py` to accept `start_page` and `end_page` and clip data accordingly. [4df691c]
 - [ ] Task: Conductor - User Manual Verification 'Data Access & Boundary Logic' (Protocol in workflow.md)
 
 ## Phase 2: Asset Validation & Preparation
