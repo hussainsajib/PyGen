@@ -12,7 +12,7 @@ This plan outlines the steps to implement Juz-level video generation, including 
 - [ ] Task: Conductor - User Manual Verification 'Data Access and Logic Layer' (Protocol in workflow.md)
 
 ## Phase 2: Video Generation Engine Enhancements
-- [ ] Task: Implement multi-Surah Mushaf chunking logic.
+- [x] Task: Implement multi-Surah Mushaf chunking logic. [8988c01]
     - [ ] Write integration tests for the continuous 15-line flow across Surah boundaries.
     - [ ] Modify or create a variant of `generate_mushaf_video` that iterates through a list of Surahs while maintaining line state.
 - [ ] Task: Implement Surah transition injection.
