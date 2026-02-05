@@ -2,7 +2,7 @@
 
 This plan outlines the steps to implement Juz-level video generation, including database access, audio processing with timestamp mapping, and a dedicated user interface.
 
-## Phase 1: Data Access and Logic Layer
+## Phase 1: Data Access and Logic Layer [checkpoint: 334e017]
 - [x] Task: Implement Juz metadata service to retrieve boundaries from SQLite. [aa97f19]
     - [ ] Write unit tests for `get_juz_boundaries` in `tests/test_juz_metadata.py`.
     - [ ] Implement query logic in `db_ops/crud_mushaf.py` to fetch start/end Surah/Ayah for a Juz.
