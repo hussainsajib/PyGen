@@ -5,7 +5,7 @@ This plan outlines the steps to profile and analyze the Mushaf video generation 
 ## Phase 1: Preparation and Baseline Setup
 - [x] Task: Create a dedicated benchmarking script `scripts/benchmark_mushaf_gen.py` to isolate the generation process. [73e1179]
 - [x] Task: Define a standard benchmark set (e.g., Surah 108, Alafasy reciter) to ensure consistent results. [73e1179]
-- [ ] Task: Integrate basic timing instrumentation around key blocks in `mushaf_video.py` and `single_clip.py`.
+- [x] Task: Integrate basic timing instrumentation around key blocks in `mushaf_video.py` and `single_clip.py`. [ad74fe2]
 - [ ] Task: Conductor - User Manual Verification 'Preparation and Baseline Setup' (Protocol in workflow.md)
 
 ## Phase 2: Detailed Profiling
