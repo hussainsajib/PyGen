@@ -40,7 +40,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 
 
----
 
-- [x] **Track: add the new juz mushaf endpoint to the navbar**
-*Link: [./tracks/navbar_juz_mushaf_20260205/](./tracks/navbar_juz_mushaf_20260205/)*
