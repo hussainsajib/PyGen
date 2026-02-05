@@ -311,10 +311,14 @@ async def create_juz_video(
     custom_title: str = None,
     upload_after_generation: bool = False,
     lines_per_page: int = 15,
-    start_page: int = None,
-    end_page: int = None,
+    start_page: str = None,
+    end_page: str = None,
     db: AsyncSession = Depends(get_db)
 ):
+    # Convert empty strings to None for integer fields
+    s_page = int(start_page) if start_page and start_page.strip() else None
+    e_page = int(end_page) if end_page and end_page.strip() else None
+
     await enqueue_job(
         db,
         surah_number=juz, # We overload surah_number for Juz identification in juz_video type
@@ -327,8 +331,8 @@ async def create_juz_video(
         custom_title=custom_title,
         upload_after_generation=upload_after_generation,
         lines_per_page=lines_per_page,
-        start_page=start_page,
-        end_page=end_page
+        start_page=s_page,
+        end_page=e_page
     )
     return RedirectResponse(url="/jobs", status_code=303)
 
