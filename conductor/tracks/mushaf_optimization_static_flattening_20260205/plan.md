@@ -2,7 +2,7 @@
 
 This plan outlines the steps to implement performance optimizations for Mushaf video generation, focusing on static layer flattening and font caching.
 
-## Phase 1: Foundation and Performance Baseline
+## Phase 1: Foundation and Performance Baseline [checkpoint: 8bf6c7d]
 - [x] Task: Implement Ayah-range selection for Juz testing. [4abdcf2]
     - [ ] Update `generate_juz_video` in `processes/mushaf_video.py` to accept optional `start_ayah` and `end_ayah` overrides.
     - [ ] Add range filtering logic to ensure only specific Ayahs are processed during test runs.
