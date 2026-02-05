@@ -30,7 +30,7 @@ This plan outlines the steps to implement Juz-level video generation, including 
 - [x] Task: Create the Juz Video generation interface. [e921309]
     - [ ] Develop `templates/juz_video.html` using Bootstrap 5, mirroring the Mushaf creation layout.
     - [ ] Implement Juz selection (1-30) and integrate the existing background/opacity modules.
-- [ ] Task: Wire the UI to the backend job system.
+- [x] Task: Wire the UI to the backend job system. [351d88d]
     - [ ] Add the `/juz-video` route to `app.py`.
     - [ ] Create the `create_juz_video_job` function in `processes/processes.py`.
 - [ ] Task: Conductor - User Manual Verification 'Frontend Development' (Protocol in workflow.md)
