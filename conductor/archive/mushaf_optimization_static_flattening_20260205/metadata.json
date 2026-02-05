@@ -1,0 +1,8 @@
+{
+  "track_id": "mushaf_optimization_static_flattening_20260205",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-05T12:23:00Z",
+  "updated_at": "2026-02-05T12:23:00Z",
+  "description": "the video generation time for mushaf juz is about 26 hours, which is a long time. how to make this time shorter or more efficient. Alternatively, find a way to test the video, which could be make a shorter video. refer to the @bottlenecks.md file to enhance the video generation"
+}
