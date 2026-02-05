@@ -77,6 +77,176 @@ def render_mushaf_text_to_image(text: str, font_path: str, font_size: int, color
         
     return img_arr
 
+def get_pil_background(background_input: str, resolution: tuple):
+    """
+    Returns a PIL Image for the background.
+    If it's a video, returns the first frame (simplification for flattening).
+    """
+    target_bg = background_input or config_manager.get("ACTIVE_BACKGROUND")
+    width, height = resolution
+    
+    if not target_bg or target_bg.startswith('#'):
+        color = hex_to_rgb(target_bg) if target_bg else BACKGROUND_RGB
+        # Add opacity to background color
+        rgba_color = color + (int(BACKGROUND_OPACITY * 255),)
+        return Image.new('RGBA', resolution, rgba_color)
+        
+    if target_bg.lower().endswith(('.mp4', '.mov', '.avi', '.mkv')):
+        # For video backgrounds, we can't easily flatten them into a static image
+        # without losing the animation. 
+        # Requirement check: "The global background (image or video frame)" should be flattened.
+        # This implies we take a frame.
+        import cv2
+        cap = cv2.VideoCapture(target_bg)
+        ret, frame = cap.read()
+        cap.release()
+        if ret:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+            img = Image.fromarray(frame)
+        else:
+            return Image.new('RGBA', resolution, BACKGROUND_RGB + (255,))
+    else:
+        img = Image.open(background_input).convert('RGBA')
+        
+    # Resize and crop to fill
+    img_aspect = img.width / img.height
+    target_aspect = width / height
+    
+    if img_aspect > target_aspect:
+        new_h = height
+        new_w = int(new_h * img_aspect)
+        img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+        left = (new_w - width) // 2
+        img = img.crop((left, 0, left + width, height))
+    else:
+        new_w = width
+        new_h = int(new_w / img_aspect)
+        img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+        top = (new_h - height) // 2
+        img = img.crop((0, top, width, top + height))
+        
+    # Apply global background opacity
+    if BACKGROUND_OPACITY < 1.0:
+        alpha = img.getchannel('A')
+        alpha = alpha.point(lambda p: int(p * BACKGROUND_OPACITY))
+        img.putalpha(alpha)
+        
+    return img
+
+def draw_mushaf_border_onto(img: Image.Image, usable_height: int, bg_mode: str, bg_color: str, bg_opacity: int):
+    """Draws the Mushaf border directly onto the PIL image."""
+    width, height = img.size
+    draw = ImageDraw.Draw(img)
+    
+    border_enabled = config_manager.get("MUSHAF_BORDER_ENABLED", "False") == "True"
+    if not border_enabled:
+        return img
+        
+    try:
+        border_width_percent = int(config_manager.get("MUSHAF_BORDER_WIDTH_PERCENT", "40"))
+    except (ValueError, TypeError):
+        border_width_percent = 40
+        
+    border_w = int(width * (border_width_percent / 100))
+    border_h = int(usable_height + 60)
+    border_color = (212, 197, 161) # Authentic Gold/Bronze
+    border_thickness = 8
+    border_radius = 25
+    
+    # Border Box coordinates (centered)
+    x0 = (width - border_w) // 2
+    y0 = (height - border_h) // 2
+    x1 = x0 + border_w
+    y1 = y0 + border_h
+    
+    # 1. Background inside border
+    opacity = 255
+    if bg_mode == "Transparent": opacity = 0
+    elif bg_mode in ["Semi-Transparent", "Semi"]: opacity = bg_opacity
+    
+    if opacity > 0:
+        fill_rgb = hex_to_rgb(bg_color)
+        fill_rgba = fill_rgb + (opacity,)
+        # Create a temp image for the internal box to handle transparency correctly with alpha blending
+        overlay = Image.new('RGBA', img.size, (0,0,0,0))
+        d_overlay = ImageDraw.Draw(overlay)
+        d_overlay.rounded_rectangle([x0, y0, x1, y1], radius=border_radius, fill=fill_rgba)
+        img.alpha_composite(overlay)
+        
+    # 2. Draw Borders
+    draw.rounded_rectangle([x0, y0, x1, y1], radius=border_radius, outline=border_color, width=border_thickness)
+    
+    inset = border_thickness + 6
+    draw.rounded_rectangle([x0 + inset, y0 + inset, x1 - inset, y1 - inset], radius=max(0, border_radius - inset), outline=border_color, width=2)
+    
+    return img
+
+def pre_render_static_page(resolution: tuple, background_input: str, renderable_lines: list, line_positions: list, line_height: float, font_paths: dict, font_scale: float):
+    """
+    Renders the static components of a Mushaf page onto a single PIL Image.
+    Static components: Background, Border, Surah Name, Basmallah, and Ayah text.
+    """
+    width, height = resolution
+    img = get_pil_background(background_input, resolution)
+    
+    bg_mode = config_manager.get("MUSHAF_PAGE_BACKGROUND_MODE", "Solid")
+    bg_color = config_manager.get("MUSHAF_PAGE_COLOR", "#FFFDF5")
+    try:
+        opacity_percent = int(config_manager.get("MUSHAF_PAGE_OPACITY", "90"))
+    except (ValueError, TypeError):
+        opacity_percent = 90
+    bg_opacity = int((opacity_percent / 100) * 255)
+    
+    # Top/Bottom margins for border height calculation
+    top_margin = height * 0.1
+    bottom_margin = height * 0.1
+    usable_height = height - top_margin - bottom_margin
+    
+    # 1. Draw Border
+    img = draw_mushaf_border_onto(img, usable_height, bg_mode, bg_color, bg_opacity)
+    
+    # 2. Draw Text Lines
+    color = FONT_COLOR
+    if isinstance(color, str) and color.startswith("rgb("):
+        try:
+            color = tuple(map(int, color.replace("rgb(", "").replace(")", "").split(",")))
+        except:
+            color = (255, 255, 255)
+            
+    for i, line in enumerate(renderable_lines):
+        l_type = line.get("line_type", "ayah")
+        y_pos = line_positions[i]
+        
+        # Determine text
+        words = line.get("words", [])
+        text = "".join([w["text"] for w in reversed(words)])
+        
+        font_path = font_paths.get("page")
+        if l_type == "basmallah":
+            font_path = font_paths.get("bsml")
+            if not text: text = "\u00F3"
+        elif l_type == "surah_name":
+            font_path = font_paths.get("sura")
+            surah_num = int(line["surah_number"])
+            key = f"surah-{surah_num}"
+            text = LIGATURE_DATA.get(key, str(surah_num))
+            
+        font_size = calculate_mushaf_font_size(width, line_height, l_type, font_scale)
+        
+        # Render text to temp image to get bounding box and handles
+        text_img_arr = render_mushaf_text_to_image(text, font_path, font_size, color, (width, font_size))
+        text_img = Image.fromarray(text_img_arr)
+        
+        # Center horizontally and vertically within the slot
+        visual_h = text_img.height
+        y_centered = calculate_centered_y(y_pos, line_height, visual_h, l_type)
+        x_centered = (width - text_img.width) // 2
+        
+        # Paste onto main image
+        img.paste(text_img, (int(x_centered), int(y_centered)), text_img)
+        
+    return img
+
 def generate_image_background(background_image_url: str, duration: int, is_short: bool):
     resolution = get_resolution(is_short)
     background_image_url = edit_image(background_image_url, is_short)
