@@ -275,10 +275,10 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             "is_short": is_short
         }
 
-async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool = False, background_path: str = None, custom_title: str = None, lines_per_page: int = 15, start_ayah: int = None, end_ayah: int = None):
+async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool = False, background_path: str = None, custom_title: str = None, lines_per_page: int = 15, start_ayah: int = None, end_ayah: int = None, start_page: int = None, end_page: int = None):
     """
     Orchestrates the generation of a Mushaf-style Juz recitation video.
-    Supports optional Ayah range selection for testing.
+    Supports optional Ayah range and relative Page range selection for testing.
     """
     async with async_session() as session:
         # 1. Fetch Juz Boundaries
@@ -287,21 +287,52 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
             return None
             
         # Apply Ayah range overrides if provided
-        if start_ayah is not None:
-            # We assume start_ayah applies to the FIRST surah in the juz for now
+        if start_ayah is not None or end_ayah is not None:
+            # For testing with range, we usually want a specific segment
+            # If both provided, we might be looking at a very specific range
+            # For now, let's just use these to prune the surahs_in_juz and their mappings
+            
+            new_mapping = {}
+            new_surahs = []
+            
+            # Simple assumption: User provides range within the FIRST surah of the Juz for quick tests
+            # Or we can just use these to cap the ENTIRE juz mapping
             s_first = str(min(int(s) for s in boundaries["verse_mapping"].keys()))
-            v_range = boundaries["verse_mapping"][s_first].split("-")
-            boundaries["verse_mapping"][s_first] = f"{start_ayah}-{v_range[1]}"
-            
-        if end_ayah is not None:
-            # We assume end_ayah applies to the LAST surah in the juz for now
             s_last = str(max(int(s) for s in boundaries["verse_mapping"].keys()))
-            v_range = boundaries["verse_mapping"][s_last].split("-")
-            boundaries["verse_mapping"][s_last] = f"{v_range[0]}-{end_ayah}"
             
-        start_surah = boundaries["start_surah"]
-        end_surah = boundaries["end_surah"]
-        surahs_in_juz = sorted([int(s) for s in boundaries["verse_mapping"].keys()])
+            for s_str, v_range_str in boundaries["verse_mapping"].items():
+                s_int = int(s_str)
+                v_start, v_end = map(int, v_range_str.split("-"))
+                
+                # If this is the first surah and we have a start_ayah override
+                if s_str == s_first and start_ayah is not None:
+                    v_start = max(v_start, start_ayah)
+                
+                # If this is the last surah and we have an end_ayah override
+                if s_str == s_last and end_ayah is not None:
+                    v_end = min(v_end, end_ayah)
+                
+                # If start_ayah/end_ayah were meant to restrict to a SINGLE surah
+                # (e.g. testing just a few verses of surah 1)
+                # We should remove other surahs from the list
+                if start_ayah is not None and end_ayah is not None:
+                    # If we are only testing Surah 1, and this surah is NOT 1, skip
+                    # This is a bit specific to "test a shorter video" request
+                    if s_str != s_first: continue 
+                
+                if v_start <= v_end:
+                    new_mapping[s_str] = f"{v_start}-{v_end}"
+                    new_surahs.append(s_int)
+            
+            boundaries["verse_mapping"] = new_mapping
+            surahs_in_juz = sorted(new_surahs)
+        else:
+            surahs_in_juz = sorted([int(s) for s in boundaries["verse_mapping"].keys()])
+            
+        if not surahs_in_juz:
+            return None
+
+        start_surah = surahs_in_juz[0]
         
         # 2. Fetch Reciter and Language Metadata
         # We'll use the first surah to fetch generic reciter/language metadata
@@ -397,14 +428,28 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
 
         # 5. Collect and Aligned Mushaf Lines across all Surahs
         # Find page range for the entire Juz
-        all_pages = set()
+        all_pages_in_juz = set()
         for s_num in surahs_in_juz:
             pr = get_surah_page_range(s_num)
             if pr and pr[0]:
                 for p in range(pr[0], pr[1] + 1):
-                    all_pages.add(p)
+                    all_pages_in_juz.add(p)
         
-        sorted_pages = sorted(list(all_pages))
+        sorted_juz_pages = sorted(list(all_pages_in_juz))
+        
+        # Apply relative Page range overrides if provided
+        if start_page is not None or end_page is not None:
+            # 1-indexed relative to the Juz pages
+            rel_start = (start_page - 1) if start_page else 0
+            rel_end = end_page if end_page else len(sorted_juz_pages)
+            # Slice the sorted pages list
+            sorted_pages = sorted_juz_pages[rel_start:rel_end]
+        else:
+            sorted_pages = sorted_juz_pages
+
+        if not sorted_pages:
+            return None
+            
         resolution = get_resolution(is_short)
         width, height = resolution
         page_clips = []
