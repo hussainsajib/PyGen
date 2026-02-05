@@ -32,3 +32,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 
 
+
+---
+
+- [x] **Track: for juz mushaf video, it doesn't generate video of the whole juz only creates a video of the bismillah for 5 seconds**
+*Link: [./tracks/fix_juz_logic_bug_20260205/](./tracks/fix_juz_logic_bug_20260205/)*
