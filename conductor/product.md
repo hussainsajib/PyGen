@@ -35,6 +35,12 @@ PyGen is an automated video generation platform designed specifically for creati
             - **Global Priority Logic:** Automatic prioritization of active background assets (images/videos) over solid color fallbacks for the outer video area.
             - **Dynamic Typography Scaling:** Configurable `MUSHAF_FONT_SCALE` setting to adjust Arabic text size (e.g., 20% smaller) for better whitespace management.
             - **Configurable Aesthetics:** Toggleable decorative border visibility (`MUSHAF_BORDER_ENABLED`) for both regular videos and Shorts, allowing for a cleaner "borderless" look.
+        - **Long-Form Juz Generation:** Automated workflow for generating full-Juz Mushaf videos.
+            - **Intelligent Boundary Detection:** Automatic retrieval of Juz start/end points from a dedicated SQLite metadata database.
+            - **Continuous Multi-Surah Rendering:** Specialized paging logic that maintains a seamless 15-line Mushaf flow across Surah transitions.
+            - **Dynamic Audio Assembly:** On-the-fly concatenation of Surah-level audio with automatic Basmallah injection and Surah 9 silence gap handling.
+            - **Synchronized Timestamp Mapping:** Precision re-mapping of word-level timestamps relative to the continuous Juz audio stream.
+            - **Automated YouTube Chapters:** Automatic generation of clickable Surah-based chapter markers in video descriptions.
     - **Multi-Language Support:** Comprehensive support for generating videos in multiple languages (e.g., Bengali, English).
         - **Dynamic Translation Sourcing:** Automated selection of language-specific translation and WBW databases.
         - **Customizable Typography:** Per-language font configuration to ensure correct rendering of special characters (e.g., macron characters in transliterations).
