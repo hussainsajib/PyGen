@@ -403,13 +403,34 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
         lines_by_page = {}
         for page_num in sorted_pages:
             page_data = get_mushaf_page_data(page_num)
+            
+            # Pre-pass: Fill in missing surah_numbers by propagation
+            last_known_surah = None
+            for line in page_data:
+                if line.get("surah_number") and line["surah_number"] != '':
+                    last_known_surah = line["surah_number"]
+                elif line.get("words"):
+                    last_known_surah = line["words"][0]["surah"]
+                    line["surah_number"] = last_known_surah
+                elif last_known_surah:
+                    line["surah_number"] = last_known_surah
+            
+            # Back-propagation for headers at the top of the page
+            next_known_surah = None
+            for line in reversed(page_data):
+                if line.get("surah_number") and line["surah_number"] != '':
+                    next_known_surah = line["surah_number"]
+                elif next_known_surah:
+                    line["surah_number"] = next_known_surah
+
             filtered_page = []
             for line in page_data:
-                # Keep line if it belongs to a surah in our Juz OR if it's a generic header line
-                # Note: surah_number in 'pages' table usually reflects the surah starting on that line or page
-                if line["surah_number"] in surah_set:
+                l_type = line.get("line_type", "ayah")
+                line_surah = line.get("surah_number")
+                
+                if line_surah in surah_set:
                     # For Ayah lines, verify they are within the Juz boundaries
-                    if line["line_type"] == "ayah":
+                    if l_type == "ayah":
                         filtered_words = []
                         for w in line["words"]:
                             s_id = str(w["surah"])
@@ -423,24 +444,29 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
                             line_copy["words"] = filtered_words
                             filtered_page.append(line_copy)
                     else:
-                        # Keep surah_name and basmallah lines if they belong to a surah in our set
+                        # Keep surah_name and basmallah lines
                         filtered_page.append(line.copy())
             
             if filtered_page:
                 aligned_page = align_mushaf_lines_with_juz_timestamps(filtered_page, all_wbw_timestamps)
                 
                 # Post-alignment refinement for static headers
-                # If a header has no timestamps (because it's not an ayah), 
-                # we should try to assign it the timing of the first ayah that follows it
-                # so it appears in the correct chunk.
                 for i, line in enumerate(aligned_page):
-                    if line["line_type"] in ["surah_name", "basmallah"] and line["start_ms"] is None:
-                        # Find next ayah line
+                    if line["line_type"] in ["surah_name", "basmallah"] and line.get("start_ms") is None:
+                        # Find next ayah line for timing
                         for j in range(i + 1, len(aligned_page)):
-                            if aligned_page[j]["start_ms"] is not None:
+                            if aligned_page[j].get("start_ms") is not None:
                                 line["start_ms"] = aligned_page[j]["start_ms"]
                                 line["end_ms"] = aligned_page[j]["end_ms"]
                                 break
+                        
+                        # If still None, look backwards (unlikely for start of surah but safe)
+                        if line.get("start_ms") is None:
+                            for j in range(i - 1, -1, -1):
+                                if aligned_page[j].get("start_ms") is not None:
+                                    line["start_ms"] = aligned_page[j]["start_ms"]
+                                    line["end_ms"] = aligned_page[j]["end_ms"]
+                                    break
                 
                 lines_by_page[page_num] = aligned_page
 
@@ -550,8 +576,10 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
         # 7. Final Assembly
         if not page_clips:
             full_audio.close()
+            if bsml_audio: bsml_audio.close()
+            for c in surah_clips: c.close()
             for tf in temp_files: cleanup_temp_file(tf)
-            return None
+            raise Exception(f"Failed to generate any page clips for Juz {juz_number}. Check alignment and timing data.")
             
         final_video = concatenate_videoclips(page_clips, method="compose")
         filename = f"mushaf_juz_{juz_number}_{reciter_key.replace('.', '_')}.mp4"
@@ -569,8 +597,13 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
             logger="bar"
         )
         
+        # Cleanup clips to release file handles
         full_audio.close()
+        if bsml_audio: bsml_audio.close()
+        for c in surah_clips: c.close()
         for c in page_clips: c.close()
+        
+        # Cleanup temp files
         for tf in temp_files: cleanup_temp_file(tf)
         
         details_path = generate_juz_details(
@@ -584,7 +617,10 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
         return {
             "video": video_path,
             "info": details_path,
+            "surah_number": 0, # Sentinel for Juz videos
             "juz_number": juz_number,
+            "start_ayah": 1,
+            "end_ayah": 0, # Sentinel
             "reciter": reciter_key,
             "is_short": is_short
         }
