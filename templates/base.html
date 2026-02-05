@@ -51,7 +51,10 @@
                         <a class="nav-link" href="{{ url_for('mushaf') }}">Mushaf</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('mushaf_video_creator') }}">Mushaf Video</a>
+                        <a class="nav-link {% if request.url.path == '/mushaf_video' %}active{% endif %}" href="{{ url_for('mushaf_video_creator') }}">Mushaf Video</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.url.path == '/juz-video' %}active{% endif %}" href="{{ url_for('juz_video_creator') }}">Juz Mushaf</a>
                     </li>
                 </ul>
             </div>
