@@ -30,3 +30,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 ## [x] **Track: make the visible border configurable in the mushaf video genertion. also make the visible border narrower by 20%**
 *Link: [./tracks/mushaf_border_width_20260128/](./tracks/mushaf_border_width_20260128/)*
 
+
+---
+
+- [x] **Track: create a new feature similar to the mushaf video but instead of creating video surah by surah I want create videos for a juz of quran.**
+*Link: [./tracks/juz_mushaf_video_20260204/](./tracks/juz_mushaf_video_20260204/)*
