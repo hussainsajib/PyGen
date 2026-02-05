@@ -75,7 +75,9 @@ async def job_worker():
                             upload_after_generation=bool(job.upload_after_generation),
                             playlist_id=job.playlist_id,
                             custom_title=job.custom_title,
-                            lines_per_page=job.lines_per_page
+                            lines_per_page=job.lines_per_page,
+                            start_page=job.start_page,
+                            end_page=job.end_page
                         )
                     else:
                         # Standard full surah generation job
