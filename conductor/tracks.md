@@ -42,7 +42,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 
 
----
 
-- [x] **Track: in the juz mushaf video generation add a new option to generate only a specific number of pages of video of that particular juz. the user should be able to select this option and the video generated will be for that specific page or range of pages in that juz**
-*Link: [./tracks/juz_page_range_20260205/](./tracks/juz_page_range_20260205/)*
