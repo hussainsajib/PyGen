@@ -114,3 +114,32 @@ def segment_words_with_timestamps(words: list, translations: list, timestamps: l
         })
 
     return segments
+
+def calculate_juz_offsets(surahs_in_juz: list, surah_durations: dict, bsml_duration: float):
+    """
+    Calculates the timing offset for each surah in a Juz relative to the start of the Juz.
+    Account for Basmallah duration and Surah 9 (At-Tawbah) gap.
+    """
+    offsets = {}
+    current_cumulative_time = 0.0
+    
+    for i, surah_num in enumerate(surahs_in_juz):
+        # The first surah in the Juz (index 0) starts at 0.0 offset
+        if i == 0:
+            offsets[surah_num] = 0.0
+            current_cumulative_time += surah_durations.get(surah_num, 0.0)
+            continue
+            
+        # For subsequent Surahs, check if Basmallah or Surah 9 gap is needed
+        if surah_num == 9:
+            # Surah At-Tawbah exception: 5s silence gap instead of Basmallah
+            current_cumulative_time += 5.0
+        elif surah_num != 1:
+            # All other Surahs except Al-Fatihah need Basmallah
+            current_cumulative_time += bsml_duration
+            
+        offsets[surah_num] = current_cumulative_time
+        # Add the surah's own duration for the next offset
+        current_cumulative_time += surah_durations.get(surah_num, 0.0)
+        
+    return offsets
