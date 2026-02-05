@@ -405,25 +405,43 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
             page_data = get_mushaf_page_data(page_num)
             filtered_page = []
             for line in page_data:
-                # Keep line if it belongs to a surah in our Juz
+                # Keep line if it belongs to a surah in our Juz OR if it's a generic header line
+                # Note: surah_number in 'pages' table usually reflects the surah starting on that line or page
                 if line["surah_number"] in surah_set:
-                    # Further filter words to ensure they are within Juz boundaries for boundary surahs
-                    # (Though Mushaf pages usually align well with Juz, we be safe)
-                    filtered_words = []
-                    for w in line["words"]:
-                        s_id = str(w["surah"])
-                        if s_id in boundaries["verse_mapping"]:
-                            v_range = boundaries["verse_mapping"][s_id].split("-")
-                            if int(v_range[0]) <= w["ayah"] <= int(v_range[1]):
-                                filtered_words.append(w)
-                    
-                    if filtered_words or line["line_type"] in ["surah_name", "basmallah"]:
-                        line_copy = line.copy()
-                        line_copy["words"] = filtered_words
-                        filtered_page.append(line_copy)
+                    # For Ayah lines, verify they are within the Juz boundaries
+                    if line["line_type"] == "ayah":
+                        filtered_words = []
+                        for w in line["words"]:
+                            s_id = str(w["surah"])
+                            if s_id in boundaries["verse_mapping"]:
+                                v_range = boundaries["verse_mapping"][s_id].split("-")
+                                if int(v_range[0]) <= w["ayah"] <= int(v_range[1]):
+                                    filtered_words.append(w)
+                        
+                        if filtered_words:
+                            line_copy = line.copy()
+                            line_copy["words"] = filtered_words
+                            filtered_page.append(line_copy)
+                    else:
+                        # Keep surah_name and basmallah lines if they belong to a surah in our set
+                        filtered_page.append(line.copy())
             
             if filtered_page:
                 aligned_page = align_mushaf_lines_with_juz_timestamps(filtered_page, all_wbw_timestamps)
+                
+                # Post-alignment refinement for static headers
+                # If a header has no timestamps (because it's not an ayah), 
+                # we should try to assign it the timing of the first ayah that follows it
+                # so it appears in the correct chunk.
+                for i, line in enumerate(aligned_page):
+                    if line["line_type"] in ["surah_name", "basmallah"] and line["start_ms"] is None:
+                        # Find next ayah line
+                        for j in range(i + 1, len(aligned_page)):
+                            if aligned_page[j]["start_ms"] is not None:
+                                line["start_ms"] = aligned_page[j]["start_ms"]
+                                line["end_ms"] = aligned_page[j]["end_ms"]
+                                break
+                
                 lines_by_page[page_num] = aligned_page
 
         # 6. Generate Clips with Page-Aware Chunking (Juz-aware)
