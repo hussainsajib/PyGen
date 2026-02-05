@@ -13,16 +13,10 @@ This plan outlines the steps to implement performance optimizations for Mushaf v
     - [ ] Update `render_mushaf_text_to_image` to retrieve fonts from the cache based on path and size.
 - [ ] Task: Conductor - User Manual Verification 'Foundation and Performance Baseline' (Protocol in workflow.md)
 
-## Phase 2: Static Layer Flattening
-- [ ] Task: Develop the pre-rendering flattening engine.
-    - [ ] Create a helper function `pre_render_static_page` in `factories/single_clip.py` that composites the background, border, header, and ayah text onto a single PIL Image.
-    - [ ] Write unit tests in `tests/test_mushaf_flattening.py` to ensure the generated image dimensions and text placements match the current multi-layer layout.
-- [ ] Task: Refactor `generate_mushaf_page_clip` to use the flattened base.
-    - [ ] Replace the individual `ImageClip` layers for background, border, and static text with a single `ImageClip` from the pre-rendered buffer.
-    - [ ] Ensure dynamic layers (highlighting `ColorClips` and the progress bar) are correctly overlayed on top of the flattened base.
-- [ ] Task: Performance Validation.
-    - [ ] Run a benchmark generation for Surah 108 using the optimized engine.
-    - [ ] Compare the "Performance Ratio" against the baseline documented in `bottlenecks.md`.
+## Phase 2: Static Layer Flattening [checkpoint: 2cb27df]
+- [x] Task: Develop the pre-rendering flattening engine. [438c88c]
+- [x] Task: Refactor `generate_mushaf_page_clip` to use the flattened base. [30daa2e]
+- [x] Task: Performance Validation. [30daa2e]
 - [ ] Task: Conductor - User Manual Verification 'Static Layer Flattening' (Protocol in workflow.md)
 
 ## Phase 3: Robustness and Documentation
