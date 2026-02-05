@@ -7,13 +7,9 @@ This plan outlines the steps to implement selective page range generation for Ju
 - [x] Task: Implement relative page range filtering in `generate_juz_video`. [e1e4f60]
 - [ ] Task: Conductor - User Manual Verification 'Backend and Logic Enhancements' (Protocol in workflow.md)
 
-## Phase 2: UI and Route Integration
-- [ ] Task: Update web routes to handle page range parameters.
-    - [ ] Update the `/create-juz-video` endpoint in `app.py` to receive `start_page` and `end_page` from the form.
-    - [ ] Update the `juz_video_interface` context to pass total pages per Juz (if dynamic) or use static limits.
-- [ ] Task: Enhance the Juz Video UI.
-    - [ ] Add `Start Page` and `End Page` numeric inputs to `templates/juz_video.html`.
-    - [ ] Implement a JavaScript validation check to ensure range validity before submission.
+## Phase 2: UI and Route Integration [checkpoint: e920850]
+- [x] Task: Update web routes to handle page range parameters. [3aaa39b]
+- [x] Task: Enhance the Juz Video UI. [5671e11]
 - [ ] Task: Conductor - User Manual Verification 'UI and Route Integration' (Protocol in workflow.md)
 
 ## Phase 3: Final Verification
