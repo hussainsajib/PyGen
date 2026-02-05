@@ -12,7 +12,6 @@ This plan outlines the steps to implement selective page range generation for Ju
 - [x] Task: Enhance the Juz Video UI. [5671e11]
 - [ ] Task: Conductor - User Manual Verification 'UI and Route Integration' (Protocol in workflow.md)
 
-## Phase 3: Final Verification
-- [ ] Task: Perform end-to-end testing of partial Juz generation.
-    - [ ] Generate a 2-page segment of Juz 30 and verify duration, audio, and visual correctness.
+## Phase 3: Final Verification [checkpoint: edd333e]
+- [x] Task: Perform end-to-end testing of partial Juz generation. [e1e4f60]
 - [ ] Task: Conductor - User Manual Verification 'Final Verification' (Protocol in workflow.md)
