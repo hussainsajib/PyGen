@@ -37,3 +37,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: for juz mushaf video, it doesn't generate video of the whole juz only creates a video of the bismillah for 5 seconds**
 *Link: [./tracks/fix_juz_logic_bug_20260205/](./tracks/fix_juz_logic_bug_20260205/)*
+
+---
+
+- [x] **Track: the video generation time for mushaf juz is about 26 hours, which is a long time. how to make this time shorter or more efficient. Alternatively, find a way to test the video, which could be make a shorter video. refer to the @bottlenecks.md file to enhance the video generation**
+*Link: [./tracks/mushaf_optimization_static_flattening_20260205/](./tracks/mushaf_optimization_static_flattening_20260205/)*
