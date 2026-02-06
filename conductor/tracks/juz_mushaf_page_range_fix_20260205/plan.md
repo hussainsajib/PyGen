@@ -9,13 +9,13 @@ Identify Surahs and Ayahs for a given Juz page range and calculate precise audio
 - [x] Task: Update `prepare_juz_data_package` in `processes/mushaf_video.py` to accept `start_page` and `end_page` and clip data accordingly. [4df691c]
 - [x] Task: Conductor - User Manual Verification 'Data Access & Boundary Logic' (Protocol in workflow.md)
 
-## Phase 2: Asset Validation & Preparation
+## Phase 2: Asset Validation & Preparation [checkpoint: 7976366]
 Ensure all fonts and images are ready before rendering.
 
 - [x] Task: Write unit tests for `validate_mushaf_assets` in `tests/test_asset_validation.py`. [0996730]
 - [x] Task: Implement `validate_mushaf_assets` to check for QPC v2 fonts and proactive image generation. [0996730]
 - [x] Task: Update the `generate_juz_video` entry point to trigger validation and page generation before the main loop. [0996730]
-- [ ] Task: Conductor - User Manual Verification 'Asset Validation & Preparation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Asset Validation & Preparation' (Protocol in workflow.md)
 
 ## Phase 3: Video Engine Integration & Synchronization
 Update the rendering engine to respect page boundaries and ensure perfect sync.
