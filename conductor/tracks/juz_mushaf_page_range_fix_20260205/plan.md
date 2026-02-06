@@ -12,9 +12,9 @@ Identify Surahs and Ayahs for a given Juz page range and calculate precise audio
 ## Phase 2: Asset Validation & Preparation
 Ensure all fonts and images are ready before rendering.
 
-- [ ] Task: Write unit tests for `validate_mushaf_assets` in `tests/test_asset_validation.py`.
-- [ ] Task: Implement `validate_mushaf_assets` to check for QPC v2 fonts and proactive image generation.
-- [ ] Task: Update the `generate_juz_video` entry point to trigger validation and page generation before the main loop.
+- [x] Task: Write unit tests for `validate_mushaf_assets` in `tests/test_asset_validation.py`. [0996730]
+- [x] Task: Implement `validate_mushaf_assets` to check for QPC v2 fonts and proactive image generation. [0996730]
+- [x] Task: Update the `generate_juz_video` entry point to trigger validation and page generation before the main loop. [0996730]
 - [ ] Task: Conductor - User Manual Verification 'Asset Validation & Preparation' (Protocol in workflow.md)
 
 ## Phase 3: Video Engine Integration & Synchronization
