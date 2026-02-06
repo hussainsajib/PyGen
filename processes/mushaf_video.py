@@ -275,6 +275,29 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             "is_short": is_short
         }
 
+def validate_mushaf_assets(page_numbers: list):
+    """
+    Verifies that all required QPC v2 font files are present on disk.
+    Returns a list of missing font paths.
+    """
+    missing_assets = []
+    font_folder = "QPC_V2_Font.ttf"
+    
+    # Check static header fonts
+    header_fonts = ["QCF_BSML.TTF", "QCF_SurahHeader_COLOR-Regular.ttf"]
+    for font_file in header_fonts:
+        path = os.path.join(font_folder, font_file)
+        if not os.path.exists(path):
+            missing_assets.append(path)
+            
+    # Check page-specific fonts
+    for page in page_numbers:
+        path = os.path.join(font_folder, f"p{page}.ttf")
+        if not os.path.exists(path):
+            missing_assets.append(path)
+            
+    return missing_assets
+
 async def prepare_juz_data_package(
     juz_number: int, 
     reciter_db_obj, 
@@ -444,7 +467,18 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
         total_duration = full_audio.duration
         total_audio_ms = total_duration * 1000
         
-        # 4. Collect and Aligned Mushaf Lines
+        # 4. Asset Validation
+        missing_fonts = validate_mushaf_assets(sorted_pages)
+        if missing_fonts:
+            # Cleanup and fail
+            full_audio.close()
+            if bsml_audio: bsml_audio.close()
+            for c in surah_clips: c.close()
+            for tf in temp_files: cleanup_temp_file(tf)
+            print(f"[ERROR] Missing required fonts: {missing_fonts}")
+            return None
+
+        # 5. Collect and Aligned Mushaf Lines
         surah_set = set(surahs_in_juz_raw)
         lines_by_page = {}
         for page_num in sorted_pages:
