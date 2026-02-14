@@ -17,13 +17,13 @@ Ensure all fonts and images are ready before rendering.
 - [x] Task: Update the `generate_juz_video` entry point to trigger validation and page generation before the main loop. [0996730]
 - [x] Task: Conductor - User Manual Verification 'Asset Validation & Preparation' (Protocol in workflow.md)
 
-## Phase 3: Video Engine Integration & Synchronization
+## Phase 3: Video Engine Integration & Synchronization [checkpoint: faf2de5]
 Update the rendering engine to respect page boundaries and ensure perfect sync.
 
 - [x] Task: Write integration tests for page-clipped Juz video generation in `tests/test_juz_video_gen.py`. [10e776f]
 - [x] Task: Refactor `generate_juz_video` loop to start and stop at the identified page boundaries. [3dd80b8]
 - [x] Task: Verify word-level synchronization remains accurate after clipping the audio and timestamp streams. [3dd80b8]
-- [~] Task: Conductor - User Manual Verification 'Video Engine Integration & Synchronization' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Video Engine Integration & Synchronization' (Protocol in workflow.md) [faf2de5]
 
 ## Phase 4: UI & API Integration
 Expose the page range parameters to the frontend and job queue.
