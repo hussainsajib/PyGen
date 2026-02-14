@@ -21,8 +21,8 @@ Ensure all fonts and images are ready before rendering.
 Update the rendering engine to respect page boundaries and ensure perfect sync.
 
 - [x] Task: Write integration tests for page-clipped Juz video generation in `tests/test_juz_video_gen.py`. [10e776f]
-- [x] Task: Refactor `generate_juz_video` loop to start and stop at the identified page boundaries. [10e776f]
-- [x] Task: Verify word-level synchronization remains accurate after clipping the audio and timestamp streams. [10e776f]
+- [x] Task: Refactor `generate_juz_video` loop to start and stop at the identified page boundaries. [3dd80b8]
+- [x] Task: Verify word-level synchronization remains accurate after clipping the audio and timestamp streams. [3dd80b8]
 - [~] Task: Conductor - User Manual Verification 'Video Engine Integration & Synchronization' (Protocol in workflow.md)
 
 ## Phase 4: UI & API Integration
