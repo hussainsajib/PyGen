@@ -464,9 +464,13 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
             return None
             
         full_audio, all_wbw_timestamps, sorted_pages, offsets, temp_files, surah_clips, bsml_audio = prep_res
-        total_duration = full_audio.duration
-        total_audio_ms = total_duration * 1000
+        total_duration = float(full_audio.duration)
+        total_audio_ms = float(total_duration * 1000)
         
+        resolution = get_resolution(is_short)
+        width, height = resolution
+        page_clips = []
+
         # 4. Asset Validation
         missing_fonts = validate_mushaf_assets(sorted_pages)
         if missing_fonts:
@@ -577,13 +581,21 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
                         chunk_start_ms = min(valid_starts)
                         chunk_end_ms = max(valid_ends)
                     
+                    print(f"DEBUG: chunk_start_ms={chunk_start_ms} ({type(chunk_start_ms)})", flush=True)
+                    print(f"DEBUG: chunk_end_ms={chunk_end_ms} ({type(chunk_end_ms)})", flush=True)
+                    print(f"DEBUG: total_duration={total_duration} ({type(total_duration)})", flush=True)
+
                     # Buffer boundaries
                     if global_chunk_idx == 0:
                         chunk_start_ms = 0
                     if p_idx == len(sorted_pages) - 1 and c_idx == len(page_chunks) - 1:
                         chunk_end_ms = total_audio_ms
                         
-                    chunk_duration_sec = (chunk_end_ms - chunk_start_ms) / 1000.0
+                    try:
+                        chunk_duration_sec = (float(chunk_end_ms) - float(chunk_start_ms)) / 1000.0
+                    except:
+                        chunk_duration_sec = 5.0 # Fallback
+                        
                     if chunk_duration_sec <= 0: continue
                     
                     # Adjust timestamps relative to chunk start
@@ -624,8 +636,8 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
                         overlays.append(generate_brand_clip(brand_name, is_short, chunk_duration_sec))
 
                     # Progress Bar (Juz level)
-                    start_ratio = chunk_start_ms / total_audio_ms
-                    end_ratio = chunk_end_ms / total_audio_ms
+                    start_ratio = float(chunk_start_ms) / float(total_audio_ms)
+                    end_ratio = float(chunk_end_ms) / float(total_audio_ms)
                     progress_bar_bg = ColorClip(size=(width, 5), color=(100, 100, 100)).set_opacity(0.3).set_duration(chunk_duration_sec).set_position(('center', height-5))
                     overlays.append(progress_bar_bg)
                     
@@ -642,10 +654,13 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
 
                     final_chunk_clip = CompositeVideoClip([mushaf_clip] + overlays, size=resolution).set_duration(chunk_duration_sec)
                     
-                    audio_start = max(0, chunk_start_ms / 1000.0)
-                    audio_end = min(total_duration, chunk_end_ms / 1000.0)
-                    if audio_end > audio_start:
-                        final_chunk_clip = final_chunk_clip.set_audio(full_audio.subclip(audio_start, audio_end))
+                    try:
+                        audio_start = max(0.0, float(chunk_start_ms) / 1000.0)
+                        audio_end = min(float(total_duration), float(chunk_end_ms) / 1000.0)
+                        if float(audio_end) > float(audio_start):
+                            final_chunk_clip = final_chunk_clip.set_audio(full_audio.subclip(audio_start, audio_end))
+                    except:
+                        pass
                     
                     page_clips.append(final_chunk_clip)
                     global_chunk_idx += 1
