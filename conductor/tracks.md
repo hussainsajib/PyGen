@@ -63,6 +63,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 
 
-- [~] **Track: Mushaf Video Footer Refinement**
+- [x] **Track: Mushaf Video Footer Refinement**
 
 *Link: [./tracks/mushaf_footer_refinement_20260215/](./mushaf_footer_refinement_20260215/)*
