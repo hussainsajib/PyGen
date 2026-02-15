@@ -16,17 +16,17 @@ Improve developer visibility by logging paths and ensuring metadata completeness
 - [x] Task: Write unit tests in `tests/test_fast_metadata.py` to verify metadata file existence after generation. 401e133
 - [x] Task: Conductor - User Manual Verification 'Terminal Logging & Metadata Generation' (Protocol in workflow.md) 401e133
 
-## Phase 3: Social Media Upload Connectivity
+## Phase 3: Social Media Upload Connectivity [checkpoint: e5b30fc]
 Verify and fix the integration between high-speed engines and automated uploaders.
 
-- [~] Task: Audit `app.py` route parameters to ensure `upload_after_generation` is correctly passed for fast engine routes.
-- [ ] Task: Update `processes/background_worker.py` to handle post-generation upload triggers for the `mushaf_fast` job type.
-- [ ] Task: Test end-to-end connectivity (Generation -> Metadata -> Upload Trigger) using a mock uploader.
-- [ ] Task: Conductor - User Manual Verification 'Social Media Upload Connectivity' (Protocol in workflow.md)
+- [x] Task: Audit `app.py` route parameters to ensure `upload_after_generation` is correctly passed for fast engine routes. e5b30fc
+- [x] Task: Update `processes/background_worker.py` to handle post-generation upload triggers for the `mushaf_fast` job type. e5b30fc
+- [x] Task: Test end-to-end connectivity (Generation -> Metadata -> Upload Trigger) using a mock uploader. e5b30fc
+- [x] Task: Conductor - User Manual Verification 'Social Media Upload Connectivity' (Protocol in workflow.md) e5b30fc
 
 ## Phase 4: Final Verification & Documentation
 Final checks and documentation sync.
 
-- [ ] Task: Run a full Juz 30 benchmark using the FFmpeg engine and verify highlights and terminal output.
+- [~] Task: Run a full Juz 30 benchmark using the FFmpeg engine and verify highlights and terminal output.
 - [ ] Task: Update project documentation if any new logging flags or config interactions were introduced.
 - [ ] Task: Conductor - User Manual Verification 'Final Verification & Documentation' (Protocol in workflow.md)
