@@ -28,7 +28,8 @@ def hex_to_rgb(hex_color: str):
     return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
 
 class MushafRenderer:
-    def __init__(self, page_number: int, is_short: bool, lines: list, font_scale: float = 0.8, background_input: str = None):
+    def __init__(self, page_number: int, is_short: bool, lines: list, font_scale: float = 0.8, background_input: str = None, 
+                 reciter_name: str = None, surah_name: str = None, brand_name: str = None, total_duration_ms: float = 0):
         self.page_number = page_number
         self.is_short = is_short
         self.lines = lines
@@ -37,10 +38,16 @@ class MushafRenderer:
         self.resolution = get_resolution(is_short)
         self.width, self.height = self.resolution
         
+        self.reciter_name = reciter_name
+        self.surah_name = surah_name
+        self.brand_name = brand_name
+        self.total_duration_ms = total_duration_ms
+        
         self.font_paths = {
             "page": os.path.abspath(os.path.join("QPC_V2_Font.ttf", f"p{page_number}.ttf")),
             "bsml": os.path.abspath(os.path.join("QPC_V2_Font.ttf", "QCF_BSML.TTF")),
-            "sura": os.path.abspath(os.path.join("QPC_V2_Font.ttf", "QCF_SurahHeader_COLOR-Regular.ttf"))
+            "sura": os.path.abspath(os.path.join("QPC_V2_Font.ttf", "QCF_SurahHeader_COLOR-Regular.ttf")),
+            "footer": "fonts/kalpurush.ttf" # Example path, adjusted for common usage
         }
         if not os.path.exists(self.font_paths["page"]):
             self.font_paths["page"] = "Arial"
@@ -84,17 +91,83 @@ class MushafRenderer:
             font_scale=self.font_scale
         )
 
-    def get_frame_at(self, timestamp_sec: float) -> np.ndarray:
+    def _draw_overlays(self, draw: ImageDraw.Draw):
+        """Draws footer info (Reciter, Surah, Brand) using PIL."""
+        if config_manager.get("ENABLE_FOOTER", "True") != "True":
+            return
+
+        from processes.video_configs import FOOTER_CONFIG
+        font_size = FOOTER_CONFIG.get("fontsize", 30)
+        color = FONT_COLOR
+        if isinstance(color, str) and color.startswith("rgb("):
+            color = hex_to_rgb("#C9B59C") # Fallback to a valid color if parsing fails
+            
+        try:
+            # Try to load Kalpurush or fallback
+            if os.path.exists(self.font_paths["footer"]):
+                font = ImageFont.truetype(self.font_paths["footer"], font_size)
+            else:
+                font = ImageFont.load_default()
+        except:
+            font = ImageFont.load_default()
+
+        # Reciter Name
+        if self.reciter_name and config_manager.get("ENABLE_RECITER_INFO", "True") == "True":
+            bbox = draw.textbbox((0, 0), self.reciter_name, font=font)
+            w = bbox[2] - bbox[0]
+            from processes.video_configs import get_reciter_info_position
+            pos = get_reciter_info_position(self.is_short, w)
+            # Position is relative (0-1)
+            x, y = int(pos[0] * self.width), int(pos[1] * self.height)
+            draw.text((x, y), self.reciter_name, font=font, fill=color)
+
+        # Surah Name
+        if self.surah_name and config_manager.get("ENABLE_SURAH_INFO", "True") == "True":
+            bbox = draw.textbbox((0, 0), self.surah_name, font=font)
+            w = bbox[2] - bbox[0]
+            from processes.video_configs import get_surah_info_position
+            pos = get_surah_info_position(self.is_short, w)
+            x, y = int(pos[0] * self.width), int(pos[1] * self.height)
+            draw.text((x, y), self.surah_name, font=font, fill=color)
+
+        # Brand Name
+        if self.brand_name and config_manager.get("ENABLE_CHANNEL_INFO", "True") == "True":
+            bbox = draw.textbbox((0, 0), self.brand_name, font=font)
+            w = bbox[2] - bbox[0]
+            from processes.video_configs import get_channel_info_position
+            pos = get_channel_info_position(self.is_short, w)
+            x, y = int(pos[0] * self.width), int(pos[1] * self.height)
+            draw.text((x, y), self.brand_name, font=font, fill=color)
+
+    def _draw_progress_bar(self, draw: ImageDraw.Draw, timestamp_ms: float):
+        """Draws the Juz progress bar."""
+        if self.total_duration_ms <= 0:
+            return
+            
+        ratio = timestamp_ms / self.total_duration_ms
+        bar_w = int(self.width * max(0.0, min(1.0, ratio)))
+        bar_h = 5
+        y = self.height - bar_h
+        
+        # Background
+        draw.rectangle([0, y, self.width, self.height], fill=(100, 100, 100, 76))
+        # Foreground
+        draw.rectangle([0, y, bar_w, self.height], fill=(0, 200, 0, 204))
+
+    def get_frame_at(self, timestamp_sec: float, chunk_start_ms: float = 0) -> np.ndarray:
         """Returns a numpy array (RGB) representing the frame at the given timestamp."""
         if self.static_base is None:
             self.prepare_static_base()
             
-        timestamp_ms = timestamp_sec * 1000
+        # timestamp_sec is relative to the start of the chunk
+        # we need absolute timestamp for highlighting if lines are absolute
+        timestamp_ms = (timestamp_sec * 1000) + chunk_start_ms
         img = self.static_base.copy()
         draw = ImageDraw.Draw(img, 'RGBA')
         
-        highlight_color = (255, 255, 0, 76) # Yellow with 0.3 opacity (approx 76/255)
+        highlight_color = (255, 255, 0, 76) # Yellow with 0.3 opacity
         
+        # 1. Draw Highlights
         for i, line in enumerate(self.renderable_lines):
             l_type = line.get("line_type", "ayah")
             if l_type in ["basmallah", "surah_name"]:
@@ -105,7 +178,6 @@ class MushafRenderer:
             
             if start_ms is not None and end_ms is not None:
                 if start_ms <= timestamp_ms <= end_ms:
-                    # Calculate highlight width
                     from factories.single_clip import calculate_mushaf_font_size
                     words = line.get("words", [])
                     text = "".join([w["text"] for w in reversed(words)])
@@ -126,8 +198,12 @@ class MushafRenderer:
                     x1 = x0 + h_width
                     y1 = y0 + int(self.line_height)
                     
-                    # Draw semi-transparent rectangle
                     draw.rectangle([x0, y0, x1, y1], fill=highlight_color)
+        
+        # 2. Draw Overlays
+        self._draw_overlays(draw)
+        
+        # 3. Draw Progress Bar
+        self._draw_progress_bar(draw, timestamp_ms)
                     
-        # Convert to RGB numpy array
         return np.array(img.convert('RGB'))
