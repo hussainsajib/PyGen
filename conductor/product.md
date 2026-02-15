@@ -23,10 +23,10 @@ PyGen is an automated video generation platform designed specifically for creati
     - **Synchronized Inline Configuration:** Direct synchronization of core generation settings (Language, Social Media Toggles) between creation pages and global application configuration.
     - **Optimized Layout:** Refined positioning of metadata (Reciter, Surah, Brand) and translation overlays for better visibility.
     - **UX Refinements:** Streamlined form submission workflow with intuitive redirects and quick-reset background options.
-    - **Mushaf-Style Rendering:** Specialized engine for generating videos that mirror traditional 15-line Mushaf layouts.
-        - **Adaptive Paging:** Configurable "Visible Lines per Scene" (e.g., 5, 10, or full 15 lines) with automatic chunking and paging logic.
-        - **Authentic Calligraphy:** Integration of QPC v2 fonts for page-specific glyphs, including decorative fonts for Bismillah (`QCF_BSML.TTF`) and Surah headers (`QCF_SurahHeader_COLOR-Regular.ttf`).
-        - **Dynamic Highlighting:** Synchronized semi-transparent line-level highlighting driven by word-level timestamps, featuring dynamic width calculation that matches the actual text portion of each line.
+            - **Mushaf-Style Rendering:** Specialized engine for generating videos that mirror traditional 15-line Mushaf layouts.
+                - **Adaptive Paging:** Configurable "Visible Lines per Scene" (e.g., 5, 10, or full 15 lines) with automatic chunking and paging logic.
+                - **Intelligent Scene Grouping:** Advanced threshold-based logic that prevents orphaned headers and Basmallah lines at page boundaries by automatically deferring low-content starting lines to the subsequent scene.
+                - **Authentic Calligraphy:** Integration of QPC v2 fonts for page-specific glyphs, including decorative fonts for Bismillah (`QCF_BSML.TTF`) and Surah headers (`QCF_SurahHeader_COLOR-Regular.ttf`).        - **Dynamic Highlighting:** Synchronized semi-transparent line-level highlighting driven by word-level timestamps, featuring dynamic width calculation that matches the actual text portion of each line.
         - **Visual Continuity:** Continuous progress tracking via a dynamic, growing progress bar integrated into the video scene.
         - **Integrated Discovery:** Native access to the stock background module (Unsplash/Pexels) directly within the Mushaf creation interface.
         - **Layered Backgrounds:** Intelligent background system that distinguishes between the global video area and the inner Mushaf page.
