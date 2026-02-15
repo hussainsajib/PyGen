@@ -432,18 +432,18 @@ def generate_full_ayah_translation_clip(text: str, is_short: bool, duration: int
     return translation_clip.set_position(('center', translation_pos)).set_duration(duration)
 
 def generate_reciter_name_clip(reciter_name_bangla: str, is_short: bool, duration: int) -> TextClip:
-    reciter_name_clip = TextClip(reciter_name_bangla, font="kalpurush", **FOOTER_CONFIG)
+    reciter_name_clip = TextClip(reciter_name_bangla, font=resolve_font_path("kalpurush"), **FOOTER_CONFIG)
     reciter_pos = COMMON["f_reciter_info_position"](is_short, reciter_name_clip.w)
     return reciter_name_clip.set_position(reciter_pos, relative=True).set_duration(duration)
 
 def generate_surah_info_clip(surah_name: str, verse_number: int, is_short: bool, duration: int, language: str = "bengali"):
     verse_str = e2b(str(verse_number)) if language == "bengali" else str(verse_number)
-    surah_name_clip = TextClip(f'{surah_name} : {verse_str}', font="kalpurush", **FOOTER_CONFIG)
+    surah_name_clip = TextClip(f'{surah_name} : {verse_str}', font=resolve_font_path("kalpurush"), **FOOTER_CONFIG)
     surah_pos = COMMON["f_surah_info_position"](is_short, surah_name_clip.w)
     return surah_name_clip.set_position(surah_pos, relative=True).set_duration(duration)
 
 def generate_brand_clip(brand_name: str, is_short: bool, duration: int) -> TextClip:
-    brand_name_clip = TextClip(brand_name, font="kalpurush", **FOOTER_CONFIG)
+    brand_name_clip = TextClip(brand_name, font=resolve_font_path("kalpurush"), **FOOTER_CONFIG)
     brand_pos = COMMON["f_channel_info_position"](is_short, brand_name_clip.w)
     return brand_name_clip.set_position(brand_pos, relative=True).set_duration(duration)
 
