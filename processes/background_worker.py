@@ -95,8 +95,10 @@ async def job_worker():
                             engine_type=job.engine_type,
                             is_short=bool(job.is_short),
                             background_path=job.background_path,
-                            is_juz=bool(job.custom_title == "juz"), # Using custom_title as juz flag for now
-                            job_id=job.id
+                            is_juz=bool(job.custom_title == "juz"),
+                            job_id=job.id,
+                            upload_after_generation=bool(job.upload_after_generation),
+                            playlist_id=job.playlist_id
                         )
                     else:
                         # Standard full surah generation job

@@ -126,6 +126,8 @@ async def create_mushaf_fast_route(
     is_short: bool = False,
     is_juz: bool = False,
     active_background: str = None,
+    playlist_id: str = None,
+    upload_after_generation: bool = False,
     db: AsyncSession = Depends(get_db)
 ):
     if engine not in ["ffmpeg", "opencv", "pyav"]:
@@ -151,7 +153,9 @@ async def create_mushaf_fast_route(
         is_short=is_short,
         background_path=active_background,
         engine_type=engine,
-        custom_title="juz" if is_juz else "surah"
+        custom_title="juz" if is_juz else "surah",
+        upload_after_generation=upload_after_generation,
+        playlist_id=playlist_id if playlist_id != "none" else None
     )
     return RedirectResponse(url="/jobs", status_code=303)
 

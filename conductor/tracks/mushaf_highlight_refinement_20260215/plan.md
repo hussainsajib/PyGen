@@ -8,18 +8,18 @@ Investigate and resolve the transparency issue in Mushaf highlighting.
 - [x] Task: Implement the fix for highlight transparency (ensuring `Image.alpha_composite` or equivalent is used correctly). 550fdac
 - [x] Task: Conductor - User Manual Verification 'Highlighting Fix & Visual Verification' (Protocol in workflow.md) 550fdac
 
-## Phase 2: Terminal Logging & Metadata Generation
+## Phase 2: Terminal Logging & Metadata Generation [checkpoint: 401e133]
 Improve developer visibility by logging paths and ensuring metadata completeness.
 
-- [~] Task: Update `processes/mushaf_video.py` and `processes/mushaf_fast_video.py` to print relative export paths to the terminal.
-- [ ] Task: Verify that all high-speed engines (FFmpeg, OpenCV, PyAV) generate the `.txt` details file in `exported_data/details`.
-- [ ] Task: Write unit tests in `tests/test_fast_metadata.py` to verify metadata file existence after generation.
-- [ ] Task: Conductor - User Manual Verification 'Terminal Logging & Metadata Generation' (Protocol in workflow.md)
+- [x] Task: Update `processes/mushaf_video.py` and `processes/mushaf_fast_video.py` to print relative export paths to the terminal. 401e133
+- [x] Task: Verify that all high-speed engines (FFmpeg, OpenCV, PyAV) generate the `.txt` details file in `exported_data/details`. 401e133
+- [x] Task: Write unit tests in `tests/test_fast_metadata.py` to verify metadata file existence after generation. 401e133
+- [x] Task: Conductor - User Manual Verification 'Terminal Logging & Metadata Generation' (Protocol in workflow.md) 401e133
 
 ## Phase 3: Social Media Upload Connectivity
 Verify and fix the integration between high-speed engines and automated uploaders.
 
-- [ ] Task: Audit `app.py` route parameters to ensure `upload_after_generation` is correctly passed for fast engine routes.
+- [~] Task: Audit `app.py` route parameters to ensure `upload_after_generation` is correctly passed for fast engine routes.
 - [ ] Task: Update `processes/background_worker.py` to handle post-generation upload triggers for the `mushaf_fast` job type.
 - [ ] Task: Test end-to-end connectivity (Generation -> Metadata -> Upload Trigger) using a mock uploader.
 - [ ] Task: Conductor - User Manual Verification 'Social Media Upload Connectivity' (Protocol in workflow.md)
