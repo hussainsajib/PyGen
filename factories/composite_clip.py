@@ -1,6 +1,7 @@
 from moviepy.editor import CompositeVideoClip, AudioFileClip, TextClip
 
 from factories.single_clip import generate_background
+from factories.font_utils import resolve_font_path
 from processes.video_configs import FONT_COLOR, COMMON
 from processes.Classes import Reciter, Surah
 
@@ -13,7 +14,7 @@ def generate_intro(surah: Surah, reciter: Reciter, background_image_url, is_shor
     if COMMON["enable_title"]:
         try:
             display_surah_name = surah.bangla_name if language == "bengali" else surah.english_name
-            title = TextClip(txt=f"সুরাহ {display_surah_name}", font="kalpurush", fontsize=100, color=FONT_COLOR)\
+            title = TextClip(txt=f"সুরাহ {display_surah_name}", font=resolve_font_path("kalpurush"), fontsize=100, color=FONT_COLOR)\
                     .set_position(("center", 0.4), relative=True)\
                     .set_duration(audio.duration)
             intro_clips.append(title)
@@ -22,7 +23,7 @@ def generate_intro(surah: Surah, reciter: Reciter, background_image_url, is_shor
 
     if COMMON["enable_subtitle"]:
         display_reciter_name = reciter.bangla_name if language == "bengali" else reciter.english_name
-        sub_title = TextClip(txt=f"{display_reciter_name}", font="kalpurush", fontsize=50, color=FONT_COLOR)\
+        sub_title = TextClip(txt=f"{display_reciter_name}", font=resolve_font_path("kalpurush"), fontsize=50, color=FONT_COLOR)\
                 .set_position(("center", 0.6), relative=True)\
                 .set_duration(audio.duration)
         intro_clips.append(sub_title)
@@ -33,7 +34,7 @@ def generate_intro(surah: Surah, reciter: Reciter, background_image_url, is_shor
 
 def generate_outro(background_image_url, is_short):
     background = generate_background(background_image_url, duration=5, is_short=is_short)
-    title = TextClip("তাকওয়া বাংলা", font="kalpurush", fontsize=70, color=FONT_COLOR)\
+    title = TextClip("তাকওয়া বাংলা", font=resolve_font_path("kalpurush"), fontsize=70, color=FONT_COLOR)\
             .set_position(('center', 'center'))\
             .set_duration(5)
     return CompositeVideoClip([background, title])

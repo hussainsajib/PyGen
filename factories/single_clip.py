@@ -6,6 +6,7 @@ from convert_numbers import english_to_arabic as e2a
 from bangla import convert_english_digit_to_bangla_digit as e2b
 from processes.video_configs import BACKGROUND_OPACITY, BACKGROUND_RGB, COMMON, FOOTER_CONFIG, SHORT, LONG, FONT_COLOR
 from config_manager import config_manager
+from factories.font_utils import resolve_font_path
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import os
@@ -25,13 +26,8 @@ except Exception as e:
 FONT_CACHE = {}
 
 def get_font_path(font_name: str) -> str:
-    """Checks for a font in a local 'fonts' directory, otherwise returns the name."""
-    if font_name and font_name.endswith(".ttf"):
-        local_path = os.path.join("fonts", font_name)
-        if os.path.exists(local_path):
-            return os.path.abspath(local_path)
-    return font_name 
-
+    """Robustly resolves a font path using shared utility."""
+    return resolve_font_path(font_name)
 def render_mushaf_text_to_image(text: str, font_path: str, font_size: int, color: str, size: tuple):
     """
     Renders Arabic Mushaf text to a numpy array (image) using Pillow.
@@ -758,7 +754,7 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
 
                         h_width = text_w + 20
 
-                        h_clip = ColorClip(size=(h_width, int(line_height)), color=(255, 255, 0)).set_opacity(0.3).set_start(start_sec).set_duration(h_duration).set_position(('center', line_positions[i]))
+                        h_clip = ColorClip(size=(h_width, int(line_height)), color=(255, 255, 0)).set_opacity(0.1).set_start(start_sec).set_duration(h_duration).set_position(('center', line_positions[i]))
 
                         clips.append(h_clip)
 

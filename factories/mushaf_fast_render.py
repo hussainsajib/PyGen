@@ -3,6 +3,7 @@ import json
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from factories.video import get_resolution
+from factories.font_utils import resolve_font_path
 from processes.video_configs import BACKGROUND_OPACITY, BACKGROUND_RGB, FONT_COLOR
 from config_manager import config_manager
 
@@ -44,7 +45,7 @@ class MushafRenderer:
             "page": os.path.abspath(os.path.join("QPC_V2_Font.ttf", f"p{page_number}.ttf")),
             "bsml": os.path.abspath(os.path.join("QPC_V2_Font.ttf", "QCF_BSML.TTF")),
             "sura": os.path.abspath(os.path.join("QPC_V2_Font.ttf", "QCF_SurahHeader_COLOR-Regular.ttf")),
-            "footer": "fonts/kalpurush.ttf"
+            "footer": resolve_font_path("kalpurush.ttf")
         }
         if not os.path.exists(self.font_paths["page"]):
             self.font_paths["page"] = "Arial"
@@ -128,7 +129,7 @@ class MushafRenderer:
         self._pre_rendered_frames[-1] = np.array(self.static_base.convert('RGB'))
         
         # Highlighted frames
-        highlight_color = (255, 255, 0, 76) # Yellow with 30% alpha
+        highlight_color = (255, 255, 0, 25) # Yellow with 10% alpha
         for i in self.highlight_rects:
             # Create a transparent layer for the highlight
             overlay = Image.new('RGBA', self.static_base.size, (0, 0, 0, 0))
