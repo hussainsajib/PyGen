@@ -34,7 +34,7 @@ class FFmpegEngine:
             temp_video_path
         ]
         
-        process = subprocess.Popen(ffmpeg_cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(ffmpeg_cmd, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
         
         total_frames = int(duration_sec * self.fps)
         
@@ -42,6 +42,9 @@ class FFmpegEngine:
             timestamp_sec = frame_idx / self.fps
             frame = self.renderer.get_frame_at(timestamp_sec)
             process.stdin.write(frame.tobytes())
+            
+            if frame_idx % (self.fps * 10) == 0:
+                print(f"  [FFmpeg] Progress: {frame_idx}/{total_frames} frames", flush=True)
             
             if performance_monitor and frame_idx % self.fps == 0:
                 performance_monitor.update_peak()

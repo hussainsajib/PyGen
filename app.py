@@ -1,6 +1,7 @@
 import os
 import json
 import asyncio
+from typing import Optional
 from fastapi.concurrency import run_in_threadpool
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager

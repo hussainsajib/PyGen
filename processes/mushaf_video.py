@@ -275,6 +275,8 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             logger="bar"
         )
         
+        print(f"\n[SUCCESS] Mushaf video exported to: {video_path}", flush=True)
+        
         full_audio.close()
         for c in page_clips:
             c.close()
@@ -743,7 +745,10 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
             threads=VIDEO_ENCODING_THREADS,
             preset="ultrafast",
             logger="bar"
-        )        
+        )
+        
+        print(f"\n[SUCCESS] Juz Mushaf video exported to: {video_path}", flush=True)
+        
         # Cleanup clips to release file handles
         full_audio.close()
         if bsml_audio: bsml_audio.close()

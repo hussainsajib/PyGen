@@ -41,6 +41,9 @@ class PyAVEngine:
             for packet in stream.encode(frame):
                 container.mux(packet)
             
+            if frame_idx % (self.fps * 10) == 0:
+                print(f"  [PyAV] Progress: {frame_idx}/{total_frames} frames", flush=True)
+            
             if performance_monitor and frame_idx % self.fps == 0:
                 performance_monitor.update_peak()
                 
@@ -59,15 +62,15 @@ class PyAVEngine:
                 '-i', audio_path,
                 '-c:v', 'copy',
                 '-c:a', 'aac',
-                '-map', 0,
-                '-map', 1,
+                '-map', '0:v:0',
+                '-map', '1:a:0',
                 '-shortest',
                 self.output_path
             ]
             
-            merge_process = subprocess.run(merge_cmd, capture_output=True)
+            merge_process = subprocess.run(merge_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             if merge_process.returncode != 0:
-                raise RuntimeError(f"FFmpeg audio merging failed: {merge_process.stderr.decode()}")
+                raise RuntimeError(f"FFmpeg audio merging failed")
                 
             if os.path.exists(temp_video_path):
                 os.remove(temp_video_path)

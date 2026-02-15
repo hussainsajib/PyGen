@@ -183,6 +183,8 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
             
         await engine.generate(total_duration, audio_export_path, performance_monitor=monitor)
         
+        print(f"\n[SUCCESS] High-speed Mushaf video exported to: {final_output_path}", flush=True)
+        
         monitor.stop()
         report = monitor.get_report()
         
@@ -191,13 +193,32 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
             os.remove(audio_export_path)
         if not is_juz:
             cleanup_temp_file(temp_audio)
+            details_path = generate_details(
+                surah_p, 
+                reciter_p, 
+                False, 
+                1, 
+                surah_p.total_ayah, 
+                is_short, 
+                custom_title=custom_title,
+                language=current_language
+            )
         else:
             for tf in temp_files: cleanup_temp_file(tf)
+            details_path = generate_juz_details(
+                juz_number,
+                reciter_p,
+                offsets,
+                is_short,
+                language=current_language
+            )
             
         return {
             "video": final_output_path,
+            "info": details_path,
             "performance": report,
             "surah_number": surah_number if not is_juz else 0,
             "juz_number": surah_number if is_juz else 0,
-            "reciter": reciter_key
+            "reciter": reciter_key,
+            "is_short": is_short
         }

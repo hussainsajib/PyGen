@@ -1,4 +1,5 @@
 import os
+import json
 import asyncio
 import anyio
 from fastapi.concurrency import run_in_threadpool
@@ -430,43 +431,27 @@ async def create_juz_video_job(juz: int, reciter: str, is_short: bool = False,
         await asyncio.sleep(20)
 
     # Upload to Facebook if enabled
-    await _upload_to_facebook_if_enabled(video_details) 
- a s y n c   d e f   c r e a t e _ m u s h a f _ f a s t _ j o b ( s u r a h :   i n t ,   r e c i t e r :   s t r ,   e n g i n e _ t y p e :   s t r ,   i s _ s h o r t :   b o o l   =   F a l s e ,   b a c k g r o u n d _ p a t h :   s t r   =   N o n e ,   i s _ j u z :   b o o l   =   F a l s e ,   j o b _ i d :   i n t   =   N o n e ) :  
-         \  
- \ \ G e n e r a t e s  
- a  
- M u s h a f  
- v i d e o  
- u s i n g  
- a  
- h i g h - s p e e d  
- e n g i n e  
- a n d  
- r e c o r d s  
- p e r f o r m a n c e . \ \ \  
-         v i d e o _ d e t a i l s   =   a w a i t   g e n e r a t e _ m u s h a f _ f a s t ( s u r a h ,   r e c i t e r ,   e n g i n e _ t y p e ,   i s _ s h o r t ,   b a c k g r o u n d _ p a t h ,   i s _ j u z = i s _ j u z )  
-          
-         i f   n o t   v i d e o _ d e t a i l s :  
-                 r a i s e   E x c e p t i o n ( \ E r r o r  
- g e n e r a t i n g  
- f a s t  
- M u s h a f  
- v i d e o \ )  
-          
-         #   R e c o r d   p e r f o r m a n c e   i n   D B   i f   j o b _ i d   i s   p r o v i d e d  
-         i f   j o b _ i d :  
-                 a s y n c   w i t h   a s y n c _ s e s s i o n ( )   a s   s e s s i o n :  
-                         f r o m   d b . m o d e l s   i m p o r t   J o b  
-                         j o b   =   a w a i t   s e s s i o n . g e t ( J o b ,   j o b _ i d )  
-                         i f   j o b :  
-                                 j o b . p e r f o r m a n c e _ r e p o r t   =   j s o n . d u m p s ( v i d e o _ d e t a i l s [ \ p e r f o r m a n c e \ ] )  
-                                 a w a i t   s e s s i o n . c o m m i t ( )  
-          
-         #   P r o c e e d   w i t h   s t a n d a r d   p o s t - g e n e r a t i o n   s t e p s   ( r e c o r d i n g   a s s e t )  
-         #   ( N o t e :   s c r e e n s h o t   e x t r a c t i o n   m i g h t   s t i l l   u s e   M o v i e P y / O p e n C V )  
-         s c r e e n s h o t _ p a t h   =   a w a i t   r u n _ i n _ t h r e a d p o o l ( e x t r a c t _ f r a m e ,   v i d e o _ p a t h = v i d e o _ d e t a i l s [ \ v i d e o \ ] )  
-         v i d e o _ d e t a i l s [ \ s c r e e n s h o t \ ]   =   s c r e e n s h o t _ p a t h  
-          
-         a w a i t   r e c o r d _ m e d i a _ a s s e t ( v i d e o _ d e t a i l s )  
-         r e t u r n   v i d e o _ d e t a i l s  
- 
+    await _upload_to_facebook_if_enabled(video_details)
+
+async def create_mushaf_fast_job(surah: int, reciter: str, engine_type: str, is_short: bool = False, background_path: str = None, is_juz: bool = False, job_id: int = None):
+    """Generates a Mushaf video using a high-speed engine and records performance."""
+    video_details = await generate_mushaf_fast(surah, reciter, engine_type, is_short, background_path, is_juz=is_juz)
+    
+    if not video_details:
+        raise Exception("Error generating fast Mushaf video")
+    
+    # Record performance in DB if job_id is provided
+    if job_id:
+        async with async_session() as session:
+            from db.models import Job
+            job = await session.get(Job, job_id)
+            if job:
+                job.performance_report = json.dumps(video_details["performance"])
+                await session.commit()
+    
+    # Proceed with standard post-generation steps (recording asset)
+    screenshot_path = await run_in_threadpool(extract_frame, video_path=video_details["video"])
+    video_details["screenshot"] = screenshot_path
+    
+    await record_media_asset(video_details)
+    return video_details
