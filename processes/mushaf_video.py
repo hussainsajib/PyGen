@@ -57,6 +57,31 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
             wbw_db_path = os.path.join("databases", "word-by-word", reciter_db_obj.wbw_database)
             wbw_timestamps = get_wbw_timestamps(wbw_db_path, surah_number, 1, surah_p.total_ayah)
         
+        # Basmallah Injection Logic
+        injection_duration_ms = 0
+        if surah_number not in [1, 9]:
+            try:
+                basmallah_audio = get_standard_basmallah_clip()
+                silence_sec_str = config_manager.get("MUSHAF_BASMALLAH_SILENCE_DURATION", "1.0")
+                try:
+                    silence_sec = float(silence_sec_str)
+                except (ValueError, TypeError):
+                    silence_sec = 1.0
+                silence_audio = make_silence(silence_sec)
+                
+                injection_duration_ms = (basmallah_audio.duration + silence_audio.duration) * 1000
+                full_audio = concatenate_audioclips([basmallah_audio, silence_audio, full_audio])
+                total_duration = full_audio.duration
+                
+                # Shift WBW timestamps
+                for key in wbw_timestamps:
+                    for seg in wbw_timestamps[key]:
+                        seg[1] += injection_duration_ms
+                        seg[2] += injection_duration_ms
+                print(f"[INFO] Injected Basmallah and {silence_sec}s silence. Offset: {injection_duration_ms}ms")
+            except Exception as e:
+                print(f"[WARNING] Failed to inject Basmallah: {e}")
+
         # 4. Mushaf Paging Logic
         page_range = get_surah_page_range(surah_number)
         if not page_range or page_range[0] is None:
@@ -316,12 +341,23 @@ async def prepare_juz_data_package(
     # 1. Audio Processing: Download and Concatenate
     surah_clips = []
     surah_durations = {}
-    bsml_path = "static/audio/basmallah.mp3"
+    
+    # Standard Basmallah
     bsml_duration = 0.0
     bsml_audio = None
-    if os.path.exists(bsml_path):
-        bsml_audio = AudioFileClip(bsml_path)
+    try:
+        bsml_audio = get_standard_basmallah_clip()
         bsml_duration = bsml_audio.duration
+    except Exception as e:
+        print(f"[WARNING] Could not load standard Basmallah: {e}")
+
+    # Silence Duration from config
+    silence_sec_str = config_manager.get("MUSHAF_BASMALLAH_SILENCE_DURATION", "1.0")
+    try:
+        silence_duration = float(silence_sec_str)
+    except (ValueError, TypeError):
+        silence_duration = 1.0
+    silence_audio = make_silence(silence_duration)
         
     temp_files = []
     for s_num in surahs_in_juz:
@@ -340,17 +376,20 @@ async def prepare_juz_data_package(
             for tf in temp_files: cleanup_temp_file(tf)
             return None
             
-    offsets = calculate_juz_offsets(surahs_in_juz, surah_durations, bsml_duration)
+    offsets = calculate_juz_offsets(surahs_in_juz, surah_durations, bsml_duration, silence_duration)
     
     final_audio_clips = []
     for i, s_num in enumerate(surahs_in_juz):
-        if i > 0:
-            if s_num == 9:
-                from moviepy.audio.AudioClip import AudioArrayClip
-                silence = AudioArrayClip(np.zeros((44100 * 5, 2)), fps=44100)
-                final_audio_clips.append(silence)
-            elif s_num != 1 and bsml_audio:
-                final_audio_clips.append(bsml_audio)
+        # Inject Basmallah/Silence/Gap for EVERY surah according to rules
+        if s_num == 9:
+            from moviepy.audio.AudioClip import AudioArrayClip
+            silence_gap = AudioArrayClip(np.zeros((44100 * 5, 2)), fps=44100)
+            final_audio_clips.append(silence_gap)
+        elif s_num != 1 and bsml_audio:
+            # Prepend Basmallah and Silence
+            final_audio_clips.append(bsml_audio)
+            final_audio_clips.append(silence_audio)
+            
         final_audio_clips.append(surah_clips[i])
         
     full_audio_juz = concatenate_audioclips(final_audio_clips)
@@ -557,6 +596,7 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
 
         # 6. Generate Clips with Page-Aware Chunking (Juz-aware)
         global_chunk_idx = 0
+        last_processed_ms = 0.0 # Track end of last chunk to avoid gaps
         for p_idx, page_num in enumerate(sorted_pages):
             if page_num not in lines_by_page: continue
             
@@ -579,16 +619,18 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
                             # Skip for now if we can't find timing
                             continue
                     else:
-                        chunk_start_ms = min(valid_starts)
+                        # Ensure gap from previous chunk is covered (important for Basmallah injection)
+                        if global_chunk_idx == 0:
+                            chunk_start_ms = 0
+                        else:
+                            chunk_start_ms = last_processed_ms
+                        
                         chunk_end_ms = max(valid_ends)
                     
-                    print(f"DEBUG: chunk_start_ms={chunk_start_ms} ({type(chunk_start_ms)})", flush=True)
-                    print(f"DEBUG: chunk_end_ms={chunk_end_ms} ({type(chunk_end_ms)})", flush=True)
-                    print(f"DEBUG: total_duration={total_duration} ({type(total_duration)})", flush=True)
+                    # Update tracker
+                    last_processed_ms = chunk_end_ms
 
-                    # Buffer boundaries
-                    if global_chunk_idx == 0:
-                        chunk_start_ms = 0
+                    # Force end boundary for the very last chunk
                     if p_idx == len(sorted_pages) - 1 and c_idx == len(page_chunks) - 1:
                         chunk_end_ms = total_audio_ms
                         

@@ -8,7 +8,7 @@ Implement the foundational utilities for managing the standardized Basmallah aud
 - [x] Task: Update `processes/mushaf_video.py` to import these new utilities. e7f82da
 - [x] Task: Conductor - User Manual Verification 'Core Audio Utilities & Shared Logic' (Protocol in workflow.md) e7f82da
 
-## Phase 2: Configuration & UI Integration
+## Phase 2: Configuration & UI Integration [checkpoint: a144d9d]
 Implement the database persistence and UI management for the Basmallah silence duration.
 
 - [x] Task: Add `MUSHAF_BASMALLAH_SILENCE_DURATION` to the database initialization/seeds. 8913398
@@ -19,7 +19,7 @@ Implement the database persistence and UI management for the Basmallah silence d
 ## Phase 3: Standalone Mushaf Video Integration
 Update the standard Surah video generation workflow to incorporate the automated injection.
 
-- [ ] Task: Write integration tests for `generate_mushaf_video` with Basmallah injection in `tests/test_mushaf_injection.py`.
+- [~] Task: Write integration tests for `generate_mushaf_video` with Basmallah injection in `tests/test_mushaf_injection.py`.
 - [ ] Task: Refactor `generate_mushaf_video` to inject `basmalah.mp3` and dynamic silence at the start of the audio stream.
 - [ ] Task: Implement exception logic to skip injection for Surah 1 and Surah 9.
 - [ ] Task: Adjust the rendering loop to display the Mushaf's "Bismillah" line statically during the injected audio.
