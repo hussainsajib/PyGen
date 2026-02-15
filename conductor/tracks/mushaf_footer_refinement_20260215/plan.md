@@ -1,17 +1,17 @@
 # Implementation Plan: Mushaf Video Footer Refinement
 
-## Phase 1: Font Discovery & Centralization
+## Phase 1: Font Discovery & Centralization [checkpoint: bb41fc4]
 Ensure all rendering backends can reliably locate and load the "Kalpurush" font.
 
 - [x] Task: Create a utility `factories/font_utils.py` to resolve font paths, including system-level paths for common fonts like "Kalpurush". 3e12f81
 - [x] Task: Write unit tests in `tests/test_font_utils.py` to verify that "Kalpurush" can be correctly resolved on the current OS. a627af7
 - [x] Task: Refactor `factories/single_clip.py` and `factories/mushaf_fast_render.py` to use the new font utility. 35315f7
-- [ ] Task: Conductor - User Manual Verification 'Font Discovery & Centralization' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Font Discovery & Centralization' (Protocol in workflow.md) bb41fc4
 
 ## Phase 2: Engine Integration & Fix
 Apply the fixes to both the stable and experimental rendering engines.
 
-- [ ] Task: Create a visual specimen script `scripts/verify_footer_render.py` to generate frames with footers across all engines.
+- [~] Task: Create a visual specimen script `scripts/verify_footer_render.py` to generate frames with footers across all engines.
 - [ ] Task: Update `MushafRenderer` in `factories/mushaf_fast_render.py` to use the centralized font path for footer rendering.
 - [ ] Task: Update the standard renderer in `factories/single_clip.py` to ensure PIL-based text rendering uses the correct font path.
 - [ ] Task: Conductor - User Manual Verification 'Engine Integration & Fix' (Protocol in workflow.md)
