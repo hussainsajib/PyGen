@@ -116,6 +116,44 @@ async def create_mushaf_video(
     )
     return RedirectResponse(url="/jobs", status_code=303)
 
+@app.get("/create-mushaf-fast/{engine}")
+async def create_mushaf_fast_route(
+    engine: str,
+    reciter: str,
+    surah: Optional[int] = None,
+    juz: Optional[int] = None,
+    is_short: bool = False,
+    is_juz: bool = False,
+    active_background: str = None,
+    db: AsyncSession = Depends(get_db)
+):
+    if engine not in ["ffmpeg", "opencv", "pyav"]:
+        return HTMLResponse("Invalid engine type", status_code=400)
+        
+    target_num = juz if is_juz else surah
+    if target_num is None:
+        return HTMLResponse("Missing surah or juz number", status_code=400)
+
+    surah_name = f"Fast {engine.upper()} - {'Juz' if is_juz else 'Surah'} {target_num}"
+    if not is_juz:
+        with open("data/surah_data.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+            surah_name = data[str(target_num)]["english_name"]
+            
+    from db_ops.crud_jobs import enqueue_job
+    await enqueue_job(
+        db,
+        surah_number=target_num,
+        surah_name=surah_name,
+        reciter=reciter,
+        job_type="mushaf_fast",
+        is_short=is_short,
+        background_path=active_background,
+        engine_type=engine,
+        custom_title="juz" if is_juz else "surah"
+    )
+    return RedirectResponse(url="/jobs", status_code=303)
+
 @app.get("/create-video")
 async def create_video(
     request: Request, 

@@ -18,7 +18,8 @@ async def enqueue_job(
     background_path: str = None,
     lines_per_page: int = 15,
     start_page: int = None,
-    end_page: int = None
+    end_page: int = None,
+    engine_type: str = "moviepy"
 ):
     job = Job(
         surah_number=surah_number,
@@ -35,7 +36,8 @@ async def enqueue_job(
         background_path=background_path,
         lines_per_page=lines_per_page,
         start_page=start_page,
-        end_page=end_page
+        end_page=end_page,
+        engine_type=engine_type
     )
     session.add(job)
     await session.commit()

@@ -32,6 +32,17 @@
                         </select>
                     </div>
 
+                    <!-- Engine Selection (Experimental) -->
+                    <div class="mb-3">
+                        <label for="engine" class="form-label text-danger fw-bold"><i class="fas fa-flask me-2"></i>Rendering Engine (Experimental):</label>
+                        <select id="engine" name="engine" class="form-select border-danger" onchange="updateFormAction(this.value)">
+                            <option value="moviepy" selected>MoviePy (Stable Default)</option>
+                            <option value="ffmpeg">FFmpeg (High Speed)</option>
+                            <option value="opencv">OpenCV (High Speed)</option>
+                            <option value="pyav">PyAV (High Speed)</option>
+                        </select>
+                    </div>
+
                     <!-- Lines per Scene Selection -->
                     <div class="mb-3">
                         <label for="lines_per_page" class="form-label">Visible Lines per Scene:</label>
@@ -147,6 +158,15 @@
 </div>
 
 <script>
+    function updateFormAction(engine) {
+        const form = document.querySelector("form");
+        if (engine === "moviepy") {
+            form.action = "/create-mushaf-video";
+        } else {
+            form.action = `/create-mushaf-fast/${engine}`;
+        }
+    }
+
     function toggleColorPicker(mode) {
         const group = document.getElementById("page_color_group");
         if (mode === "Transparent") {

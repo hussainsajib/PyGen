@@ -7,7 +7,7 @@ import json
 import os
 from dotenv import load_dotenv
 from moviepy.config import change_settings
-from processes.processes import create_surah_video, manual_upload_to_youtube, manual_upload_to_facebook, create_wbw_video_job, create_mushaf_video_job, create_juz_video_job
+from processes.processes import create_surah_video, manual_upload_to_youtube, manual_upload_to_facebook, create_wbw_video_job, create_mushaf_video_job, create_juz_video_job, create_mushaf_fast_job
 from fastapi.concurrency import run_in_threadpool
 
 load_dotenv()
@@ -86,6 +86,17 @@ async def job_worker():
                             lines_per_page=job.lines_per_page,
                             start_page=job.start_page,
                             end_page=job.end_page
+                        )
+                    elif job.job_type == "mushaf_fast":
+                        # Experimental fast engine job
+                        await create_mushaf_fast_job(
+                            surah=job.surah_number,
+                            reciter=job.reciter,
+                            engine_type=job.engine_type,
+                            is_short=bool(job.is_short),
+                            background_path=job.background_path,
+                            is_juz=bool(job.custom_title == "juz"), # Using custom_title as juz flag for now
+                            job_id=job.id
                         )
                     else:
                         # Standard full surah generation job

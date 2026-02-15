@@ -37,3 +37,8 @@ class Job(Base):
     lines_per_page = Column(Integer, default=15)
     start_page = Column(Integer, nullable=True)
     end_page = Column(Integer, nullable=True)
+    
+    # Experimental Engine Fields
+    engine_type = Column(String(20), default="moviepy")
+    performance_report = Column(String, nullable=True) # JSON string
+
