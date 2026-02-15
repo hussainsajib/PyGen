@@ -30,6 +30,10 @@ PyGen is an automated video generation platform designed specifically for creati
         - **Visual Continuity:** Continuous progress tracking via a dynamic, growing progress bar integrated into the video scene.
         - **Integrated Discovery:** Native access to the stock background module (Unsplash/Pexels) directly within the Mushaf creation interface.
         - **Layered Backgrounds:** Intelligent background system that distinguishes between the global video area and the inner Mushaf page.
+        - **Automated Basmallah Injection:** Intelligent prepending of a standardized Basmallah audio file (`recitation_data/basmalah.mp3`) at the start of recitations.
+            - **Conditional Exception:** Automatically skips injection for Surah 1 and Surah 9 to respect traditional recitation standards.
+            - **Configurable Pacing:** User-adjustable silence duration (`MUSHAF_BASMALLAH_SILENCE_DURATION`) between the Basmallah and the first Ayah.
+            - **Visual Synchronization:** Seamless display of the Mushaf's Bismillah line during the injected audio without dynamic highlighting.
             - **Adaptive Page Rendering:** Inner page area supports "Transparent", "Semi-Transparent", and "Solid" modes.
             - **Granular Opacity Control:** Precise control over inner page transparency via a 0-100 slider in the configuration dashboard.
             - **Global Priority Logic:** Automatic prioritization of active background assets (images/videos) over solid color fallbacks for the outer video area.
