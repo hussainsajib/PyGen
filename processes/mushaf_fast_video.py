@@ -86,7 +86,9 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
             scenes = group_mushaf_lines_into_scenes(all_aligned_lines, threshold=3, max_lines=15, defer_if_no_ayah=True)
             all_page_data = []
             for chunk in scenes:
-                p_num = chunk[0].get("page_number")
+                # Use first Ayah's page number if available to ensure correct font loading
+                first_ayah = next((l for l in chunk if l.get("line_type") == "ayah"), None)
+                p_num = first_ayah.get("page_number") if first_ayah else chunk[0].get("page_number")
                 all_page_data.append((p_num, chunk))
                 
             reciter_display = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name

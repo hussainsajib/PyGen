@@ -10,23 +10,36 @@ def get_surah_page_range(surah_number: int):
     conn = sqlite3.connect(DB_15_LINES)
     try:
         cursor = conn.cursor()
+        
+        # 1. Metadata-based range (catches headers even if no words)
         cursor.execute("SELECT MIN(page_number), MAX(page_number) FROM pages WHERE surah_number = ?", (surah_number,))
-        res = cursor.fetchone()
-        if res and res[0] is not None:
-            return res
-            
-        # Fallback: if surah_number is not explicitly set in the page headers (e.g. continuation)
-        # We need to find pages where this surah's words exist.
-        # This is slower but more accurate for edge cases.
+        meta_res = cursor.fetchone()
+        meta_start = meta_res[0] if meta_res and meta_res[0] is not None else None
+        meta_end = meta_res[1] if meta_res and meta_res[1] is not None else None
+
+        # 2. Word-based range (catches content where metadata might be missing)
         conn_wbw = sqlite3.connect(DB_WBW)
         cursor_wbw = conn_wbw.cursor()
         cursor_wbw.execute("SELECT MIN(id), MAX(id) FROM words WHERE surah = ?", (surah_number,))
         w_range = cursor_wbw.fetchone()
-        if not w_range or w_range[0] is None:
+        
+        word_start = None
+        word_end = None
+        
+        if w_range and w_range[0] is not None:
+            cursor.execute("SELECT MIN(page_number), MAX(page_number) FROM pages WHERE first_word_id <= ? AND last_word_id >= ?", (w_range[1], w_range[0]))
+            word_res = cursor.fetchone()
+            word_start = word_res[0] if word_res and word_res[0] is not None else None
+            word_end = word_res[1] if word_res and word_res[1] is not None else None
+            
+        # 3. Combine ranges
+        starts = [s for s in [meta_start, word_start] if s is not None]
+        ends = [e for e in [meta_end, word_end] if e is not None]
+        
+        if not starts:
             return (None, None)
             
-        cursor.execute("SELECT MIN(page_number), MAX(page_number) FROM pages WHERE first_word_id <= ? AND last_word_id >= ?", (w_range[1], w_range[0]))
-        return cursor.fetchone()
+        return (min(starts), max(ends))
     finally:
         conn.close()
 
@@ -135,6 +148,17 @@ def get_mushaf_page_data(page_number: int):
                 "surah_number": resolved_surah,
                 "words": words
             })
+            
+        # Backward pass to fill missing surah_numbers (e.g. leading Basmallah)
+        if lines_data:
+            # Find first known surah
+            first_known = next((l["surah_number"] for l in lines_data if l["surah_number"]), None)
+            if first_known:
+                for l in lines_data:
+                    if not l["surah_number"]:
+                        l["surah_number"] = first_known
+                    else:
+                        break # Stop once we hit a known one (assuming structure holds)
             
     finally:
         conn_15line.close()

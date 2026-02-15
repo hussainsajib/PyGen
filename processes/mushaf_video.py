@@ -117,7 +117,9 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
         
         for s_idx, chunk in enumerate(scenes):
             try:
-                page_num = chunk[0].get("page_number") # Use first line's page
+                # Use the page number from the first Ayah line to ensure correct font loading
+                first_ayah = next((l for l in chunk if l.get("line_type") == "ayah"), None)
+                page_num = first_ayah.get("page_number") if first_ayah else chunk[0].get("page_number")
                 
                 valid_starts = [l["start_ms"] for l in chunk if l["start_ms"] is not None]
                 valid_ends = [l["end_ms"] for l in chunk if l["end_ms"] is not None]
