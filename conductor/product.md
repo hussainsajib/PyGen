@@ -45,6 +45,10 @@ PyGen is an automated video generation platform designed specifically for creati
             - **Dynamic Audio Assembly:** On-the-fly concatenation of Surah-level audio with automatic Basmallah injection and Surah 9 silence gap handling.
             - **Synchronized Timestamp Mapping:** Precision re-mapping of word-level timestamps relative to the continuous Juz audio stream.
             - **Automated YouTube Chapters:** Automatic generation of clickable Surah-based chapter markers in video descriptions.
+        - **Experimental High-Speed Engines:** Multi-backend rendering system for evaluating performance alternatives to MoviePy.
+            - **Multi-Backend Support:** Choice of high-performance rendering paths using FFmpeg (Piped), OpenCV, or PyAV.
+            - **Optimized Pre-rendering:** Specialized caching strategy that pre-renders static overlays and highlight states, achieving up to 40x speed improvement over standard clip-based composition.
+            - **Integrated Benchmarking:** Automated tracking of generation time and memory usage for side-by-side performance evaluation.
     - **Multi-Language Support:** Comprehensive support for generating videos in multiple languages (e.g., Bengali, English).
         - **Dynamic Translation Sourcing:** Automated selection of language-specific translation and WBW databases.
         - **Customizable Typography:** Per-language font configuration to ensure correct rendering of special characters (e.g., macron characters in transliterations).

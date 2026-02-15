@@ -16,6 +16,7 @@
 
 ## Media Processing
 - **Video Composition:** MoviePy (Script-based video editing)
+- **High-Speed Encoding:** PyAV (Pythonic binding for FFmpeg libraries), OpenCV (C++ optimized video writing), and FFmpeg (Direct subprocess piping).
 - **Resource Management:** Dynamic CPU-aware threading for optimized video encoding.
 - **Computer Vision:** OpenCV (Used for image manipulation and analysis)
 - **Image Processing:** Pillow (PIL Fork - Comprehensive image library)
