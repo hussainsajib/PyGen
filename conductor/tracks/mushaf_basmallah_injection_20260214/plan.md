@@ -16,7 +16,7 @@ Implement the database persistence and UI management for the Basmallah silence d
 - [x] Task: Update the configuration save/load logic in `app.py` or the relevant controller to handle this setting. e802847
 - [x] Task: Conductor - User Manual Verification 'Configuration & UI Integration' (Protocol in workflow.md) e802847
 
-## Phase 3: Standalone Mushaf Video Integration
+## Phase 3: Standalone Mushaf Video Integration [checkpoint: 24168b2]
 Update the standard Surah video generation workflow to incorporate the automated injection.
 
 - [x] Task: Write integration tests for `generate_mushaf_video` with Basmallah injection in `tests/test_mushaf_injection.py`. d4fc19f
@@ -25,7 +25,7 @@ Update the standard Surah video generation workflow to incorporate the automated
 - [x] Task: Adjust the rendering loop to display the Mushaf's "Bismillah" line statically during the injected audio. d4fc19f
 - [x] Task: Conductor - User Manual Verification 'Standalone Mushaf Video Integration' (Protocol in workflow.md) d4fc19f
 
-## Phase 4: Juz Mushaf Video Integration
+## Phase 4: Juz Mushaf Video Integration [checkpoint: 24168b2]
 Extend the Juz generation workflow to handle sequential Basmallah injection at Surah transitions.
 
 - [x] Task: Write integration tests for `generate_juz_video` with multi-surah injection in `tests/test_juz_injection.py`. d4fc19f
@@ -37,6 +37,6 @@ Extend the Juz generation workflow to handle sequential Basmallah injection at S
 ## Phase 5: Finalization & Documentation
 Wrap up the track with final checks and documentation.
 
-- [ ] Task: Verify overall system performance and memory usage during bulk generation.
-- [ ] Task: Update project documentation if any configuration constants were introduced.
+- [x] Task: Verify overall system performance and memory usage during bulk generation. 24168b2
+- [~] Task: Update project documentation if any configuration constants were introduced.
 - [ ] Task: Conductor - User Manual Verification 'Finalization & Documentation' (Protocol in workflow.md)
