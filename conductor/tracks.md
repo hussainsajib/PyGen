@@ -57,17 +57,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Automated Basmallah Injection for Mushaf Videos**
 
 *Link: [./tracks/mushaf_basmallah_injection_20260214/](./tracks/mushaf_basmallah_injection_20260214/)*
-
-
----
-
-
-
-- [ ] **Track: Mushaf Video Header Boundary Refinement**
-
-*Link: [./tracks/mushaf_header_boundary_20260215/](./mushaf_header_boundary_20260215/)*
-
----
-
-- [ ] **Track: Fix orphan header/basmalah page generation for Surah 53**
-*Link: [./tracks/surah_53_orphan_header_fix_20260215/](./tracks/surah_53_orphan_header_fix_20260215/)*
