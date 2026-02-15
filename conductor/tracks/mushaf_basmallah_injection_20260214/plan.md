@@ -19,20 +19,20 @@ Implement the database persistence and UI management for the Basmallah silence d
 ## Phase 3: Standalone Mushaf Video Integration
 Update the standard Surah video generation workflow to incorporate the automated injection.
 
-- [~] Task: Write integration tests for `generate_mushaf_video` with Basmallah injection in `tests/test_mushaf_injection.py`.
-- [ ] Task: Refactor `generate_mushaf_video` to inject `basmalah.mp3` and dynamic silence at the start of the audio stream.
-- [ ] Task: Implement exception logic to skip injection for Surah 1 and Surah 9.
-- [ ] Task: Adjust the rendering loop to display the Mushaf's "Bismillah" line statically during the injected audio.
-- [ ] Task: Conductor - User Manual Verification 'Standalone Mushaf Video Integration' (Protocol in workflow.md)
+- [x] Task: Write integration tests for `generate_mushaf_video` with Basmallah injection in `tests/test_mushaf_injection.py`. d4fc19f
+- [x] Task: Refactor `generate_mushaf_video` to inject `basmalah.mp3` and dynamic silence at the start of the audio stream. d4fc19f
+- [x] Task: Implement exception logic to skip injection for Surah 1 and Surah 9. d4fc19f
+- [x] Task: Adjust the rendering loop to display the Mushaf's "Bismillah" line statically during the injected audio. d4fc19f
+- [x] Task: Conductor - User Manual Verification 'Standalone Mushaf Video Integration' (Protocol in workflow.md) d4fc19f
 
 ## Phase 4: Juz Mushaf Video Integration
 Extend the Juz generation workflow to handle sequential Basmallah injection at Surah transitions.
 
-- [ ] Task: Write integration tests for `generate_juz_video` with multi-surah injection in `tests/test_juz_injection.py`.
-- [ ] Task: Update `prepare_juz_data_package` in `processes/mushaf_video.py` to inject Basmallah and dynamic silence at each valid Surah transition.
-- [ ] Task: Recalculate word-level timestamp offsets to account for the additional injected durations.
-- [ ] Task: Ensure the visual paging logic correctly identifies and displays the Bismillah line during transition periods.
-- [ ] Task: Conductor - User Manual Verification 'Juz Mushaf Video Integration' (Protocol in workflow.md)
+- [x] Task: Write integration tests for `generate_juz_video` with multi-surah injection in `tests/test_juz_injection.py`. d4fc19f
+- [x] Task: Update `prepare_juz_data_package` in `processes/mushaf_video.py` to inject Basmallah and dynamic silence at each valid Surah transition. d4fc19f
+- [x] Task: Recalculate word-level timestamp offsets to account for the additional injected durations. d4fc19f
+- [x] Task: Ensure the visual paging logic correctly identifies and displays the Bismillah line during transition periods. d4fc19f
+- [x] Task: Conductor - User Manual Verification 'Juz Mushaf Video Integration' (Protocol in workflow.md) d4fc19f
 
 ## Phase 5: Finalization & Documentation
 Wrap up the track with final checks and documentation.
