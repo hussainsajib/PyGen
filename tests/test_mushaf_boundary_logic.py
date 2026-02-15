@@ -1,72 +1,56 @@
 import pytest
 from db_ops.crud_mushaf import group_mushaf_lines_into_scenes
 
-def test_group_scenes_surah_53_case():
+def test_defer_only_if_zero_ayah_case_1_defer():
     """
-    Surah 53 starts with 1 line on page 525, then 15 on page 526.
-    With threshold=3, the first scene should contain 1 + 15 lines (total 16).
+    Case 1: Surah starting with ONLY Header/Basmallah on first page (must defer).
+    Page 1: Header, Basmalah
+    Page 2: Ayah 1, Ayah 2
+    Expected:
+    Scene 1: Header, Basmalah, Ayah 1, Ayah 2 (all from Page 1 and 2 combined)
     """
     lines = [
-        {"line_number": 15, "line_type": "surah_name", "page": 525},
-        # Page 526 starts here
-        {"line_number": 1, "line_type": "basmallah", "page": 526},
-        {"line_number": 2, "line_type": "ayah", "page": 526},
-        {"line_number": 3, "line_type": "ayah", "page": 526},
-        {"line_number": 4, "line_type": "ayah", "page": 526}
+        # Page 1 content (Orphaned)
+        {'line_type': 'surah_name', 'page_number': 525, 'sura_number': 53},
+        {'line_type': 'basmallah', 'page_number': 525, 'sura_number': 53},
+        # Page 2 content
+        {'line_type': 'ayah', 'page_number': 526, 'sura_number': 53, 'ayah_number': 1},
+        {'line_type': 'ayah', 'page_number': 526, 'sura_number': 53, 'ayah_number': 2},
     ]
-    
-    scenes = group_mushaf_lines_into_scenes(lines, threshold=3, max_lines=15)
-    
-    # Deferred Page 525 (1 line) + Page 526 (4 lines) = 5 lines total
-    assert len(scenes) == 1
-    assert len(scenes[0]) == 5
 
-def test_short_surah_protection():
-    """If the total lines is less than threshold, it should still return 1 scene."""
-    lines = [
-        {"line_number": 15, "line_type": "surah_name", "page": 1},
-        {"line_number": 1, "line_type": "basmallah", "page": 2}
-    ]
-    scenes = group_mushaf_lines_into_scenes(lines, threshold=3)
-    assert len(scenes) == 1
-    assert len(scenes[0]) == 2
+    # We expect 'defer_if_no_ayah=True' to trigger the merge
+    scenes = group_mushaf_lines_into_scenes(lines, defer_if_no_ayah=True)
 
-def test_standard_threshold_met():
-    """If 3 lines are on the first page, they stay on the first page."""
+    # Should be 1 scene total, merging page 525 and 526
+    assert len(scenes) == 1
+    assert len(scenes[0]) == 4
+    assert scenes[0][0]['line_type'] == 'surah_name'
+    assert scenes[0][2]['line_type'] == 'ayah'
+
+
+def test_defer_only_if_zero_ayah_case_2_no_defer():
+    """
+    Case 2: Surah starting with Header + at least 1 Ayah on first page (must NOT defer).
+    Page 1: Header, Basmalah, Ayah 1
+    Page 2: Ayah 2
+    Expected:
+    Scene 1: Header, Basmalah, Ayah 1
+    Scene 2: Ayah 2
+    """
     lines = [
-        {"line_number": 13, "line_type": "ayah", "page": 1},
-        {"line_number": 14, "line_type": "ayah", "page": 1},
-        {"line_number": 15, "line_type": "ayah", "page": 1},
-        {"line_number": 1, "line_type": "ayah", "page": 2}
+        # Page 1 content (Normal)
+        {'line_type': 'surah_name', 'page_number': 100, 'sura_number': 2},
+        {'line_type': 'basmallah', 'page_number': 100, 'sura_number': 2},
+        {'line_type': 'ayah', 'page_number': 100, 'sura_number': 2, 'ayah_number': 1},
+        # Page 2 content
+        {'line_type': 'ayah', 'page_number': 101, 'sura_number': 2, 'ayah_number': 2},
     ]
-    scenes = group_mushaf_lines_into_scenes(lines, threshold=3)
+
+    scenes = group_mushaf_lines_into_scenes(lines, defer_if_no_ayah=True)
+
+    # Should remain 2 scenes
     assert len(scenes) == 2
+    # Scene 1 has 3 items
     assert len(scenes[0]) == 3
-    assert len(scenes[1]) == 1
-
-def test_group_scenes_orphaned_header_refinement():
-    """If defer_if_no_ayah is True, defer if 0 ayahs on first page regardless of threshold (within limits)."""
-    lines = [
-        {"line_number": 14, "line_type": "surah_name", "page": 1},
-        {"line_number": 15, "line_type": "basmallah", "page": 1},
-        {"line_number": 1, "line_type": "ayah", "page": 2}
-    ]
-    # Even if threshold was 2, we should still defer if defer_if_no_ayah=True
-    scenes = group_mushaf_lines_into_scenes(lines, threshold=2, defer_if_no_ayah=True)
-    assert len(scenes) == 1
-    assert len(scenes[0]) == 3
-
-def test_group_scenes_header_with_ayah_override():
-    """If defer_if_no_ayah is True, and there is 1 ayah, do NOT defer even if below threshold."""
-    lines = [
-        {"line_number": 14, "line_type": "surah_name", "page": 1},
-        {"line_number": 15, "line_type": "ayah", "page": 1},
-        {"line_number": 1, "line_type": "ayah", "page": 2}
-    ]
-    # Total lines on Page 1 = 2. Threshold = 3.
-    # Usually it would defer. But since it has an Ayah and defer_if_no_ayah=True, 
-    # it MUST NOT defer (render exactly as it appears).
-    scenes = group_mushaf_lines_into_scenes(lines, threshold=3, defer_if_no_ayah=True)
-    assert len(scenes) == 2
-    assert len(scenes[0]) == 2
+    # Scene 2 has 1 item
     assert len(scenes[1]) == 1
