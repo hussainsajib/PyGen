@@ -13,7 +13,7 @@ from db_ops.crud_language import fetch_localized_metadata
 from db.database import async_session
 from net_ops.download_file import download_mp3_temp, cleanup_temp_file
 from factories.single_clip import generate_background, generate_mushaf_page_clip, generate_reciter_name_clip, generate_surah_info_clip, generate_brand_clip
-from factories.video import get_resolution
+from factories.video import get_resolution, get_standard_basmallah_clip, make_silence
 from processes.video_configs import VIDEO_ENCODING_THREADS, COMMON, FONT_COLOR
 from processes.description import generate_details, generate_juz_details
 from processes.Classes.surah import Surah
