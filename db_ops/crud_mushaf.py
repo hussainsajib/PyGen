@@ -131,6 +131,7 @@ def get_mushaf_page_data(page_number: int):
         
         lines = cursor_15line.fetchall()
         
+        last_known_surah = None
         for line in lines:
             page_num, line_num, l_type, centered, start_id, end_id, surah_num = line
             
@@ -159,12 +160,22 @@ def get_mushaf_page_data(page_number: int):
                         "text": w[5]
                     })
             
+            # Propagate surah_number for filtering accuracy
+            resolved_surah = surah_num
+            if not resolved_surah or resolved_surah == '':
+                if words:
+                    resolved_surah = words[0]["surah"]
+                elif last_known_surah:
+                    resolved_surah = last_known_surah
+            
+            last_known_surah = resolved_surah
+
             lines_data.append({
                 "page_number": page_num,
                 "line_number": line_num,
                 "line_type": l_type,
                 "is_centered": bool(centered),
-                "surah_number": surah_num,
+                "surah_number": resolved_surah,
                 "words": words
             })
             
@@ -197,6 +208,7 @@ def get_mushaf_page_data_structured(page_number: int):
         
         lines = cursor_15line.fetchall()
         
+        last_known_surah = None
         for line in lines:
             page_num, line_num, l_type, centered, start_id, end_id, surah_num = line
             
@@ -205,23 +217,36 @@ def get_mushaf_page_data_structured(page_number: int):
                 continue
 
             concatenated_text = ""
-            if l_type == 'ayah' and start_id is not None and end_id is not None:
+            first_word_surah = None
+            if l_type == 'ayah' and start_id is not None and end_id is not None and start_id != '' and end_id != '':
                 cursor_wbw.execute("""
-                    SELECT text
+                    SELECT text, surah
                     FROM words
                     WHERE id BETWEEN ? AND ?
                     ORDER BY id
                 """, (start_id, end_id))
                 
                 words_raw = cursor_wbw.fetchall()
-                concatenated_text = " ".join([w[0] for w in words_raw])
+                if words_raw:
+                    concatenated_text = " ".join([w[0] for w in words_raw])
+                    first_word_surah = words_raw[0][1]
             
+            # Propagate surah_number
+            resolved_surah = surah_num
+            if not resolved_surah or resolved_surah == '':
+                if first_word_surah:
+                    resolved_surah = first_word_surah
+                elif last_known_surah:
+                    resolved_surah = last_known_surah
+            
+            last_known_surah = resolved_surah
+
             lines_data.append({
                 "page_number": page_num,
                 "line_number": line_num,
                 "line_type": l_type,
                 "is_centered": bool(centered),
-                "surah_number": surah_num,
+                "surah_number": resolved_surah,
                 "text": concatenated_text
             })
             
