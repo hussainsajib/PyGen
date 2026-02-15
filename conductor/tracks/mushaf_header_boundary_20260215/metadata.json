@@ -1,0 +1,8 @@
+{
+  "track_id": "mushaf_header_boundary_20260215",
+  "type": "bug",
+  "status": "new",
+  "created_at": "2026-02-15T16:26:00Z",
+  "updated_at": "2026-02-15T16:26:00Z",
+  "description": "i generated mushaf video of surah 53 it is showing only the surah header, nothing else. for any surah that has the header or basmalah in the preceding page, should have those move to the following page. this should by only for mushaf video and not for juz mushaf or anything else"
+}
