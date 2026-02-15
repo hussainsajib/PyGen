@@ -13,8 +13,8 @@ Implement the database persistence and UI management for the Basmallah silence d
 
 - [x] Task: Add `MUSHAF_BASMALLAH_SILENCE_DURATION` to the database initialization/seeds. 8913398
 - [x] Task: Update the configuration dashboard template (`templates/config.html`) to include the new silence duration setting. 76dca4e
-- [~] Task: Update the configuration save/load logic in `app.py` or the relevant controller to handle this setting.
-- [ ] Task: Conductor - User Manual Verification 'Configuration & UI Integration' (Protocol in workflow.md)
+- [x] Task: Update the configuration save/load logic in `app.py` or the relevant controller to handle this setting. e802847
+- [x] Task: Conductor - User Manual Verification 'Configuration & UI Integration' (Protocol in workflow.md) e802847
 
 ## Phase 3: Standalone Mushaf Video Integration
 Update the standard Surah video generation workflow to incorporate the automated injection.
