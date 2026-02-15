@@ -38,5 +38,5 @@ Extend the Juz generation workflow to handle sequential Basmallah injection at S
 Wrap up the track with final checks and documentation.
 
 - [x] Task: Verify overall system performance and memory usage during bulk generation. 24168b2
-- [~] Task: Update project documentation if any configuration constants were introduced.
-- [ ] Task: Conductor - User Manual Verification 'Finalization & Documentation' (Protocol in workflow.md)
+- [x] Task: Update project documentation if any configuration constants were introduced. 020b676
+- [x] Task: Conductor - User Manual Verification 'Finalization & Documentation' (Protocol in workflow.md) 020b676
