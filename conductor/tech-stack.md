@@ -9,6 +9,7 @@
 - **Primary Database:** PostgreSQL (Advanced relational database)
 - **ORM/Database Toolkit:** SQLAlchemy (Using `asyncpg` for asynchronous PostgreSQL access)
 - **Word-by-Word Databases:** SQLite (Local storage for synchronized word-level timestamps, Arabic text, and translations)
+- **Font Management:** Robust font resolution utility (`factories/font_utils.py`) supporting local and system-level font discovery across Windows, macOS, and Linux.
 - **Mushaf Structural Data:** Specialized SQLite databases (`qpc-v2-15-lines.db`) defining precise page/line/word boundaries for authentic rendering.
 - **Juz Metadata:** Dedicated SQLite database (`quran-metadata-juz.sqlite`) defining start/end boundaries and verse mappings for all 30 Juz.
 - **High-Fidelity Typography:** Support for Private Use Area (PUA) glyphs and page-specific TrueType fonts (QPC v2) for perfect Mushaf representation.
