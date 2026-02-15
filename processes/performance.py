@@ -22,10 +22,22 @@ def get_current_memory_mb() -> float:
     """Returns current process RSS memory usage in MB."""
     if os.name == 'nt':
         try:
-            process_handle = ctypes.windll.kernel32.GetCurrentProcess()
+            PROCESS_QUERY_INFORMATION = 0x0400
+            PROCESS_VM_READ = 0x0010
+            pid = os.getpid()
+            handle = ctypes.windll.kernel32.OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, False, pid)
+            if not handle:
+                return 0.0
+
             counters = PROCESS_MEMORY_COUNTERS()
-            ctypes.windll.psapi.GetProcessMemoryInfo(process_handle, ctypes.byref(counters), ctypes.sizeof(counters))
-            return counters.WorkingSetSize / (1024 * 1024)
+            counters.cb = ctypes.sizeof(PROCESS_MEMORY_COUNTERS)
+            
+            success = ctypes.windll.psapi.GetProcessMemoryInfo(handle, ctypes.byref(counters), counters.cb)
+            ctypes.windll.kernel32.CloseHandle(handle)
+            
+            if success:
+                return counters.WorkingSetSize / (1024 * 1024)
+            return 0.0
         except:
             return 0.0
     else:
