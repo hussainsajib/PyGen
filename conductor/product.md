@@ -49,6 +49,8 @@ PyGen is an automated video generation platform designed specifically for creati
             - **Multi-Backend Support:** Choice of high-performance rendering paths using FFmpeg (Piped), OpenCV, or PyAV.
             - **Optimized Pre-rendering:** Specialized caching strategy that pre-renders static overlays and highlight states, achieving up to 40x speed improvement over standard clip-based composition.
             - **Integrated Benchmarking:** Automated tracking of generation time and memory usage for side-by-side performance evaluation.
+            - **Seamless Distribution:** Fully connected to the social media distribution workflow, including automated metadata generation and upload triggers.
+        - **Terminal Export Logging:** Automated printing of relative disk paths for successfully generated video files directly to the terminal for improved developer visibility.
     - **Multi-Language Support:** Comprehensive support for generating videos in multiple languages (e.g., Bengali, English).
         - **Dynamic Translation Sourcing:** Automated selection of language-specific translation and WBW databases.
         - **Customizable Typography:** Per-language font configuration to ensure correct rendering of special characters (e.g., macron characters in transliterations).
