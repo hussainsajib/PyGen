@@ -1,0 +1,8 @@
+{
+  "track_id": "surah_53_orphan_header_fix_20260215",
+  "type": "bug",
+  "status": "new",
+  "created_at": "2026-02-15T16:59:00Z",
+  "updated_at": "2026-02-15T16:59:00Z",
+  "description": "Fix orphan header/basmalah page generation for Surah 53"
+}
