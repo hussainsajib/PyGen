@@ -1,0 +1,8 @@
+{
+  "track_id": "fix_reciter_name_rendering_20260215",
+  "type": "bug",
+  "status": "new",
+  "created_at": "2026-02-15T18:36:00Z",
+  "updated_at": "2026-02-15T18:36:00Z",
+  "description": "Fix rendering issue with reciter name in footer (letters not properly shown)"
+}
