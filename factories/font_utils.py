@@ -30,7 +30,7 @@ def resolve_font_path(font_name: str) -> str:
     potential_dirs = []
 
     if system == "Windows":
-        windir = os.environ.get("WINDIR", "C:\Windows")
+        windir = os.environ.get("WINDIR", r"C:\Windows")
         potential_dirs.append(os.path.join(windir, "Fonts"))
     elif system == "Darwin": # macOS
         potential_dirs.extend([
