@@ -4,8 +4,16 @@ from db.database import async_session
 import asyncio
 import logging
 import json
+import os
+from dotenv import load_dotenv
+from moviepy.config import change_settings
 from processes.processes import create_surah_video, manual_upload_to_youtube, manual_upload_to_facebook, create_wbw_video_job, create_mushaf_video_job, create_juz_video_job
 from fastapi.concurrency import run_in_threadpool
+
+load_dotenv()
+IMAGEMAGICK_BINARY = os.getenv("IMAGEMAGICK_BINARY")
+if IMAGEMAGICK_BINARY:
+    change_settings({"IMAGEMAGICK_BINARY": IMAGEMAGICK_BINARY})
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

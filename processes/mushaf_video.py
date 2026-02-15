@@ -2,6 +2,7 @@ import os
 import tempfile
 import anyio
 import numpy as np
+from fastapi.concurrency import run_in_threadpool
 from moviepy.editor import concatenate_videoclips, AudioFileClip, CompositeVideoClip, ColorClip, TextClip, concatenate_audioclips
 from db_ops.crud_surah import read_surah_data
 from db_ops.crud_reciters import get_reciter_by_key
@@ -619,49 +620,58 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
                     # For Juz, this is complex because headers might be at end of previous page
                     # The get_mushaf_page_data already includes them if they exist in the DB for that page.
                     
-                    # Generate Clip
-                    mushaf_clip = generate_mushaf_page_clip(chunk_for_rendering, page_num, is_short, chunk_duration_sec, background_input=background_path)
-                    
+                                            # Generate Clip
+                    mushaf_clip = await run_in_threadpool(
+                        generate_mushaf_page_clip, 
+                        chunk_for_rendering, page_num, is_short, chunk_duration_sec, background_input=background_path
+                    )
+
                     # Add Overlays
                     reciter_display_name = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name
                     # Juz Title instead of Surah Name
                     juz_display_name = f"Juz {juz_number}"
-                    
+
                     overlays = []
                     if config_manager.get("ENABLE_RECITER_INFO", "True") == "True":
-                        overlays.append(generate_reciter_name_clip(reciter_display_name, is_short, chunk_duration_sec))
+                        overlays.append(await run_in_threadpool(generate_reciter_name_clip, reciter_display_name, is_short, chunk_duration_sec))
                     if config_manager.get("ENABLE_SURAH_INFO", "True") == "True":
-                        overlays.append(generate_surah_info_clip(juz_display_name, 0, is_short, chunk_duration_sec, language=current_language))
+                        overlays.append(await run_in_threadpool(generate_surah_info_clip, juz_display_name, 0, is_short, chunk_duration_sec, language=current_language))
                     if config_manager.get("ENABLE_CHANNEL_INFO", "True") == "True":
-                        overlays.append(generate_brand_clip(brand_name, is_short, chunk_duration_sec))
-
+                        overlays.append(await run_in_threadpool(generate_brand_clip, brand_name, is_short, chunk_duration_sec))
+                    
                     # Progress Bar (Juz level)
                     start_ratio = float(chunk_start_ms) / float(total_audio_ms)
                     end_ratio = float(chunk_end_ms) / float(total_audio_ms)
-                    progress_bar_bg = ColorClip(size=(width, 5), color=(100, 100, 100)).set_opacity(0.3).set_duration(chunk_duration_sec).set_position(('center', height-5))
+                    progress_bar_bg = await run_in_threadpool(
+                        lambda: ColorClip(size=(width, 5), color=(100, 100, 100)).set_opacity(0.3).set_duration(chunk_duration_sec).set_position(('center', height-5))
+                    )
                     overlays.append(progress_bar_bg)
-                    
+
                     def get_progress_width(t, sr=start_ratio, er=end_ratio, dur=chunk_duration_sec):
                         if dur <= 0: return 1
                         p = sr + (er - sr) * (t / dur)
                         w = int(width * max(0.0, min(1.0, p)))
                         return max(1, w)
 
-                    progress_bar_fg = ColorClip(size=(width, 5), color=(0, 200, 0))
-                    progress_bar_fg = progress_bar_fg.resize(newsize=lambda t: (get_progress_width(t), 5))
-                    progress_bar_fg = progress_bar_fg.set_opacity(0.8).set_duration(chunk_duration_sec).set_position(('left', height-5))
+                    progress_bar_fg = await run_in_threadpool(
+                        lambda: ColorClip(size=(width, 5), color=(0, 200, 0)).resize(newsize=lambda t: (get_progress_width(t), 5)).set_opacity(0.8).set_duration(chunk_duration_sec).set_position(('left', height-5))
+                    )
                     overlays.append(progress_bar_fg)
 
-                    final_chunk_clip = CompositeVideoClip([mushaf_clip] + overlays, size=resolution).set_duration(chunk_duration_sec)
-                    
+                    final_chunk_clip = await run_in_threadpool(
+                        lambda: CompositeVideoClip([mushaf_clip] + overlays, size=resolution).set_duration(chunk_duration_sec)
+                    )
+
                     try:
                         audio_start = max(0.0, float(chunk_start_ms) / 1000.0)
                         audio_end = min(float(total_duration), float(chunk_end_ms) / 1000.0)
                         if float(audio_end) > float(audio_start):
-                            final_chunk_clip = final_chunk_clip.set_audio(full_audio.subclip(audio_start, audio_end))
+                            final_chunk_clip = await run_in_threadpool(
+                                lambda: final_chunk_clip.set_audio(full_audio.subclip(audio_start, audio_end))
+                            )
                     except:
                         pass
-                    
+
                     page_clips.append(final_chunk_clip)
                     global_chunk_idx += 1
                 except Exception as e:
@@ -675,14 +685,15 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
             for c in surah_clips: c.close()
             for tf in temp_files: cleanup_temp_file(tf)
             raise Exception(f"Failed to generate any page clips for Juz {juz_number}. Check alignment and timing data.")
-            
-        final_video = concatenate_videoclips(page_clips, method="compose")
+
+        final_video = await run_in_threadpool(concatenate_videoclips, page_clips, method="compose")
         filename = f"mushaf_juz_{juz_number}_{reciter_key.replace('.', '_')}.mp4"
         export_dir = "exported_data/shorts" if is_short else "exported_data/videos"
         os.makedirs(export_dir, exist_ok=True)
         video_path = os.path.join(export_dir, filename)
-        
-        final_video.write_videofile(
+
+        await run_in_threadpool(
+            final_video.write_videofile,
             video_path,
             fps=24,
             codec="libx264",
@@ -690,8 +701,7 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
             threads=VIDEO_ENCODING_THREADS,
             preset="ultrafast",
             logger="bar"
-        )
-        
+        )        
         # Cleanup clips to release file handles
         full_audio.close()
         if bsml_audio: bsml_audio.close()

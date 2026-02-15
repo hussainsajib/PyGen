@@ -30,4 +30,4 @@ Expose the page range parameters to the frontend and job queue.
 
 - [x] Task: Update the Juz video creation form in `templates/juz_video.html` to include optional "Start Page" and "End Page" inputs. [5671e11]
 - [x] Task: Update the `/juz-video` route and `create_juz_video_job` to pass these parameters to the engine. [5671e11]
-- [~] Task: Conductor - User Manual Verification 'UI & API Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'UI & API Integration' (Protocol in workflow.md)

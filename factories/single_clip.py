@@ -106,7 +106,10 @@ def get_pil_background(background_input: str, resolution: tuple):
         else:
             return Image.new('RGBA', resolution, BACKGROUND_RGB + (255,))
     else:
-        img = Image.open(background_input).convert('RGBA')
+        if not target_bg or not os.path.isfile(target_bg):
+            # Fallback if file missing or is a directory
+            return Image.new('RGBA', resolution, BACKGROUND_RGB + (255,))
+        img = Image.open(target_bg).convert('RGBA')
         
     # Resize and crop to fill
     img_aspect = img.width / img.height

@@ -371,6 +371,7 @@ async def create_juz_video_job(juz: int, reciter: str, is_short: bool = False,
                              start_page: int = None,
                              end_page: int = None):
     """Generates a Juz Mushaf-style video and optionally uploads it to YouTube."""
+    logger.info(f"Starting Juz video generation job for Juz {juz}, Reciter: {reciter}, Pages: {start_page}-{end_page}")
     video_details = await generate_juz_video(
         juz, 
         reciter, 
@@ -383,7 +384,10 @@ async def create_juz_video_job(juz: int, reciter: str, is_short: bool = False,
     )
     
     if not video_details:
+        logger.error(f"Failed to generate Juz video for Juz {juz}")
         raise Exception("Error generating Juz video")
+    
+    logger.info(f"Juz video generated successfully: {video_details['video']}")
     
     screenshot_path = await run_in_threadpool(extract_frame, video_path=video_details["video"])
     video_details["screenshot"] = screenshot_path
