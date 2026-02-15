@@ -1,6 +1,6 @@
 # Implementation Plan: Automated Basmallah Injection for Mushaf Videos
 
-## Phase 1: Core Audio Utilities & Shared Logic
+## Phase 1: Core Audio Utilities & Shared Logic [checkpoint: d78c610]
 Implement the foundational utilities for managing the standardized Basmallah audio and silence injection.
 
 - [x] Task: Write unit tests for Basmallah audio validation and silence generation in `tests/test_audio_utils.py`. 81db9e1
@@ -11,9 +11,9 @@ Implement the foundational utilities for managing the standardized Basmallah aud
 ## Phase 2: Configuration & UI Integration
 Implement the database persistence and UI management for the Basmallah silence duration.
 
-- [ ] Task: Add `MUSHAF_BASMALLAH_SILENCE_DURATION` to the database initialization/seeds.
-- [ ] Task: Update the configuration dashboard template (`templates/config.html`) to include the new silence duration setting.
-- [ ] Task: Update the configuration save/load logic in `app.py` or the relevant controller to handle this setting.
+- [x] Task: Add `MUSHAF_BASMALLAH_SILENCE_DURATION` to the database initialization/seeds. 8913398
+- [x] Task: Update the configuration dashboard template (`templates/config.html`) to include the new silence duration setting. 76dca4e
+- [~] Task: Update the configuration save/load logic in `app.py` or the relevant controller to handle this setting.
 - [ ] Task: Conductor - User Manual Verification 'Configuration & UI Integration' (Protocol in workflow.md)
 
 ## Phase 3: Standalone Mushaf Video Integration
