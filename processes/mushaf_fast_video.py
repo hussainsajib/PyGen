@@ -8,7 +8,7 @@ from factories.mushaf_opencv_engine import OpenCVEngine
 from factories.mushaf_pyav_engine import PyAVEngine
 from processes.performance import PerformanceMonitor
 from processes.mushaf_video import prepare_juz_data_package
-from db_ops.crud_mushaf import get_surah_page_range, get_mushaf_page_data, align_mushaf_lines_with_timestamps, get_juz_boundaries, align_mushaf_lines_with_juz_timestamps
+from db_ops.crud_mushaf import get_surah_page_range, get_mushaf_page_data, align_mushaf_lines_with_timestamps, get_juz_boundaries, align_mushaf_lines_with_juz_timestamps, group_mushaf_lines_into_scenes
 from db_ops.crud_reciters import get_reciter_by_key
 from db_ops.crud_surah import read_surah_data
 from db_ops.crud_language import fetch_localized_metadata
@@ -74,15 +74,20 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
             sorted_pages = list(range(start_page, end_page + 1))
             
             # Aligned Data (Flat for fast render)
-            # For simplicity in this experiment, we'll render page-by-page sequence
-            # but concatenate them into one long list of timestamps/pages
-            all_page_data = []
+            all_aligned_lines = []
             for p_num in sorted_pages:
                 p_data = get_mushaf_page_data(p_num)
                 # Filter for this surah
                 filtered = [l for l in p_data if l["surah_number"] == surah_number or (l["words"] and any(w["surah"] == surah_number for w in l["words"]))]
                 aligned = align_mushaf_lines_with_timestamps(filtered, wbw_timestamps)
-                all_page_data.append((p_num, aligned))
+                all_aligned_lines.extend(aligned)
+            
+            # Group into Scenes (Handling Page Boundaries)
+            scenes = group_mushaf_lines_into_scenes(all_aligned_lines, threshold=3, max_lines=15, defer_if_no_ayah=True)
+            all_page_data = []
+            for chunk in scenes:
+                p_num = chunk[0].get("page_number")
+                all_page_data.append((p_num, chunk))
                 
             reciter_display = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name
             surah_display = surah_p.bangla_name if current_language == "bengali" else surah_p.english_name
@@ -101,11 +106,18 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
             full_audio, all_wbw_timestamps, sorted_pages, offsets, temp_files, surah_clips, bsml_audio = prep_res
             total_duration = full_audio.duration
             
-            all_page_data = []
+            all_aligned_lines = []
             for p_num in sorted_pages:
                 p_data = get_mushaf_page_data(p_num)
                 aligned = align_mushaf_lines_with_juz_timestamps(p_data, all_wbw_timestamps)
-                all_page_data.append((p_num, aligned))
+                all_aligned_lines.extend(aligned)
+                
+            # Group into Scenes (Handling Page Boundaries)
+            scenes = group_mushaf_lines_into_scenes(all_aligned_lines, threshold=3, max_lines=15, defer_if_no_ayah=False)
+            all_page_data = []
+            for chunk in scenes:
+                p_num = chunk[0].get("page_number")
+                all_page_data.append((p_num, chunk))
                 
             reciter_display = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name
             surah_display = f"Juz {juz_number}"
