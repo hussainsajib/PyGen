@@ -70,7 +70,7 @@ class MushafRenderer:
         for line in self.lines:
             l_type = line.get("line_type", "ayah")
             words = line.get("words", [])
-            text = "".join([w["text"] for w in reversed(words)])
+            text = "".join([w["text"] for w in words])
             if l_type == "basmallah" and not text:
                 text = "\u00F3"
             if not text and l_type != "surah_name":
@@ -91,7 +91,7 @@ class MushafRenderer:
                 continue
             
             words = line.get("words", [])
-            text = "".join([w["text"] for w in reversed(words)])
+            text = "".join([w["text"] for w in words])
             font_size = calculate_mushaf_font_size(self.width, self.line_height, l_type, self.font_scale)
             
             cache_key = f"{self.font_paths['page']}_{font_size}"
