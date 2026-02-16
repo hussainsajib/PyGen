@@ -58,10 +58,15 @@ def test_generate_mushaf_page_clip_font_selection():
         args_sura = mock_render.call_args_list[1]
         assert "QCF_SurahHeader_COLOR-Regular.ttf" in args_sura[0][1]
         
-        # 3. Ayah (Standard Line)
-        args_ayah = mock_render.call_args_list[2]
-        # Text should be W2W1 (reversed)
-        assert args_ayah[0][0] == "W2W1"
+                    # 3. Ayah (Standard Line)
+        
+                    args_ayah = mock_render.call_args_list[2]
+        
+                    # Text should be 2W1W (W1W2 reversed entirely)
+        
+                    assert args_ayah[0][0] == "2W1W"
+        
+        
         assert "p5.ttf" in args_ayah[0][1]
 
 def test_generate_mushaf_page_clip_surah_fallback():
