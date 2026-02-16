@@ -204,12 +204,29 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                 
                 overlays = []
                 if config_manager.get("ENABLE_FOOTER", "True") == "True":
+                    from factories.single_clip import generate_footer_bar_clip
+                    footer_bar = generate_footer_bar_clip(width, height, chunk_duration_sec)
+                    # Position footer bar: centered horizontally, floating above bottom
+                    bar_y = height - footer_bar.h - 30 
+                    overlays.append(footer_bar.set_position(('center', bar_y)))
+                    
+                    text_y = bar_y + (footer_bar.h - 30) // 2
+                    
                     if config_manager.get("ENABLE_RECITER_INFO", "True") == "True":
-                        overlays.append(generate_reciter_name_clip(reciter_display_name, is_short, chunk_duration_sec))
+                        c = generate_reciter_name_clip(reciter_display_name, is_short, chunk_duration_sec)
+                        from processes.video_configs import get_reciter_info_position
+                        pos_x_ratio = get_reciter_info_position(is_short, c.w)[0]
+                        overlays.append(c.set_position((int(width * pos_x_ratio), text_y)))
+                        
                     if config_manager.get("ENABLE_SURAH_INFO", "True") == "True":
-                        overlays.append(generate_surah_info_clip(surah_display_name, 0, is_short, chunk_duration_sec, language=current_language))
+                        c = generate_surah_info_clip(surah_display_name, 0, is_short, chunk_duration_sec, language=current_language)
+                        overlays.append(c.set_position(('center', text_y)))
+                        
                     if config_manager.get("ENABLE_CHANNEL_INFO", "True") == "True":
-                        overlays.append(generate_brand_clip(brand_name, is_short, chunk_duration_sec))
+                        c = generate_brand_clip(brand_name, is_short, chunk_duration_sec)
+                        from processes.video_configs import get_channel_info_position
+                        pos_x_ratio = get_channel_info_position(is_short, c.w)[0]
+                        overlays.append(c.set_position((int(width * pos_x_ratio) - c.w, text_y)))
 
                 # Progress Bar
                 start_ratio = chunk_start_ms / total_audio_ms
@@ -526,16 +543,37 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
 
                 # Add Overlays
                 reciter_display_name = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name
-                juz_display_name = f"Juz {juz_number}"
+                
+                if current_language == "bengali":
+                    from factories.single_clip import e2b
+                    juz_display_name = f"পারা {e2b(str(juz_number))}"
+                else:
+                    juz_display_name = f"Juz {juz_number}"
 
                 overlays = []
                 if config_manager.get("ENABLE_FOOTER", "True") == "True":
+                    from factories.single_clip import generate_footer_bar_clip
+                    footer_bar = await run_in_threadpool(generate_footer_bar_clip, width, height, chunk_duration_sec)
+                    bar_y = height - footer_bar.h - 30 
+                    overlays.append(footer_bar.set_position(('center', bar_y)))
+                    
+                    text_y = bar_y + (footer_bar.h - 30) // 2
+                    
                     if config_manager.get("ENABLE_RECITER_INFO", "True") == "True":
-                        overlays.append(await run_in_threadpool(generate_reciter_name_clip, reciter_display_name, is_short, chunk_duration_sec))
+                        c = await run_in_threadpool(generate_reciter_name_clip, reciter_display_name, is_short, chunk_duration_sec)
+                        from processes.video_configs import get_reciter_info_position
+                        pos_x_ratio = get_reciter_info_position(is_short, c.w)[0]
+                        overlays.append(c.set_position((int(width * pos_x_ratio), text_y)))
+                        
                     if config_manager.get("ENABLE_SURAH_INFO", "True") == "True":
-                        overlays.append(await run_in_threadpool(generate_surah_info_clip, juz_display_name, 0, is_short, chunk_duration_sec, language=current_language))
+                        c = await run_in_threadpool(generate_surah_info_clip, juz_display_name, 0, is_short, chunk_duration_sec, language=current_language)
+                        overlays.append(c.set_position(('center', text_y)))
+                        
                     if config_manager.get("ENABLE_CHANNEL_INFO", "True") == "True":
-                        overlays.append(await run_in_threadpool(generate_brand_clip, brand_name, is_short, chunk_duration_sec))
+                        c = await run_in_threadpool(generate_brand_clip, brand_name, is_short, chunk_duration_sec)
+                        from processes.video_configs import get_channel_info_position
+                        pos_x_ratio = get_channel_info_position(is_short, c.w)[0]
+                        overlays.append(c.set_position((int(width * pos_x_ratio) - c.w, text_y)))
                 
                 # Progress Bar
                 start_ratio = float(chunk_start_ms) / float(total_audio_ms)

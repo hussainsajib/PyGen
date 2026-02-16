@@ -122,7 +122,11 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
                 all_page_data.append((p_num, chunk))
                 
             reciter_display = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name
-            surah_display = f"Juz {juz_number}"
+            if current_language == "bengali":
+                from factories.single_clip import e2b
+                surah_display = f"পারা {e2b(str(juz_number))}"
+            else:
+                surah_display = f"Juz {juz_number}"
 
         # 2. Sequence Rendering Phase
         # For the fast engines, we need a single renderer that can handle multiple pages
@@ -170,9 +174,15 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
                 
                 p_num, lines = target_page
                 if p_num not in self.renderers:
+                    # Determine surah number for this page
+                    s_num = None
+                    if lines:
+                        s_num = lines[0].get("surah_number")
+                        
                     self.renderers[p_num] = MushafRenderer(
                         p_num, self.is_short, lines, self.font_scale, self.background,
-                        self.r_name, self.s_name, self.b_name, self.total_ms
+                        self.r_name, self.s_name, self.b_name, self.total_ms,
+                        surah_number=s_num
                     )
                 return self.renderers[p_num].get_frame_at(timestamp_sec)
 
