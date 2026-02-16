@@ -63,5 +63,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 
 
-- [ ] **Track: Mushaf Video Layout Redesign (Side Header & Stacked Footer)**
+- [x] **Track: Mushaf Video Layout Redesign (Side Header & Stacked Footer)**
 *Link: [./tracks/mushaf_layout_redesign_20260215/](./tracks/mushaf_layout_redesign_20260215/)*
