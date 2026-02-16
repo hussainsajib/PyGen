@@ -61,5 +61,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Revert metadata layout to horizontal footer with background bar for Mushaf and Juz videos**
+- [x] **Track: Revert metadata layout to horizontal footer with background bar for Mushaf and Juz videos**
 *Link: [./tracks/mushaf_footer_revert_20260215/](./tracks/mushaf_footer_revert_20260215/)*
