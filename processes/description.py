@@ -111,89 +111,52 @@ def seconds_to_hms(seconds: float) -> str:
 
 
 def generate_juz_details(juz_number: int, reciter: Reciter, offsets: dict, is_short: bool = False, language: str = "bengali") -> str:
-
     """
-
     Generates localized title and description for a Juz video, including chapter markers.
-
     """
-
     filename = f"exported_data/details/juz_{juz_number}_{reciter.english_name.lower().replace(' ', '_')}{'_short' if is_short else ''}.txt"
-
     if os.path.isfile(filename):
-
         os.remove(filename)
-
         
-
     reciter_name = reciter.bangla_name if language == "bengali" else reciter.english_name
-
     
-
     # 1. Title
-
     title = f"Juz {juz_number} Full - {reciter_name}"
-
     if language == "bengali":
-
-        title = f"জুজ {e2b(str(juz_number))} সম্পূর্ণ - {reciter_name}"
-
+        title = f"কুরআন তিলাওয়াত - পারা {e2b(str(juz_number))} - {reciter_name}"
         
-
     # 2. Description
-
     with open(filename, "a", encoding="utf-8") as f:
-
         f.write(f"{title}\n\n")
-
         
-
         if language == "bengali":
-
-            f.write("সম্পূর্ণ জুজ তিলাওয়াত। কুরআনের এই সুন্দর তিলাওয়াতটি শুনুন এবং শেয়ার করুন।\n\n")
-
+            f.write(f"সম্পূর্ণ পারা {e2b(str(juz_number))} তিলাওয়াত। কুরআনের এই সুন্দর তিলাওয়াতটি শুনুন এবং শেয়ার করুন।\n\n")
         else:
-
             f.write("Full Juz Recitation. Listen to this beautiful Quran recitation and share.\n\n")
-
             
-
         # Chapter Markers
-
         f.write("Chapters:\n")
-
         # Sort surahs in the Juz by their start offset
-
         sorted_surahs = sorted(offsets.items(), key=lambda x: x[1])
-
         for surah_num, offset_sec in sorted_surahs:
-
             s_obj = Surah(surah_num)
-
             s_name = s_obj.bangla_name if language == "bengali" else s_obj.english_name
-
             f.write(f"{seconds_to_hms(offset_sec)} Surah {s_name}\n")
-
         f.write("\n")
-
         
-
         f.write("Subscribe for more Quran reminders: @TaqwaBangla\n")
-
         f.write("Social Links: https://www.facebook.com/profile.php?id=61570927757129\n\n")
-
         
-
-        f.write(f"#Juz{juz_number} #FullJuz #Quran #Recitation #TaqwaBangla #Islam\n\n")
-
+        if language == "bengali":
+            f.write(f"#Para{juz_number} #FullPara #Quran #Recitation #TaqwaBangla #Islam\n\n")
+        else:
+            f.write(f"#Juz{juz_number} #FullJuz #Quran #Recitation #TaqwaBangla #Islam\n\n")
         
-
         # Tags
-
-        tags = ["Quran", "Islam", "Islamic", "Quran Tilawat", "Taqwa Bangla", reciter_name, f"Juz {juz_number}"]
-
+        if language == "bengali":
+            tags = ["Quran", "Islam", "Islamic", "Quran Tilawat", "Taqwa Bangla", reciter_name, f"পারা {e2b(str(juz_number))}"]
+        else:
+            tags = ["Quran", "Islam", "Islamic", "Quran Tilawat", "Taqwa Bangla", reciter_name, f"Juz {juz_number}"]
         f.write("TAGS: " + ", ".join(tags))
-
         
-
     return filename
