@@ -44,6 +44,8 @@ PyGen is an automated video generation platform designed specifically for creati
         - **Long-Form Juz Generation:** Automated workflow for generating full-Juz Mushaf videos.
             - **Intelligent Boundary Detection:** Automatic retrieval of Juz start/end points from a dedicated SQLite metadata database.
             - **Continuous Multi-Surah Rendering:** Specialized paging logic that maintains a seamless 15-line Mushaf flow across Surah transitions.
+            - **Enhanced Bengali Localization:** For Juz videos, the "Juz" label is localized to "পারা" (Para) in the video footer and metadata, using Bengali digits for the number.
+            - **Standardized Bengali Metadata:** Automated generation of localized titles and descriptions for YouTube/Facebook following the format: `কুরআন তিলাওয়াত - পারা [Bengali Number] - [Bengali Reciter Name]`.
             - **Dynamic Audio Assembly:** On-the-fly concatenation of Surah-level audio with automatic Basmallah injection and Surah 9 silence gap handling.
             - **Synchronized Timestamp Mapping:** Precision re-mapping of word-level timestamps relative to the continuous Juz audio stream.
             - **Automated YouTube Chapters:** Automatic generation of clickable Surah-based chapter markers in video descriptions.
