@@ -230,7 +230,7 @@ def pre_render_static_page(resolution: tuple, background_input: str, renderable_
         
         # Determine text
         words = line.get("words", [])
-        text = "".join([w["text"] for w in words])
+        text = "".join([w["text"] for w in reversed(words)])
         
         font_path = font_paths.get("page")
         if l_type == "basmallah":
@@ -631,7 +631,7 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
     for line in lines:
         l_type = line.get("line_type", "ayah")
         words = line.get("words", [])
-        text = "".join([w["text"] for w in words])
+        text = "".join([w["text"] for w in reversed(words)])
         if l_type == "basmallah" and not text:
             text = "\u00F3"
         if not text and l_type != "surah_name":
@@ -735,7 +735,7 @@ def generate_mushaf_page_clip(lines: list, page_number: int, is_short: bool, dur
                         # Since we flattened it, we must re-calculate or approximate.
                         # For consistency, we'll re-calculate width once per highlighted line
                         words = line.get("words", [])
-                        text = "".join([w["text"] for w in words])
+                        text = "".join([w["text"] for w in reversed(words)])
                         font_size = calculate_mushaf_font_size(width, line_height, l_type, font_scale)
                         
                         # Use PIL to get text width accurately

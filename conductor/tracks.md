@@ -61,5 +61,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Fix incorrect Arabic word ordering (LTR instead of RTL) in high-speed rendering engines.**
+- [x] **Track: Fix incorrect Arabic word ordering (LTR instead of RTL) in high-speed rendering engines.**
 *Link: [./tracks/arabic_word_ordering_fix_20260216/](./tracks/arabic_word_ordering_fix_20260216/)*
