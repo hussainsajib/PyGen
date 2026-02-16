@@ -44,5 +44,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Fix Pause Marking Positioning in Mushaf/Juz Videos**
+- [x] **Track: Fix Pause Marking Positioning in Mushaf/Juz Videos**
 *Link: [./tracks/fix_pause_marking_20260216/](./tracks/fix_pause_marking_20260216/)*
