@@ -1,0 +1,8 @@
+{
+  "track_id": "mushaf_background_dimming_20260215",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-16T07:54:00Z",
+  "updated_at": "2026-02-16T07:54:00Z",
+  "description": "Configurable background dimming and footer cleanup for Mushaf videos"
+}
