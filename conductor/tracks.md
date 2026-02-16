@@ -57,9 +57,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Automated Basmallah Injection for Mushaf Videos**
 
 *Link: [./tracks/mushaf_basmallah_injection_20260214/](./tracks/mushaf_basmallah_injection_20260214/)*
-
-
----
-
-- [x] **Track: Configurable background dimming and footer cleanup for Mushaf videos**
-*Link: [./tracks/mushaf_background_dimming_20260215/](./tracks/mushaf_background_dimming_20260215/)*
