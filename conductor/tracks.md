@@ -61,5 +61,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Automated Basmallah Injection for Juz Mushaf Videos**
+- [x] **Track: Automated Basmallah Injection for Juz Mushaf Videos**
 *Link: [./tracks/juz_basmallah_injection_20260215/](./tracks/juz_basmallah_injection_20260215/)*
