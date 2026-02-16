@@ -57,3 +57,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Automated Basmallah Injection for Mushaf Videos**
 
 *Link: [./tracks/mushaf_basmallah_injection_20260214/](./tracks/mushaf_basmallah_injection_20260214/)*
+
+
+---
+
+- [ ] **Track: Add 5-second intro and ending screens to Mushaf and Juz Mushaf videos with localized Bengali metadata and branding.**
+*Link: [./tracks/mushaf_intro_ending_20260216/](./tracks/mushaf_intro_ending_20260216/)*
