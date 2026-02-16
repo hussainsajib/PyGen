@@ -61,5 +61,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Fix Incorrect Start Page for Juz Video Basmallah**
+- [x] **Track: Fix Incorrect Start Page for Juz Video Basmallah**
 *Link: [./tracks/fix_juz_start_page_20260216/](./tracks/fix_juz_start_page_20260216/)*

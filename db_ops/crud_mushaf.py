@@ -43,6 +43,36 @@ def get_surah_page_range(surah_number: int):
     finally:
         conn.close()
 
+def get_page_for_verse(surah: int, ayah: int, is_last: bool = False):
+    """
+    Returns the Mushaf page number for a specific Surah:Ayah coordinate.
+    If is_last=True, it uses the last word of the ayah, otherwise the first.
+    """
+    conn_wbw = sqlite3.connect(DB_WBW)
+    try:
+        cursor_wbw = conn_wbw.cursor()
+        if is_last:
+            cursor_wbw.execute("SELECT MAX(id) FROM words WHERE surah = ? AND ayah = ?", (surah, ayah))
+        else:
+            cursor_wbw.execute("SELECT MIN(id) FROM words WHERE surah = ? AND ayah = ?", (surah, ayah))
+        
+        res = cursor_wbw.fetchone()
+        if not res or res[0] is None:
+            return None
+        
+        word_id = res[0]
+    finally:
+        conn_wbw.close()
+    
+    conn_15line = sqlite3.connect(DB_15_LINES)
+    try:
+        cursor_15line = conn_15line.cursor()
+        cursor_15line.execute("SELECT page_number FROM pages WHERE first_word_id <= ? AND last_word_id >= ? LIMIT 1", (word_id, word_id))
+        res_page = cursor_15line.fetchone()
+        return res_page[0] if res_page else None
+    finally:
+        conn_15line.close()
+
 def get_juz_boundaries(juz_number: int):
     """
     Retrieves start and end boundaries for a Juz from the metadata database.
@@ -60,10 +90,9 @@ def get_juz_boundaries(juz_number: int):
             last_v = row[1].split(":")
             mapping = json.loads(row[2])
             
-            # Derive page range
-            surahs = sorted([int(s) for s in mapping.keys()])
-            start_p = get_surah_page_range(surahs[0])[0]
-            end_p = get_surah_page_range(surahs[-1])[1]
+            # Derive page range using the specific start and end verses
+            start_p = get_page_for_verse(int(first_v[0]), int(first_v[1]))
+            end_p = get_page_for_verse(int(last_v[0]), int(last_v[1]), is_last=True)
             
             return {
                 "start_surah": int(first_v[0]),
