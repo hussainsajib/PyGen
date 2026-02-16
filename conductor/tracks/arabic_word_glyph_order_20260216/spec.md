@@ -1,22 +1,21 @@
-# Specification: Correct Arabic Word and Glyph Ordering in Fast Rendering Engines
+# Specification: Fix Arabic Word Ordering in Fast Rendering Engines
 
 ## Overview
-This track addresses a rendering bug in the high-speed "Fast" video engines (FFmpeg, OpenCV, PyAV) where Arabic words and their associated glyphs (like pause signs) are being displayed in the incorrect visual order. Specifically, for Surah 2, Ayah 5, Word 5, the pause sign appears to the right of the word (as if rendered Left-to-Right), whereas in Arabic (Right-to-Left), the pause sign should appear to the left of the word.
+This track addresses a regression in the high-speed "Fast" video engines (FFmpeg, OpenCV, PyAV) where Arabic words in a Mushaf line are currently being arranged in the incorrect visual order (appearing Left-to-Right instead of Right-to-Left). The fix involves ensuring that the word sequence retrieved from the database is properly processed using a Bi-Directional (Bidi) algorithm before rendering to maintain authentic RTL flow.
 
 ## Requirements
 
 ### 1. Functional Requirements
-- **Correct RTL Word Ordering:** Ensure that all words within a Mushaf line are arranged from right to left across the screen.
-- **Correct Internal Glyph Ordering:** Ensure that within a single word entry, the word itself and any associated signs (pause signs, tajweed marks) are rendered in the correct logical and visual sequence for Arabic script.
-- **Engine Parity:** The "Fast" rendering backends must match the correct visual output of the standard MoviePy engine.
+- **Correct RTL Word Sequence:** In every Mushaf line, words must be ordered from Right to Left across the screen.
+- **Authentic Word Placement:** The first word of an Ayah line (or the start of a multi-surah line) must be positioned at the far right of the line's content area.
+- **Engine Parity:** The visual output of the Fast engines must match the correct RTL arrangement used in the standard MoviePy engine and the web Mushaf viewer.
 
 ### 2. Technical Requirements
-- **Investigation:** Analyze `factories/mushaf_fast_render.py` and its interaction with `PIL.ImageDraw`.
-- **Bidi Support:** Implement or fix the use of Bi-Directional (Bidi) algorithm processing for Arabic text strings before they are passed to the rendering library.
-- **Reshaping:** Verify if `arabic_reshaper` is required to ensure glyphs connect and position themselves correctly when combined.
-- **Font Integration:** Ensure the QPC v2 fonts are being used correctly by the Bidi/Reshaping logic to preserve custom glyph positions.
+- **Bidi Integration:** Implement or correct the use of `python-bidi` (or a similar Bidi algorithm) in `factories/mushaf_fast_render.py` to reorder the text strings logically before they are passed to Pillow's `ImageDraw.text`.
+- **String Assembly Fix:** Review and refactor the word joining logic in `MushafRenderer` to ensure strings are joined in the correct logical sequence expected by the Bidi algorithm and QPC v2 fonts.
+- **Font-Aware Rendering:** Ensure that PUA (Private Use Area) glyphs and page-specific fonts continue to display correctly after Bidi reordering.
 
 ## Success Criteria
-- [ ] Surah 2, Ayah 5, Word 5 displays the pause sign to the left of the word.
-- [ ] Entire Ayah lines in Juz/Mushaf videos follow the correct RTL flow (start of ayah on the right).
-- [ ] Text rendering remains high-fidelity without broken glyph connections.
+- [ ] Every line in a Juz or standalone Mushaf video follows the correct RTL word flow.
+- [ ] Words with associated signs (e.g., pause signs) maintain their correct relative positions.
+- [ ] Visual verification confirms that Word 1 of a line is on the right side.
