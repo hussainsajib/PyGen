@@ -63,5 +63,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 
 
-- [ ] **Track: Fix rendering issue with reciter name in footer (letters not properly shown)**
+- [x] **Track: Fix rendering issue with reciter name in footer (letters not properly shown)**
 *Link: [./tracks/fix_reciter_name_rendering_20260215/](./tracks/fix_reciter_name_rendering_20260215/)*

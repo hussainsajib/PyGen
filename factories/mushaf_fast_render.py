@@ -156,41 +156,52 @@ class MushafRenderer:
         return self._footer_font
 
     def _draw_overlays(self, draw: ImageDraw.Draw):
-        """Draws footer info (Reciter, Surah, Brand) using PIL."""
+        """Draws footer info (Reciter, Surah, Brand) using complex text rendering."""
         if config_manager.get("ENABLE_FOOTER", "True") != "True":
             return
 
-        font = self._get_footer_font()
+        from factories.complex_text import render_complex_text_to_pil
+        from processes.video_configs import FOOTER_CONFIG
+        
+        font_path = self.font_paths["footer"]
+        font_size = FOOTER_CONFIG.get("fontsize", 30)
+        
         color = FONT_COLOR
         if isinstance(color, str) and color.startswith("rgb("):
             color = hex_to_rgb("#C9B59C")
+        # Ensure color is a string for MoviePy if it's a tuple? 
+        # complex_text.py handles tuple conversion.
+        
+        # Helper to render and paste
+        def draw_complex_text(text, position_func):
+            try:
+                # Render text to image
+                img = render_complex_text_to_pil(text, font_path, font_size, color)
+                w, h = img.size
+                
+                # Calculate position
+                pos = position_func(self.is_short, w)
+                x, y = int(pos[0] * self.width), int(pos[1] * self.height)
+                
+                # Paste onto static base (using alpha composite for transparency)
+                self.static_base.paste(img, (x, y), img)
+            except Exception as e:
+                print(f"[ERROR] Failed to draw overlay text '{text}': {e}")
 
         # Reciter Name
         if self.reciter_name and config_manager.get("ENABLE_RECITER_INFO", "True") == "True":
-            bbox = draw.textbbox((0, 0), self.reciter_name, font=font)
-            w = bbox[2] - bbox[0]
             from processes.video_configs import get_reciter_info_position
-            pos = get_reciter_info_position(self.is_short, w)
-            x, y = int(pos[0] * self.width), int(pos[1] * self.height)
-            draw.text((x, y), self.reciter_name, font=font, fill=color)
+            draw_complex_text(self.reciter_name, get_reciter_info_position)
 
         # Surah Name
         if self.surah_name and config_manager.get("ENABLE_SURAH_INFO", "True") == "True":
-            bbox = draw.textbbox((0, 0), self.surah_name, font=font)
-            w = bbox[2] - bbox[0]
             from processes.video_configs import get_surah_info_position
-            pos = get_surah_info_position(self.is_short, w)
-            x, y = int(pos[0] * self.width), int(pos[1] * self.height)
-            draw.text((x, y), self.surah_name, font=font, fill=color)
+            draw_complex_text(self.surah_name, get_surah_info_position)
 
         # Brand Name
         if self.brand_name and config_manager.get("ENABLE_CHANNEL_INFO", "True") == "True":
-            bbox = draw.textbbox((0, 0), self.brand_name, font=font)
-            w = bbox[2] - bbox[0]
             from processes.video_configs import get_channel_info_position
-            pos = get_channel_info_position(self.is_short, w)
-            x, y = int(pos[0] * self.width), int(pos[1] * self.height)
-            draw.text((x, y), self.brand_name, font=font, fill=color)
+            draw_complex_text(self.brand_name, get_channel_info_position)
 
     def _draw_progress_bar_numpy(self, frame_np: np.ndarray, timestamp_ms: float):
         """Draws the progress bar directly onto the numpy array."""
