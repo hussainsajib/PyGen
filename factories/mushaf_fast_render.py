@@ -28,7 +28,7 @@ def hex_to_rgb(hex_color: str):
 class MushafRenderer:
     def __init__(self, page_number: int, is_short: bool, lines: list, font_scale: float = 0.8, background_input: str = None, 
                  reciter_name: str = None, surah_name: str = None, brand_name: str = None, total_duration_ms: float = 0,
-                 surah_number: int = None):
+                 surah_number: int = None, render_mode: str = "main"):
         self.page_number = page_number
         self.is_short = is_short
         self.lines = lines
@@ -42,6 +42,7 @@ class MushafRenderer:
         self.brand_name = brand_name
         self.total_duration_ms = total_duration_ms
         self.surah_number = surah_number
+        self.render_mode = render_mode # "main", "intro", "ending"
         
         self.font_paths = {
             "page": os.path.abspath(os.path.join("QPC_V2_Font.ttf", f"p{page_number}.ttf")),
@@ -60,7 +61,8 @@ class MushafRenderer:
         self._footer_font = None 
         self._pre_rendered_frames = {} 
         
-        self._prepare_renderable_lines()
+        if self.render_mode == "main":
+            self._prepare_renderable_lines()
 
     def _prepare_renderable_lines(self):
         from factories.single_clip import calculate_mushaf_font_size
@@ -112,35 +114,71 @@ class MushafRenderer:
 
     def prepare_static_base(self):
         """Renders the background, border, and static text once."""
-        from factories.single_clip import pre_render_static_page
-        self.static_base = pre_render_static_page(
-            resolution=self.resolution,
-            background_input=self.background_input,
-            renderable_lines=self.renderable_lines,
-            line_positions=self.line_positions,
-            line_height=self.line_height,
-            font_paths=self.font_paths,
-            font_scale=self.font_scale
-        )
-        
-        # Pre-render overlays onto static_base (RGBA)
-        draw = ImageDraw.Draw(self.static_base, 'RGBA')
-        self._draw_overlays(draw)
+        if self.render_mode == "main":
+            from factories.single_clip import pre_render_static_page
+            self.static_base = pre_render_static_page(
+                resolution=self.resolution,
+                background_input=self.background_input,
+                renderable_lines=self.renderable_lines,
+                line_positions=self.line_positions,
+                line_height=self.line_height,
+                font_paths=self.font_paths,
+                font_scale=self.font_scale
+            )
+            
+            # Pre-render overlays onto static_base (RGBA)
+            draw = ImageDraw.Draw(self.static_base, 'RGBA')
+            self._draw_overlays(draw)
+        else:
+            # Intro or Ending mode
+            from factories.single_clip import get_pil_background, draw_mushaf_border_onto
+            self.static_base = get_pil_background(self.background_input, self.resolution)
+            
+            # Apply Dimming
+            try:
+                dimming_opacity = float(config_manager.get("MUSHAF_BACKGROUND_DIMMING", "0.0"))
+            except (ValueError, TypeError):
+                dimming_opacity = 0.0
+                
+            if dimming_opacity > 0:
+                overlay = Image.new('RGBA', self.resolution, (0, 0, 0, int(dimming_opacity * 255)))
+                self.static_base.alpha_composite(overlay)
+                
+            # Draw Border
+            top_margin = self.height * 0.1
+            bottom_margin = self.height * 0.1
+            usable_height = self.height - top_margin - bottom_margin
+            bg_mode = config_manager.get("MUSHAF_PAGE_BACKGROUND_MODE", "Solid")
+            bg_color = config_manager.get("MUSHAF_PAGE_COLOR", "#FFFDF5")
+            try:
+                opacity_percent = int(config_manager.get("MUSHAF_PAGE_OPACITY", "90"))
+            except (ValueError, TypeError):
+                opacity_percent = 90
+            bg_opacity = int((opacity_percent / 100) * 255)
+            
+            self.static_base = draw_mushaf_border_onto(self.static_base, usable_height, bg_mode, bg_color, bg_opacity)
+            
+            draw = ImageDraw.Draw(self.static_base, 'RGBA')
+            if self.render_mode == "intro":
+                self._draw_intro_screen(draw)
+            elif self.render_mode == "ending":
+                self._draw_ending_screen(draw)
         
         # Base frame (no highlights) - convert to RGB numpy
         self._pre_rendered_frames[-1] = np.array(self.static_base.convert('RGB'))
         
-        # Highlighted frames
-        highlight_color = (255, 255, 0, 25) # Yellow with 10% alpha
-        for i in self.highlight_rects:
-            # Create a transparent layer for the highlight
-            overlay = Image.new('RGBA', self.static_base.size, (0, 0, 0, 0))
-            draw_overlay = ImageDraw.Draw(overlay)
-            draw_overlay.rectangle(self.highlight_rects[i], fill=highlight_color)
-            
-            # Composite the highlight overlay onto the static base
-            combined = Image.alpha_composite(self.static_base, overlay)
-            self._pre_rendered_frames[i] = np.array(combined.convert('RGB'))
+        # Highlighted frames (only relevant for main mode)
+        if self.render_mode == "main":
+            highlight_color = (255, 255, 0, 25) # Yellow with 10% alpha
+            for i in self.highlight_rects:
+                # Create a transparent layer for the highlight
+                overlay = Image.new('RGBA', self.static_base.size, (0, 0, 0, 0))
+                draw_overlay = ImageDraw.Draw(overlay)
+                draw_overlay.rectangle(self.highlight_rects[i], fill=highlight_color)
+                
+                # Composite the highlight overlay onto the static base
+                combined = Image.alpha_composite(self.static_base, overlay)
+                self._pre_rendered_frames[i] = np.array(combined.convert('RGB'))
 
     def _get_footer_font(self):
         if self._footer_font:
@@ -156,6 +194,66 @@ class MushafRenderer:
         except:
             self._footer_font = ImageFont.load_default()
         return self._footer_font
+
+    def _draw_intro_screen(self, draw: ImageDraw.Draw):
+        """Draws the intro screen with Surah/Para name and reciter."""
+        from factories.complex_text import render_complex_text_to_pil
+        
+        font_path = self.font_paths["footer"]
+        color = FONT_COLOR
+        if isinstance(color, str) and color.startswith("rgb("):
+            color = hex_to_rgb("#C9B59C")
+            
+        title_size = 80
+        sub_size = 40
+        
+        # Title: Surah or Para Name
+        title_text = self.surah_name or "Quran"
+        title_img = render_complex_text_to_pil(title_text, font_path, title_size, color)
+        
+        # Sub-heading: Reciter Name
+        sub_text = self.reciter_name or ""
+        sub_img = render_complex_text_to_pil(sub_text, font_path, sub_size, color)
+        
+        # Position
+        total_h = title_img.height + 20 + sub_img.height
+        start_y = (self.height - total_h) // 2
+        
+        x_title = (self.width - title_img.width) // 2
+        self.static_base.paste(title_img, (x_title, start_y), title_img)
+        
+        x_sub = (self.width - sub_img.width) // 2
+        self.static_base.paste(sub_img, (x_sub, start_y + title_img.height + 20), sub_img)
+
+    def _draw_ending_screen(self, draw: ImageDraw.Draw):
+        """Draws the ending screen with branding and subscribe CTA."""
+        from factories.complex_text import render_complex_text_to_pil
+        
+        font_path = self.font_paths["footer"]
+        color = FONT_COLOR
+        if isinstance(color, str) and color.startswith("rgb("):
+            color = hex_to_rgb("#C9B59C")
+            
+        brand_size = 70
+        cta_size = 35
+        
+        # Brand: Taqwa Bangla
+        brand_text = "তাকওয়া বাংলা"
+        brand_img = render_complex_text_to_pil(brand_text, font_path, brand_size, color)
+        
+        # CTA: Subscribe
+        cta_text = "চ্যানেলটি সাবস্ক্রাইব করুন"
+        cta_img = render_complex_text_to_pil(cta_text, font_path, cta_size, color)
+        
+        # Position
+        total_h = brand_img.height + 25 + cta_img.height
+        start_y = (self.height - total_h) // 2
+        
+        x_brand = (self.width - brand_img.width) // 2
+        self.static_base.paste(brand_img, (x_brand, start_y), brand_img)
+        
+        x_cta = (self.width - cta_img.width) // 2
+        self.static_base.paste(cta_img, (x_cta, start_y + brand_img.height + 25), cta_img)
 
     def _draw_overlays(self, draw: ImageDraw.Draw):
         """Draws horizontal footer with a semi-transparent background bar."""

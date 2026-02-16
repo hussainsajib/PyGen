@@ -61,5 +61,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Add 5-second intro and ending screens to Mushaf and Juz Mushaf videos with localized Bengali metadata and branding.**
+- [x] **Track: Add 5-second intro and ending screens to Mushaf and Juz Mushaf videos with localized Bengali metadata and branding.**
 *Link: [./tracks/mushaf_intro_ending_20260216/](./tracks/mushaf_intro_ending_20260216/)*

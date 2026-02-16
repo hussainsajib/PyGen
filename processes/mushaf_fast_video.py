@@ -21,7 +21,7 @@ from moviepy.editor import AudioFileClip, concatenate_audioclips
 from config_manager import config_manager
 from processes.description import generate_details, generate_juz_details
 
-async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type: str, is_short: bool = False, background_path: str = None, custom_title: str = None, is_juz: bool = False):
+async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type: str, is_short: bool = False, background_path: str = None, custom_title: str = None, is_juz: bool = False, lines_per_page: int = 15, start_page: int = None, end_page: int = None):
     """
     Orchestrates high-speed Mushaf video generation using the specified backend engine.
     """
@@ -70,8 +70,8 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
                     pass
             
             # Paging
-            start_page, end_page = get_surah_page_range(surah_number)
-            sorted_pages = list(range(start_page, end_page + 1))
+            s_page, e_page = get_surah_page_range(surah_number)
+            sorted_pages = list(range(s_page, e_page + 1))
             
             # Aligned Data (Flat for fast render)
             all_aligned_lines = []
@@ -83,13 +83,28 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
                 all_aligned_lines.extend(aligned)
             
             # Group into Scenes (Handling Page Boundaries)
-            scenes = group_mushaf_lines_into_scenes(all_aligned_lines, threshold=3, max_lines=15, defer_if_no_ayah=True)
+            scenes = group_mushaf_lines_into_scenes(all_aligned_lines, threshold=3, max_lines=lines_per_page, defer_if_no_ayah=True)
+            
+            # Shift main recitation timestamps by 5 seconds for intro
+            for chunk in scenes:
+                for line in chunk:
+                    if line.get("start_ms") is not None:
+                        line["start_ms"] += 5000
+                    if line.get("end_ms") is not None:
+                        line["end_ms"] += 5000
+
             all_page_data = []
+            # Prepend Intro
+            all_page_data.append((0, [], "intro"))
+            
             for chunk in scenes:
                 # Use first Ayah's page number if available to ensure correct font loading
                 first_ayah = next((l for l in chunk if l.get("line_type") == "ayah"), None)
                 p_num = first_ayah.get("page_number") if first_ayah else chunk[0].get("page_number")
-                all_page_data.append((p_num, chunk))
+                all_page_data.append((p_num, chunk, "main"))
+            
+            # Append Ending
+            all_page_data.append((0, [], "ending"))
                 
             reciter_display = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name
             surah_display = surah_p.bangla_name if current_language == "bengali" else surah_p.english_name
@@ -105,9 +120,18 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
             reciter_p = Reciter(reciter_key)
             
             prep_res = await prepare_juz_data_package(juz_number, reciter_db_obj, boundaries)
-            full_audio, all_wbw_timestamps, sorted_pages, offsets, temp_files, surah_clips, bsml_audio = prep_res
-            total_duration = full_audio.duration
+            full_audio, all_wbw_timestamps, sorted_pages, offsets, temp_files, surah_clips, _ = prep_res
             
+            # Shift timestamps in all_wbw_timestamps for intro
+            for key in all_wbw_timestamps:
+                for seg in all_wbw_timestamps[key]:
+                    seg[1] += 5000
+                    seg[2] += 5000
+
+            # Override sorted_pages if start/end provided
+            if start_page is not None and end_page is not None:
+                sorted_pages = [p for p in sorted_pages if start_page <= p <= end_page]
+
             all_aligned_lines = []
             for p_num in sorted_pages:
                 p_data = get_mushaf_page_data(p_num)
@@ -115,11 +139,18 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
                 all_aligned_lines.extend(aligned)
                 
             # Group into Scenes (Handling Page Boundaries)
-            scenes = group_mushaf_lines_into_scenes(all_aligned_lines, threshold=3, max_lines=15, defer_if_no_ayah=False)
+            scenes = group_mushaf_lines_into_scenes(all_aligned_lines, threshold=3, max_lines=lines_per_page, defer_if_no_ayah=False)
+            
             all_page_data = []
+            # Prepend Intro
+            all_page_data.append((0, [], "intro"))
+            
             for chunk in scenes:
                 p_num = chunk[0].get("page_number")
-                all_page_data.append((p_num, chunk))
+                all_page_data.append((p_num, chunk, "main"))
+            
+            # Append Ending
+            all_page_data.append((0, [], "ending"))
                 
             reciter_display = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name
             if current_language == "bengali":
@@ -129,8 +160,11 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
                 surah_display = f"Juz {juz_number}"
 
         # 2. Sequence Rendering Phase
-        # For the fast engines, we need a single renderer that can handle multiple pages
-        # or we switch renderers per page. Switching is easier.
+        # Prepend and append 5s silence to audio
+        intro_silence = make_silence(5.0)
+        ending_silence = make_silence(5.0)
+        full_audio = concatenate_audioclips([intro_silence, full_audio, ending_silence])
+        total_duration = full_audio.duration
         
         output_filename = f"fast_{engine_type}_{'juz' if is_juz else 'surah'}_{surah_number}_{reciter_key.replace('.', '_')}.mp4"
         export_dir = "exported_data/videos"
@@ -146,8 +180,8 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
         # We'll wrap the multiple renderers into a SequenceRenderer
         class SequenceRenderer:
             def __init__(self, page_data_list, is_short, font_scale, r_name, s_name, b_name, total_ms, background):
-                self.page_data_list = page_data_list
-                self.renderers = {}
+                self.page_data_list = page_data_list # List of (p_num, lines, mode)
+                self.renderers = {} # Key: (p_num, mode)
                 self.resolution = get_resolution(is_short)
                 self.is_short = is_short
                 self.font_scale = font_scale
@@ -159,32 +193,45 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
                 
             def get_frame_at(self, timestamp_sec):
                 ts_ms = timestamp_sec * 1000
-                # Find which page this timestamp belongs to
-                # For simplicity, we find the first page where any line's start_ms <= ts_ms <= end_ms
-                # If not found, use the first page that doesn't have timestamps but covers the gap
-                target_page = self.page_data_list[0]
-                for p_num, lines in self.page_data_list:
-                    valid_times = [l for l in lines if l.get("start_ms") is not None]
-                    if valid_times:
-                        if valid_times[0]["start_ms"] <= ts_ms <= valid_times[-1]["end_ms"]:
-                            target_page = (p_num, lines)
-                            break
-                    # Handle gaps between pages
-                    # This is naive but works for linear flow
                 
-                p_num, lines = target_page
-                if p_num not in self.renderers:
+                # Determine which page/mode this timestamp belongs to
+                target_data = self.page_data_list[0] # Default to intro
+                
+                if timestamp_sec < 5.0:
+                    target_data = self.page_data_list[0]
+                elif timestamp_sec > (self.total_ms / 1000.0) - 5.0:
+                    target_data = self.page_data_list[-1]
+                else:
+                    # Main content
+                    for item in self.page_data_list:
+                        p_num, lines, mode = item
+                        if mode == "main":
+                            # Find the first scene that contains this timestamp
+                            # Standard alignment ensures lines have absolute global timestamps
+                            valid_starts = [l["start_ms"] for l in lines if l.get("start_ms") is not None]
+                            if valid_starts:
+                                # We use a generous window for main content scenes
+                                # This is slightly fuzzy to handle gaps
+                                if valid_starts[0] <= ts_ms:
+                                    target_data = item
+                                    # Don't break yet, keep looking for the LATEST matching scene
+                                    # since scenes are sorted chronologically
+                    
+                p_num, lines, mode = target_data
+                cache_key = (p_num, mode)
+                
+                if cache_key not in self.renderers:
                     # Determine surah number for this page
                     s_num = None
                     if lines:
                         s_num = lines[0].get("surah_number")
                         
-                    self.renderers[p_num] = MushafRenderer(
+                    self.renderers[cache_key] = MushafRenderer(
                         p_num, self.is_short, lines, self.font_scale, self.background,
                         self.r_name, self.s_name, self.b_name, self.total_ms,
-                        surah_number=s_num
+                        surah_number=s_num, render_mode=mode
                     )
-                return self.renderers[p_num].get_frame_at(timestamp_sec)
+                return self.renderers[cache_key].get_frame_at(timestamp_sec)
 
         try:
             font_scale = float(config_manager.get("MUSHAF_FONT_SCALE", "0.8"))
@@ -234,7 +281,8 @@ async def generate_mushaf_fast(surah_number: int, reciter_key: str, engine_type:
                 reciter_p,
                 offsets,
                 is_short,
-                language=current_language
+                language=current_language,
+                custom_title=custom_title
             )
             
         return {

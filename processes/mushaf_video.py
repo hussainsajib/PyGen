@@ -71,8 +71,6 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                 
                 injection_offset_ms = (bsml_audio.duration + silence_audio.duration) * 1000
                 full_audio = concatenate_audioclips([bsml_audio, silence_audio, full_audio])
-                total_duration = full_audio.duration
-                total_audio_ms = total_duration * 1000
                 
                 # Shift all word timestamps
                 for ayah_num in wbw_timestamps:
@@ -81,6 +79,23 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                         seg[2] += injection_offset_ms
             except Exception as e:
                 print(f"[WARNING] Basmallah injection failed: {e}")
+
+        # --- Intro/Ending Timing ---
+        # Shift all main timestamps by 5 seconds for the intro screen
+        recitation_start_offset_ms = 5000
+        for ayah_num in wbw_timestamps:
+            for seg in wbw_timestamps[ayah_num]:
+                seg[1] += recitation_start_offset_ms
+                seg[2] += recitation_start_offset_ms
+        
+        # Prepend and append 5s silence to audio
+        intro_silence = make_silence(5.0)
+        ending_silence = make_silence(5.0)
+        full_audio = concatenate_audioclips([intro_silence, full_audio, ending_silence])
+        
+        total_duration = full_audio.duration
+        total_audio_ms = total_duration * 1000
+        # ----------------------------
 
         # 4. Filter and Align Lines
         page_range = get_surah_page_range(surah_number)
@@ -115,6 +130,28 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
         resolution = get_resolution(is_short)
         width, height = resolution
         
+        # --- Create Intro Clip ---
+        from factories.mushaf_fast_render import MushafRenderer
+        try:
+            font_scale = float(config_manager.get("MUSHAF_FONT_SCALE", "0.8"))
+        except:
+            font_scale = 0.8
+            
+        reciter_display_name = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name
+        surah_display_name = surah_p.bangla_name if current_language == "bengali" else surah_p.english_name
+
+        intro_renderer = MushafRenderer(
+            page_number=start_page, is_short=is_short, lines=[], 
+            font_scale=font_scale, background_input=background_path,
+            reciter_name=reciter_display_name, surah_name=surah_display_name, 
+            brand_name=brand_name, total_duration_ms=total_audio_ms,
+            surah_number=surah_number, render_mode="intro"
+        )
+        intro_frame = intro_renderer.get_frame_at(0)
+        intro_clip = ImageClip(intro_frame).set_duration(5.0).set_audio(intro_silence)
+        page_clips.append(intro_clip)
+        # -------------------------
+
         for s_idx, chunk in enumerate(scenes):
             try:
                 # Use the page number from the first Ayah line to ensure correct font loading
@@ -127,24 +164,14 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                 if not valid_starts or not valid_ends:
                     # Fallback for empty/unaligned chunks
                     if s_idx == 0:
-                        chunk_start_ms = 0
-                        chunk_end_ms = 5000
+                        chunk_start_ms = recitation_start_offset_ms
+                        chunk_end_ms = recitation_start_offset_ms + 5000
                     else:
                         # Use end of previous chunk if possible, or skip
                         continue
                 else:
                     chunk_start_ms = min(valid_starts, default=0)
                     chunk_end_ms = max(valid_ends, default=chunk_start_ms + 5000)
-                
-                # Force boundaries
-                if s_idx == 0:
-                    chunk_start_ms = 0
-                if s_idx == len(scenes) - 1:
-                    chunk_end_ms = total_audio_ms
-                    
-                chunk_duration_sec = (chunk_end_ms - chunk_start_ms) / 1000.0
-                if chunk_duration_sec <= 0:
-                    continue
                 
                 # Adjust timestamps relative to chunk start
                 chunk_for_rendering = []
@@ -158,13 +185,13 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                     # Headers and basmallah should last end of scene
                     if line_copy.get("line_type") in ["surah_name", "basmallah"]:
                         line_copy["start_ms"] = 0
-                        line_copy["end_ms"] = chunk_duration_sec * 1000
+                        line_copy["end_ms"] = (chunk_end_ms - chunk_start_ms)
                         
                     chunk_for_rendering.append(line_copy)
 
-                # Inject Surah Header ONLY on the very first scene
+                # Inject Surah Header ONLY on the very first recitation scene
                 if s_idx == 0:
-                    scene_end_ms = chunk_duration_sec * 1000
+                    scene_duration_ms = chunk_end_ms - chunk_start_ms
                     has_header = any(l.get("line_type") == "surah_name" for l in chunk_for_rendering)
                     if not has_header:
                         header_line = {
@@ -175,7 +202,7 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                             "surah_number": surah_number,
                             "words": [],
                             "start_ms": 0,
-                            "end_ms": scene_end_ms
+                            "end_ms": scene_duration_ms
                         }
                         chunk_for_rendering.insert(0, header_line)
 
@@ -191,36 +218,33 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                                 "surah_number": surah_number,
                                 "words": [],
                                 "start_ms": 0,
-                                "end_ms": scene_end_ms
+                                "end_ms": scene_duration_ms
                              }
                              chunk_for_rendering.insert(insert_idx, bsml_line)
 
                 # Generate Clip
-                mushaf_clip = generate_mushaf_page_clip(chunk_for_rendering, page_num, is_short, chunk_duration_sec, background_input=background_path)
+                mushaf_clip = generate_mushaf_page_clip(chunk_for_rendering, page_num, is_short, (chunk_end_ms - chunk_start_ms)/1000.0, background_input=background_path)
                 
                 # Add Overlays
-                reciter_display_name = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name
-                surah_display_name = surah_p.bangla_name if current_language == "bengali" else surah_p.english_name
+                # (Re-calculating display names for consistency if needed, already done above)
                 
                 overlays = []
                 if config_manager.get("ENABLE_FOOTER", "True") == "True":
                     # Determine vertical position for footer items
-                    # bar_height = 30 + 30 = 60. bar_y = height - 60 - 30 = height - 90
-                    # text_y = bar_y + (60 - 30) // 2 = bar_y + 15 = height - 75
                     text_y = height - 75
                     
                     if config_manager.get("ENABLE_RECITER_INFO", "True") == "True":
-                        c = generate_reciter_name_clip(reciter_display_name, is_short, chunk_duration_sec)
+                        c = generate_reciter_name_clip(reciter_display_name, is_short, (chunk_end_ms - chunk_start_ms)/1000.0)
                         from processes.video_configs import get_reciter_info_position
                         pos_x_ratio = get_reciter_info_position(is_short, c.w)[0]
                         overlays.append(c.set_position((int(width * pos_x_ratio), text_y)))
                         
                     if config_manager.get("ENABLE_SURAH_INFO", "True") == "True":
-                        c = generate_surah_info_clip(surah_display_name, 0, is_short, chunk_duration_sec, language=current_language)
+                        c = generate_surah_info_clip(surah_display_name, 0, is_short, (chunk_end_ms - chunk_start_ms)/1000.0, language=current_language)
                         overlays.append(c.set_position(('center', text_y)))
                         
                     if config_manager.get("ENABLE_CHANNEL_INFO", "True") == "True":
-                        c = generate_brand_clip(brand_name, is_short, chunk_duration_sec)
+                        c = generate_brand_clip(brand_name, is_short, (chunk_end_ms - chunk_start_ms)/1000.0)
                         from processes.video_configs import get_channel_info_position
                         pos_x_ratio = get_channel_info_position(is_short, c.w)[0]
                         overlays.append(c.set_position((int(width * pos_x_ratio) - c.w, text_y)))
@@ -228,25 +252,26 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                 # Progress Bar
                 start_ratio = chunk_start_ms / total_audio_ms
                 end_ratio = chunk_end_ms / total_audio_ms
-                progress_bar_bg = ColorClip(size=(width, 5), color=(100, 100, 100)).set_opacity(0.3).set_duration(chunk_duration_sec).set_position(('center', height-5))
+                progress_bar_bg = ColorClip(size=(width, 5), color=(100, 100, 100)).set_opacity(0.3).set_duration((chunk_end_ms - chunk_start_ms)/1000.0).set_position(('center', height-5))
                 overlays.append(progress_bar_bg)
                 progress_bar_fg = ColorClip(size=(width, 5), color=(0, 200, 0))
                 
-                def get_progress_width(t, sr=start_ratio, er=end_ratio, dur=chunk_duration_sec):
-                    if dur <= 0: return 1
-                    p = sr + (er - sr) * (t / dur)
+                def get_progress_width(t, sr=start_ratio, er=end_ratio, dur_ms=(chunk_end_ms-chunk_start_ms)):
+                    dur_sec = dur_ms / 1000.0
+                    if dur_sec <= 0: return 1
+                    p = sr + (er - sr) * (t / dur_sec)
                     w = int(width * max(0.0, min(1.0, p)))
                     return max(1, w)
 
                 progress_bar_fg = progress_bar_fg.resize(newsize=lambda t: (get_progress_width(t), 5))
-                progress_bar_fg = progress_bar_fg.set_opacity(0.8).set_duration(chunk_duration_sec).set_position(('left', height-5))
+                progress_bar_fg = progress_bar_fg.set_opacity(0.8).set_duration((chunk_end_ms - chunk_start_ms)/1000.0).set_position(('left', height-5))
                 overlays.append(progress_bar_fg)
 
                 # Compose Chunk
                 all_chunk_clips = [mushaf_clip] + overlays
                 valid_chunk_clips = [c for c in all_chunk_clips if c is not None]
                 
-                final_chunk_clip = CompositeVideoClip(valid_chunk_clips, size=resolution).set_duration(chunk_duration_sec)
+                final_chunk_clip = CompositeVideoClip(valid_chunk_clips, size=resolution).set_duration((chunk_end_ms - chunk_start_ms)/1000.0)
                 
                 audio_start = max(0, chunk_start_ms / 1000.0)
                 audio_end = min(total_duration, chunk_end_ms / 1000.0)
@@ -258,6 +283,19 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                 print(f"[ERROR] Scene {s_idx} failed: {e}", flush=True)
                 traceback.print_exc()
                 continue
+
+        # --- Create Ending Clip ---
+        ending_renderer = MushafRenderer(
+            page_number=end_page, is_short=is_short, lines=[], 
+            font_scale=font_scale, background_input=background_path,
+            reciter_name=reciter_display_name, surah_name=surah_display_name, 
+            brand_name=brand_name, total_duration_ms=total_audio_ms,
+            surah_number=surah_number, render_mode="ending"
+        )
+        ending_frame = ending_renderer.get_frame_at(total_duration - 0.1) # Near end
+        ending_clip = ImageClip(ending_frame).set_duration(5.0).set_audio(ending_silence)
+        page_clips.append(ending_clip)
+        # -------------------------
 
         # 6. Final Assembly
         if not page_clips:
@@ -419,9 +457,24 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
         # 2. Data Package
         prep_res = await prepare_juz_data_package(juz_number, reciter_db_obj, boundaries)
         full_audio, all_wbw_timestamps, sorted_pages, offsets, temp_files, surah_clips, _ = prep_res
+        
+        # --- Intro/Ending Timing ---
+        recitation_start_offset_ms = 5000
+        # Shift all word timestamps in all_wbw_timestamps
+        for key in all_wbw_timestamps:
+            for seg in all_wbw_timestamps[key]:
+                seg[1] += recitation_start_offset_ms
+                seg[2] += recitation_start_offset_ms
+        
+        # Prepend and append 5s silence to audio
+        intro_silence = make_silence(5.0)
+        ending_silence = make_silence(5.0)
+        full_audio = concatenate_audioclips([intro_silence, full_audio, ending_silence])
+        
         total_duration = full_audio.duration
         total_audio_ms = total_duration * 1000
-        
+        # ----------------------------
+
         # 3. Filter and Align Lines across entire Juz
         all_aligned_lines = []
         for page_num in sorted_pages:
@@ -475,8 +528,34 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
         resolution = get_resolution(is_short)
         width, height = resolution
         
+        # --- Create Intro Clip ---
+        from factories.mushaf_fast_render import MushafRenderer
+        try:
+            font_scale = float(config_manager.get("MUSHAF_FONT_SCALE", "0.8"))
+        except:
+            font_scale = 0.8
+            
+        reciter_display_name = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name
+        if current_language == "bengali":
+            from factories.single_clip import e2b
+            juz_display_name = f"পারা {e2b(str(juz_number))}"
+        else:
+            juz_display_name = f"Juz {juz_number}"
+
+        intro_renderer = MushafRenderer(
+            page_number=sorted_pages[0], is_short=is_short, lines=[], 
+            font_scale=font_scale, background_input=background_path,
+            reciter_name=reciter_display_name, surah_name=juz_display_name, 
+            brand_name=brand_name, total_duration_ms=total_audio_ms,
+            surah_number=surahs_in_juz[0], render_mode="intro"
+        )
+        intro_frame = intro_renderer.get_frame_at(0)
+        intro_clip = ImageClip(intro_frame).set_duration(5.0).set_audio(intro_silence)
+        page_clips.append(intro_clip)
+        # -------------------------
+
         global_chunk_idx = 0
-        last_processed_ms = 0.0 # Track end of last chunk to avoid gaps
+        last_processed_ms = float(recitation_start_offset_ms) # Track end of last chunk
         
         for s_idx, chunk in enumerate(scenes):
             try:
@@ -488,22 +567,20 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
                 
                 if not valid_starts or not valid_ends:
                     if global_chunk_idx == 0:
-                        chunk_start_ms = 0
-                        chunk_end_ms = 5000
+                        chunk_start_ms = recitation_start_offset_ms
+                        chunk_end_ms = recitation_start_offset_ms + 5000
                     else:
                         continue
                 else:
                     if global_chunk_idx == 0:
-                        chunk_start_ms = 0
+                        chunk_start_ms = recitation_start_offset_ms
                     else:
                         chunk_start_ms = last_processed_ms
                     
                     chunk_end_ms = max(valid_ends)
                 
                 last_processed_ms = chunk_end_ms
-                if s_idx == len(scenes) - 1:
-                    chunk_end_ms = total_audio_ms
-                    
+                
                 chunk_duration_sec = (float(chunk_end_ms) - float(chunk_start_ms)) / 1000.0
                 if chunk_duration_sec <= 0: continue
                 
@@ -517,7 +594,7 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
                     
                     if line_copy.get("line_type") in ["surah_name", "basmallah"]:
                         line_copy["start_ms"] = 0
-                        line_copy["end_ms"] = chunk_duration_sec * 1000
+                        line_copy["end_ms"] = (chunk_end_ms - chunk_start_ms)
                         
                     chunk_for_rendering.append(line_copy)
 
@@ -526,15 +603,6 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
                     generate_mushaf_page_clip, 
                     chunk_for_rendering, page_num, is_short, chunk_duration_sec, background_input=background_path
                 )
-
-                # Add Overlays
-                reciter_display_name = reciter_p.bangla_name if current_language == "bengali" else reciter_p.english_name
-                
-                if current_language == "bengali":
-                    from factories.single_clip import e2b
-                    juz_display_name = f"পারা {e2b(str(juz_number))}"
-                else:
-                    juz_display_name = f"Juz {juz_number}"
 
                 overlays = []
                 if config_manager.get("ENABLE_FOOTER", "True") == "True":
@@ -595,6 +663,19 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
                 print(f"[ERROR] Juz {juz_number} Scene {s_idx} failed: {e}")
                 traceback.print_exc()
                 continue
+
+        # --- Create Ending Clip ---
+        ending_renderer = MushafRenderer(
+            page_number=sorted_pages[-1], is_short=is_short, lines=[], 
+            font_scale=font_scale, background_input=background_path,
+            reciter_name=reciter_display_name, surah_name=juz_display_name, 
+            brand_name=brand_name, total_duration_ms=total_audio_ms,
+            surah_number=surahs_in_juz[-1], render_mode="ending"
+        )
+        ending_frame = ending_renderer.get_frame_at(total_duration - 0.1)
+        ending_clip = ImageClip(ending_frame).set_duration(5.0).set_audio(ending_silence)
+        page_clips.append(ending_clip)
+        # -------------------------
 
         # 5. Final Assembly
         if not page_clips:
