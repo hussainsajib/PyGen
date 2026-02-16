@@ -57,9 +57,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Automated Basmallah Injection for Mushaf Videos**
 
 *Link: [./tracks/mushaf_basmallah_injection_20260214/](./tracks/mushaf_basmallah_injection_20260214/)*
-
-
----
-
-- [x] **Track: Fix incorrect Arabic word and glyph ordering in high-speed rendering engines.**
-*Link: [./tracks/arabic_word_glyph_order_20260216/](./tracks/arabic_word_glyph_order_20260216/)*
