@@ -61,5 +61,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Configurable background dimming and footer cleanup for Mushaf videos**
+- [x] **Track: Configurable background dimming and footer cleanup for Mushaf videos**
 *Link: [./tracks/mushaf_background_dimming_20260215/](./tracks/mushaf_background_dimming_20260215/)*

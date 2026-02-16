@@ -110,6 +110,11 @@
                         <input type="range" class="form-range flex-grow-1 me-2" min="10" max="90" id="mushaf_border_width_range" value="{{ item.value }}" oninput="document.getElementById('mushaf_border_width_value').value = this.value">
                         <input type="number" name="{{ item.key }}" id="mushaf_border_width_value" class="form-control" style="width: 80px;" value="{{ item.value }}" min="10" max="90" oninput="document.getElementById('mushaf_border_width_range').value = this.value">
                     </div>
+                {% elif item.key == 'MUSHAF_BACKGROUND_DIMMING' %}
+                    <div class="d-flex align-items-center">
+                        <input type="range" class="form-range flex-grow-1 me-2" min="0" max="1" step="0.05" id="mushaf_dimming_range" value="{{ item.value }}" oninput="document.getElementById('mushaf_dimming_value').value = this.value">
+                        <input type="number" name="{{ item.key }}" id="mushaf_dimming_value" class="form-control" style="width: 80px;" value="{{ item.value }}" min="0" max="1" step="0.05" oninput="document.getElementById('mushaf_dimming_range').value = this.value">
+                    </div>
                 {% else %}
                     <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="form-control">
                 {% endif %}

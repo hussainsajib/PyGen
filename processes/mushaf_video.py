@@ -204,13 +204,10 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                 
                 overlays = []
                 if config_manager.get("ENABLE_FOOTER", "True") == "True":
-                    from factories.single_clip import generate_footer_bar_clip
-                    footer_bar = generate_footer_bar_clip(width, height, chunk_duration_sec)
-                    # Position footer bar: centered horizontally, floating above bottom
-                    bar_y = height - footer_bar.h - 30 
-                    overlays.append(footer_bar.set_position(('center', bar_y)))
-                    
-                    text_y = bar_y + (footer_bar.h - 30) // 2
+                    # Determine vertical position for footer items
+                    # bar_height = 30 + 30 = 60. bar_y = height - 60 - 30 = height - 90
+                    # text_y = bar_y + (60 - 30) // 2 = bar_y + 15 = height - 75
+                    text_y = height - 75
                     
                     if config_manager.get("ENABLE_RECITER_INFO", "True") == "True":
                         c = generate_reciter_name_clip(reciter_display_name, is_short, chunk_duration_sec)
@@ -317,25 +314,28 @@ async def prepare_juz_data_package(juz_number: int, reciter_db_obj, boundaries: 
     temp_files = []
     surah_clips = []
     all_wbw_timestamps = {}
+    final_audio_clips = []
     
     # 1. Collect Audio and Timestamps for each Surah
     offsets = {}
     current_offset_ms = 0
     
-    # Optional: Initial Basmallah for the very first Surah of Juz (if not Surah 1 or 9)
-    initial_bsml = None
-    first_surah = surahs_in_juz[0]
-    if first_surah not in [1, 9]:
-        try:
-            initial_bsml = get_standard_basmallah_clip()
-            current_offset_ms += initial_bsml.duration * 1000
-            # Silence after initial basmallah
-            silence_sec = float(config_manager.get("MUSHAF_BASMALLAH_SILENCE_DURATION", "1.0"))
-            current_offset_ms += silence_sec * 1000
-        except:
-            initial_bsml = None
-
     for s_num in surahs_in_juz:
+        # Handle Basmallah Injection for each Surah
+        # Skip for Surah 1 and Surah 9
+        if s_num not in [1, 9]:
+            try:
+                bsml_audio = get_standard_basmallah_clip()
+                final_audio_clips.append(bsml_audio)
+                current_offset_ms += bsml_audio.duration * 1000
+                
+                silence_sec = float(config_manager.get("MUSHAF_BASMALLAH_SILENCE_DURATION", "1.0"))
+                silence_audio = make_silence(silence_sec)
+                final_audio_clips.append(silence_audio)
+                current_offset_ms += silence_audio.duration * 1000
+            except Exception as e:
+                print(f"[WARNING] Basmallah injection failed for Surah {s_num} in Juz: {e}")
+
         audio_url = read_surah_data(s_num, reciter_db_obj.database)
         if not audio_url: continue
         
@@ -371,37 +371,23 @@ async def prepare_juz_data_package(juz_number: int, reciter_db_obj, boundaries: 
         
         offsets[s_num] = current_offset_ms
         
-        # Determine effective duration of this surah part
+        # Recitation segment duration
         if s_timestamps:
             last_ayah_in_juz = max(s_timestamps.keys())
             first_ayah_in_juz = min(s_timestamps.keys())
             part_duration_ms = s_timestamps[last_ayah_in_juz][-1][2] - s_timestamps[first_ayah_in_juz][0][1]
-            current_offset_ms += part_duration_ms
-        else:
-            current_offset_ms += clip.duration * 1000
             
-    # 2. Assemble Audio
-    final_audio_clips = []
-    if initial_bsml:
-        final_audio_clips.append(initial_bsml)
-        silence_sec = float(config_manager.get("MUSHAF_BASMALLAH_SILENCE_DURATION", "1.0"))
-        final_audio_clips.append(make_silence(silence_sec))
-        
-    for i, clip in enumerate(surah_clips):
-        s_num = surahs_in_juz[i]
-        v_mapping = boundaries["verse_mapping"][str(s_num)]
-        v_range = v_mapping.split("-")
-        s_ayah, e_ayah = int(v_range[0]), int(v_range[1])
-        
-        wbw_db_path = os.path.join("databases", "word-by-word", reciter_db_obj.wbw_database)
-        s_timestamps = get_wbw_timestamps(wbw_db_path, s_num, s_ayah, e_ayah)
-        if s_timestamps:
+            # Prepare recitation subclip
             start_t = s_timestamps[min(s_timestamps.keys())][0][1] / 1000.0
             end_t = s_timestamps[max(s_timestamps.keys())][-1][2] / 1000.0
             final_audio_clips.append(clip.subclip(start_t, end_t))
+            
+            current_offset_ms += part_duration_ms
         else:
             final_audio_clips.append(clip)
+            current_offset_ms += clip.duration * 1000
             
+    # 2. Assemble Audio
     full_audio = concatenate_audioclips(final_audio_clips)
     
     # 3. Identify sorted pages
@@ -409,7 +395,7 @@ async def prepare_juz_data_package(juz_number: int, reciter_db_obj, boundaries: 
     end_page = boundaries["end_page"]
     sorted_pages = list(range(start_page, end_page + 1))
     
-    return full_audio, all_wbw_timestamps, sorted_pages, offsets, temp_files, surah_clips, initial_bsml
+    return full_audio, all_wbw_timestamps, sorted_pages, offsets, temp_files, surah_clips, None # initial_bsml no longer separate
 
 async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool = False, background_path: str = None, lines_per_page: int = 15):
     """
@@ -432,7 +418,7 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
         
         # 2. Data Package
         prep_res = await prepare_juz_data_package(juz_number, reciter_db_obj, boundaries)
-        full_audio, all_wbw_timestamps, sorted_pages, offsets, temp_files, surah_clips, bsml_audio = prep_res
+        full_audio, all_wbw_timestamps, sorted_pages, offsets, temp_files, surah_clips, _ = prep_res
         total_duration = full_audio.duration
         total_audio_ms = total_duration * 1000
         
@@ -552,12 +538,7 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
 
                 overlays = []
                 if config_manager.get("ENABLE_FOOTER", "True") == "True":
-                    from factories.single_clip import generate_footer_bar_clip
-                    footer_bar = await run_in_threadpool(generate_footer_bar_clip, width, height, chunk_duration_sec)
-                    bar_y = height - footer_bar.h - 30 
-                    overlays.append(footer_bar.set_position(('center', bar_y)))
-                    
-                    text_y = bar_y + (footer_bar.h - 30) // 2
+                    text_y = height - 75
                     
                     if config_manager.get("ENABLE_RECITER_INFO", "True") == "True":
                         c = await run_in_threadpool(generate_reciter_name_clip, reciter_display_name, is_short, chunk_duration_sec)
@@ -618,7 +599,6 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
         # 5. Final Assembly
         if not page_clips:
             full_audio.close()
-            if bsml_audio: bsml_audio.close()
             for c in surah_clips: c.close()
             for tf in temp_files: cleanup_temp_file(tf)
             return None
@@ -646,7 +626,6 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
         await run_in_threadpool(generate_juz_details, juz_number, reciter_p, offsets, is_short, current_language)
         
         full_audio.close()
-        if bsml_audio: bsml_audio.close()
         for c in surah_clips: c.close()
         for tf in temp_files: cleanup_temp_file(tf)
         

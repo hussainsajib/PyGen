@@ -188,6 +188,18 @@ def pre_render_static_page(resolution: tuple, background_input: str, renderable_
     width, height = resolution
     img = get_pil_background(background_input, resolution)
     
+    # --- Background Dimming ---
+    try:
+        dimming_opacity = float(config_manager.get("MUSHAF_BACKGROUND_DIMMING", "0.0"))
+    except (ValueError, TypeError):
+        dimming_opacity = 0.0
+        
+    if dimming_opacity > 0:
+        # Create a black overlay
+        overlay = Image.new('RGBA', resolution, (0, 0, 0, int(dimming_opacity * 255)))
+        img.alpha_composite(overlay)
+    # --------------------------
+
     bg_mode = config_manager.get("MUSHAF_PAGE_BACKGROUND_MODE", "Solid")
     bg_color = config_manager.get("MUSHAF_PAGE_COLOR", "#FFFDF5")
     try:
@@ -291,7 +303,7 @@ def generate_solid_background(duration: int, resolution: tuple, color=None):
         color = hex_to_rgb(color)
     return ColorClip(size=resolution, color=color).set_duration(duration)
 
-def generate_background(background_input: str, duration: int, is_short: bool):
+def generate_background(background_input: str, duration: int, is_short: bool, dimming: float = 0.0):
     resolution = get_resolution(is_short)
     
     # Use explicitly provided background_input first
@@ -301,15 +313,23 @@ def generate_background(background_input: str, duration: int, is_short: bool):
     if not target_bg:
         target_bg = config_manager.get("ACTIVE_BACKGROUND")
         
+    base_clip = None
     if target_bg:
         if target_bg.startswith('#'):
-            return generate_solid_background(duration, resolution, color=target_bg)
-        if target_bg.lower().endswith(('.mp4', '.mov', '.avi', '.mkv')):
-            return generate_video_background(target_bg, duration, is_short)
-        return generate_image_background(target_bg, duration, is_short)
-        
-    # Final fallback to solid BACKGROUND_RGB
-    return generate_solid_background(duration, resolution)
+            base_clip = generate_solid_background(duration, resolution, color=target_bg)
+        elif target_bg.lower().endswith(('.mp4', '.mov', '.avi', '.mkv')):
+            base_clip = generate_video_background(target_bg, duration, is_short)
+        else:
+            base_clip = generate_image_background(target_bg, duration, is_short)
+    else:
+        # Final fallback to solid BACKGROUND_RGB
+        base_clip = generate_solid_background(duration, resolution)
+
+    if dimming > 0:
+        dim_clip = ColorClip(size=resolution, color=(0, 0, 0)).set_opacity(dimming).set_duration(duration)
+        return CompositeVideoClip([base_clip, dim_clip])
+    
+    return base_clip
 
 def generate_arabic_text_clip(text: str, is_short: bool, duration: int) -> TextClip:
     arabic_sizes = COMMON["f_arabic_size"](is_short, text)
@@ -433,18 +453,22 @@ def generate_full_ayah_translation_clip(text: str, is_short: bool, duration: int
 
 def generate_reciter_name_clip(reciter_name_bangla: str, is_short: bool, duration: int) -> TextClip:
     reciter_name_clip = TextClip(reciter_name_bangla, font=resolve_font_path("kalpurush"), **FOOTER_CONFIG)
-    reciter_pos = COMMON["f_reciter_info_position"](is_short, reciter_name_clip.w)
+    from processes.video_configs import get_reciter_info_position
+    reciter_pos = get_reciter_info_position(is_short, reciter_name_clip.w)
     return reciter_name_clip.set_position(reciter_pos, relative=True).set_duration(duration)
 
 def generate_surah_info_clip(surah_name: str, verse_number: int, is_short: bool, duration: int, language: str = "bengali"):
     verse_str = e2b(str(verse_number)) if language == "bengali" else str(verse_number)
-    surah_name_clip = TextClip(f'{surah_name} : {verse_str}', font=resolve_font_path("kalpurush"), **FOOTER_CONFIG)
-    surah_pos = COMMON["f_surah_info_position"](is_short, surah_name_clip.w)
+    display_text = f'{surah_name} : {verse_str}' if verse_number > 0 else surah_name
+    surah_name_clip = TextClip(display_text, font=resolve_font_path("kalpurush"), **FOOTER_CONFIG)
+    from processes.video_configs import get_surah_info_position
+    surah_pos = get_surah_info_position(is_short, surah_name_clip.w)
     return surah_name_clip.set_position(surah_pos, relative=True).set_duration(duration)
 
 def generate_brand_clip(brand_name: str, is_short: bool, duration: int) -> TextClip:
     brand_name_clip = TextClip(brand_name, font=resolve_font_path("kalpurush"), **FOOTER_CONFIG)
-    brand_pos = COMMON["f_channel_info_position"](is_short, brand_name_clip.w)
+    from processes.video_configs import get_channel_info_position
+    brand_pos = get_channel_info_position(is_short, brand_name_clip.w)
     return brand_name_clip.set_position(brand_pos, relative=True).set_duration(duration)
 
 def generate_mushaf_border_clip(size: tuple, thickness: int, radius: int, color: tuple, padding: int, duration: float, bg_mode: str = "Solid", bg_color: str = "#FFFDF5", bg_opacity: int = 255) -> ImageClip:

@@ -25,7 +25,8 @@ PyGen is an automated video generation platform designed specifically for creati
     - **UX Refinements:** Streamlined form submission workflow with intuitive redirects and quick-reset background options.
         - **Mushaf-Style Rendering:** Specialized engine for generating videos that mirror traditional 15-line Mushaf layouts.
             - **Adaptive Paging:** Configurable "Visible Lines per Scene" (e.g., 5, 10, or full 15 lines) with automatic chunking and paging logic.
-            - **Enhanced Horizontal Footer:** Reciter Name, Surah/Juz Name, and Brand Name are displayed horizontally in a floating footer bar positioned slightly above the bottom edge. The footer features a semi-transparent background bar to ensure maximum legibility across diverse video backgrounds.
+            - **Configurable Background Dimming:** New `MUSHAF_BACKGROUND_DIMMING` setting allows users to adjust the global background darkness (0.0 to 1.0). This enhances text readability by layering a semi-transparent black overlay behind all content.
+            - **Refined Horizontal Footer:** Reciter Name, Surah/Juz Name, and Brand Name are displayed horizontally in a floating footer positioned slightly above the bottom edge. The previous semi-transparent background bar has been removed for a cleaner, modern aesthetic, with legibility ensured by the new global dimming effect.
             - **Intelligent Scene Grouping:** Advanced content-aware logic that prevents orphaned headers and Basmallah lines at page boundaries in standalone videos. It automatically defers starting headers to the subsequent scene if the first page contains no actual Ayah text, ensuring a clean and professional start for every recitation. Standalone videos intelligently exclude the orphaned starting page while Juz Mushaf videos maintain original boundaries for authenticity.
             - **Authentic Calligraphy:** Integration of QPC v2 fonts for page-specific glyphs, including decorative fonts for Bismillah (`QCF_BSML.TTF`) and Surah headers (`QCF_SurahHeader_COLOR-Regular.ttf`).
         - **Dynamic Highlighting:** Synchronized semi-transparent line-level highlighting driven by word-level timestamps, featuring dynamic width calculation that matches the actual text portion of each line.
@@ -46,8 +47,8 @@ PyGen is an automated video generation platform designed specifically for creati
             - **Continuous Multi-Surah Rendering:** Specialized paging logic that maintains a seamless 15-line Mushaf flow across Surah transitions.
             - **Enhanced Bengali Localization:** For Juz videos, the "Juz" label is localized to "পারা" (Para) in the video footer and metadata, using Bengali digits for the number.
             - **Standardized Bengali Metadata:** Automated generation of localized titles and descriptions for YouTube/Facebook following the format: `কুরআন তিলাওয়াত - পারা [Bengali Number] - [Bengali Reciter Name]`.
-            - **Dynamic Audio Assembly:** On-the-fly concatenation of Surah-level audio with automatic Basmallah injection and Surah 9 silence gap handling.
-            - **Synchronized Timestamp Mapping:** Precision re-mapping of word-level timestamps relative to the continuous Juz audio stream.
+            - **Automated Basmallah Injection:** Automatic prepending of Basmallah audio and a configurable silence period before every applicable Surah in the Juz (matching standalone video behavior).
+            - **Synchronized Timestamp Mapping:** Precision re-mapping of word-level timestamps relative to the continuous Juz audio stream, accounting for multiple audio injections and silences.
             - **Automated YouTube Chapters:** Automatic generation of clickable Surah-based chapter markers in video descriptions.
         - **Experimental High-Speed Engines:** Multi-backend rendering system for evaluating performance alternatives to MoviePy.
             - **Multi-Backend Support:** Choice of high-performance rendering paths using FFmpeg (Piped), OpenCV, or PyAV.
