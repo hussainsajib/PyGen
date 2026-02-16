@@ -61,5 +61,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Bengali Localization for Juz Videos (Para Labels and Metadata)**
+- [x] **Track: Bengali Localization for Juz Videos (Para Labels and Metadata)**
 *Link: [./tracks/juz_bengali_localization_20260215/](./tracks/juz_bengali_localization_20260215/)*
