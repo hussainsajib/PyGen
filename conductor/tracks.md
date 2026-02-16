@@ -57,3 +57,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Automated Basmallah Injection for Mushaf Videos**
 
 *Link: [./tracks/mushaf_basmallah_injection_20260214/](./tracks/mushaf_basmallah_injection_20260214/)*
+
+
+---
+
+- [ ] **Track: Revert metadata layout to horizontal footer with background bar for Mushaf and Juz videos**
+*Link: [./tracks/mushaf_footer_revert_20260215/](./tracks/mushaf_footer_revert_20260215/)*
