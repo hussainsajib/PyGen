@@ -1,0 +1,8 @@
+{
+  "track_id": "fix_wbw_translation_20260216",
+  "type": "bug",
+  "status": "new",
+  "created_at": "2026-02-16T19:43:00Z",
+  "updated_at": "2026-02-16T19:43:00Z",
+  "description": "in word by word video creation WBW_FULL_TRANSLATION_ENABLED is true but i don't see the full translation at the bottom of the screen"
+}
