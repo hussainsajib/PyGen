@@ -2,10 +2,10 @@
 
 Fixing a regression where the full ayah translation is missing from word-by-word videos.
 
-## Phase 1: Investigation and Environment Setup
+## Phase 1: Investigation and Environment Setup [checkpoint: 577cbb0]
 - [x] Task: Verify existing WBW rendering paths and identify where the translation overlay is skipped.
 - [x] Task: Ensure the testing environment has access to necessary translation databases (e.g., `rawai_al_bayan.sqlite`).
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Investigation and Environment Setup' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Investigation and Environment Setup' (Protocol in workflow.md)
 
 ## Phase 2: Core Implementation
 - [ ] Task: Update `processes/surah_video.py` to include full translation rendering in all WBW modes (Advanced, Standard, Interlinear).
