@@ -1,8 +1,0 @@
-{
-  "track_id": "shorts_duration_validation_20260125",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-01-25T14:58:00Z",
-  "updated_at": "2026-01-25T14:58:00Z",
-  "description": "after generating a word by word short type video if it's more than 1 minute, don't upload it to youtube and throw an error for youtube. For facebook, it's fine for now"
-}

@@ -1,8 +1,0 @@
-{
-  "track_id": "fix_juz_logic_bug_20260205",
-  "type": "bug",
-  "status": "new",
-  "created_at": "2026-02-05T10:45:00Z",
-  "updated_at": "2026-02-05T10:45:00Z",
-  "description": "for juz mushaf video, it doesn't generate video of the whole juz only creates a video of the bismillah for 5 seconds"
-}

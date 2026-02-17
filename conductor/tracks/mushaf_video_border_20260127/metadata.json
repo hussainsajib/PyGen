@@ -1,8 +1,0 @@
-{
-  "track_id": "mushaf_video_border_20260127",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-01-27T15:42:00Z",
-  "updated_at": "2026-01-27T15:42:00Z",
-  "description": "in the mushaf video, create a box around the whole mushaf area that includes surah header, bismillah, and surah text. this should be static, somewhat resembling an actual mushaf"
-}

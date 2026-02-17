@@ -1,8 +1,0 @@
-{
-  "track_id": "mushaf_video_generation_20260125",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-01-25T22:24:00Z",
-  "updated_at": "2026-01-25T22:24:00Z",
-  "description": "create a new feature for the user to select a surah and select the reciter. integrate the background selection module from word-by-word section of the app in this section as well. generate a video based on those. in the video show 5 lines form the mushaf format (@schema_report.md). highlight the line the reciter is currently reading. you can use the word by word databases for recitation. for reciter dropdown, use the same source as in the word by word page."
-}

@@ -1,10 +1,16 @@
 import cv2
+import os
 
 def extract_frame(video_path: str):
     # Open the video file
     frame_time = 1
-    screenshot_name = f"screenshot_{video_path.split("/")[-1].split(".")[0]}.png"
-    output_image_path = f"exported_data/screenshots/{screenshot_name}"
+    
+    # Correctly extract filename regardless of platform slashes
+    base_name = os.path.basename(video_path)
+    file_name_no_ext = os.path.splitext(base_name)[0]
+    screenshot_name = f"screenshot_{file_name_no_ext}.png"
+    
+    output_image_path = os.path.join("exported_data", "screenshots", screenshot_name)
     cap = cv2.VideoCapture(video_path)
     
     if not cap.isOpened():

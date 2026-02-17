@@ -40,6 +40,9 @@ archive.zip
 # Artifacts
 *.mp3
 *.mp4
+*.png
+*.jpg
+*.jpeg
 *.log
 *.sqlite
 *.db
@@ -47,3 +50,6 @@ archive.zip
 # Secrets
 client_info.json
 video_release_date.txt
+
+# AI related
+conductor/tracks/

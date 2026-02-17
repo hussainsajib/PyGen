@@ -1,8 +1,0 @@
-{
-  "track_id": "mushaf_footer_revert_20260215",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-02-15T20:44:00Z",
-  "updated_at": "2026-02-15T20:44:00Z",
-  "description": "Revert metadata layout to horizontal footer with background bar for Mushaf and Juz videos"
-}

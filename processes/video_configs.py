@@ -36,19 +36,14 @@ def get_translation_text_position(is_short: bool):
     return (LONG["height"] // 2) + 25
 
 def get_reciter_info_position(is_short: bool, clip_width: int):
-    if is_short:
-        return ((SHORT["width"] - clip_width) / (SHORT["width"] * 2), 0.10)
+    # This is now used as a relative hint within the footer bar logic in engines
     return (0.05, 0.92)
 
 def get_surah_info_position(is_short: bool, clip_width: int):
-    if is_short:
-        return ((SHORT["width"] - clip_width) / (SHORT["width"] * 2), 0.12)
-    return ((LONG["width"] - clip_width) / (LONG["width"] * 2), 0.92)
+    return (0.5, 0.92)
 
 def get_channel_info_position(is_short: bool, clip_width: int):
-    if is_short:
-        return ((SHORT["width"] - clip_width) / (SHORT["width"] * 2), 0.14)
-    return (0.85, 0.92)
+    return (0.95, 0.92)
 
 def get_arabic_textbox_size(is_short: bool, text: str):
     if 0 < len(text) < 450:
@@ -153,23 +148,6 @@ LONG = {
             "height": None,
             "width": 1600,
             "color": COMMON["font_color"]
-        },
-        "footer": {
-            "reciter": {
-                "size": 0,
-                "position": 0,
-                "color": COMMON["font_color"]
-            },
-            "surah": {
-                "size": 0,
-                "position": 0,
-                "color": COMMON["font_color"]
-            },
-            "channel": {
-                "size": 0,
-                "position": 0,
-                "color": COMMON["font_color"]
-            }
         }
     },
     "outro": {
@@ -207,23 +185,6 @@ SHORT = {
             "height": None,
             "width": 1600,
             "color": COMMON["font_color"]
-        },
-        "footer": {
-            "reciter": {
-                "size": 0,
-                "position": 0,
-                "color": COMMON["font_color"]
-            },
-            "surah": {
-                "size": 0,
-                "position": 0,
-                "color": COMMON["font_color"]
-            },
-            "channel": {
-                "size": 0,
-                "position": 0,
-                "color": COMMON["font_color"]
-            }
         }
     },
     "outro": {

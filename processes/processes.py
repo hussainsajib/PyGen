@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import asyncio
 import anyio
@@ -179,8 +180,11 @@ async def create_wbw_video_job(surah: int, start_verse: int, end_verse:int,
         logger.warning(f"Short exceeds 60s ({duration:.2f}s). Skipping YouTube upload.")
         can_upload_to_youtube = False
     
+    logger.info(f"YouTube upload check (WBW): upload_after_generation={upload_after_generation}, can_upload_to_youtube={can_upload_to_youtube}")
+
     # Upload to YouTube if requested
     if upload_after_generation and can_upload_to_youtube:
+        logger.info("Attempting YouTube upload for WBW video...")
         target_channel_id = await _get_target_youtube_channel_id()
         
         target_playlist_id = None
@@ -214,8 +218,13 @@ async def create_mushaf_video_job(surah: int, reciter: str, is_short: bool = Fal
                              playlist_id: str = None,
                              custom_title: str = None,
                              lines_per_page: int = 15):
-    """Generates a Mushaf-style video and optionally uploads it to YouTube."""
-    video_details = await generate_mushaf_video(surah, reciter, is_short, background_path, custom_title=custom_title, lines_per_page=lines_per_page)
+    """Generates a Mushaf-style video using FFmpeg engine by default and optionally uploads it to YouTube."""
+    # Default to fast FFmpeg engine
+    video_details = await generate_mushaf_fast(
+        surah, reciter, engine_type="ffmpeg", 
+        is_short=is_short, background_path=background_path, 
+        custom_title=custom_title, lines_per_page=lines_per_page
+    )
     
     if not video_details:
         raise Exception("Error generating Mushaf video")
@@ -233,8 +242,11 @@ async def create_mushaf_video_job(surah: int, reciter: str, is_short: bool = Fal
         logger.warning(f"Short exceeds 60s ({duration:.2f}s). Skipping YouTube upload.")
         can_upload_to_youtube = False
     
+    logger.info(f"YouTube upload check (Mushaf): upload_after_generation={upload_after_generation}, can_upload_to_youtube={can_upload_to_youtube}")
+
     # Upload to YouTube if requested
     if upload_after_generation and can_upload_to_youtube:
+        logger.info("Attempting YouTube upload for Mushaf video...")
         target_channel_id = await _get_target_youtube_channel_id()
         
         target_playlist_id = None
@@ -263,9 +275,6 @@ async def create_mushaf_video_job(surah: int, reciter: str, is_short: bool = Fal
     await _upload_to_facebook_if_enabled(video_details)
 
 async def manual_upload_to_youtube(video_filename: str, reciter_key: str, playlist_id: str, details_filename: str):
-    import os
-    import re
-    
     target_channel_id = await _get_target_youtube_channel_id() # Fetch channel ID
     
     if video_filename.startswith("quran_shorts_"):
@@ -277,23 +286,31 @@ async def manual_upload_to_youtube(video_filename: str, reciter_key: str, playli
         
     details_path = os.path.join("exported_data/details", details_filename)
     
-    # Try to find screenshot
-    match = await run_in_threadpool(re.match, r'quran_video_(\d+)_(.+)\.mp4', video_filename)
-    screenshot_path = None
-    if match:
-        surah_num = match.group(1)
-        rest = match.group(2)
-        screenshot_dir = "exported_data/screenshots"
-        potential_path = os.path.join(screenshot_dir, f"screenshot_quran_video_{surah_num}_{rest}.png")
-        if await run_in_threadpool(os.path.exists, potential_path):
-            screenshot_path = potential_path
+    # Try to find screenshot based on filename convention
+    # All screenshots are named: screenshot_{video_filename_no_ext}.png
+    video_base = os.path.splitext(video_filename)[0]
+    screenshot_filename = f"screenshot_{video_base}.png"
+    screenshot_path = os.path.join("exported_data", "screenshots", screenshot_filename)
+    
+    if not await run_in_threadpool(os.path.exists, screenshot_path):
+        # Fallback to old regex logic for legacy support if needed
+        match = await run_in_threadpool(re.match, r'quran_video_(\d+)_(.+)\.mp4', video_filename)
+        if match:
+            surah_num = match.group(1)
+            rest = match.group(2)
+            screenshot_dir = "exported_data/screenshots"
+            potential_path = os.path.join(screenshot_dir, f"screenshot_quran_video_{surah_num}_{rest}.png")
+            if await run_in_threadpool(os.path.exists, potential_path):
+                screenshot_path = potential_path
+            else:
+                def normalize(s):
+                    return re.sub(r'[^a-z0-9]', '', s.lower())
+                for s_file in await run_in_threadpool(os.listdir, screenshot_dir):
+                    if s_file.startswith(f"screenshot_quran_video_{surah_num}_") and normalize(s_file) == normalize(f"screenshot_quran_video_{surah_num}_{rest}.png"):
+                        screenshot_path = os.path.join(screenshot_dir, s_file)
+                        break
         else:
-            def normalize(s):
-                return re.sub(r'[^a-z0-9]', '', s.lower())
-            for s_file in await run_in_threadpool(os.listdir, screenshot_dir):
-                if s_file.startswith(f"screenshot_quran_video_{surah_num}_") and normalize(s_file) == normalize(f"screenshot_quran_video_{surah_num}_{rest}.png"):
-                    screenshot_path = os.path.join(screenshot_dir, s_file)
-                    break
+            screenshot_path = None # Truly not found
 
     video_details = {
         "video": video_path,
@@ -304,6 +321,7 @@ async def manual_upload_to_youtube(video_filename: str, reciter_key: str, playli
     }
     
     try:
+        logger.info(f"Starting manual YouTube upload for {video_filename}...")
         video_id = await run_in_threadpool(
             upload_to_youtube,
             video_details=video_details,
@@ -313,7 +331,10 @@ async def manual_upload_to_youtube(video_filename: str, reciter_key: str, playli
         if video_id:
             await update_media_asset_upload(video_path, video_id)
     except Exception as e:
-        print(f"YouTube upload failed: {e}")
+        logger.error(f"Manual YouTube upload failed: {e}")
+
+    # Also upload to Facebook if enabled
+    await _upload_to_facebook_if_enabled(video_details)
 
 async def manual_upload_to_facebook(video_filename: str, details_filename: str):
     import os
@@ -350,9 +371,10 @@ async def manual_upload_to_facebook(video_filename: str, details_filename: str):
                     title = lines[0].strip()
                     description = "".join(lines[1:]).strip()
         except Exception as e:
-            print(f"Error reading info file for Facebook upload: {e}")
+            logger.error(f"Error reading info file for Facebook upload: {e}")
 
     try:
+        logger.info(f"Starting manual Facebook upload for {video_filename}...")
         video_id = await run_in_threadpool(
             fb_client.upload_to_facebook,
             video_path=video_path,
@@ -360,9 +382,9 @@ async def manual_upload_to_facebook(video_filename: str, details_filename: str):
             description=description
         )
         if video_id:
-            print(f"Manual Facebook upload successful: {video_id}")
+            logger.info(f"Manual Facebook upload successful: {video_id}")
     except Exception as e:
-        print(f"Facebook manual upload failed: {e}")
+        logger.error(f"Facebook manual upload failed: {e}")
 
 async def create_juz_video_job(juz: int, reciter: str, is_short: bool = False, 
                              background_path: str = None,
@@ -372,17 +394,16 @@ async def create_juz_video_job(juz: int, reciter: str, is_short: bool = False,
                              lines_per_page: int = 15,
                              start_page: int = None,
                              end_page: int = None):
-    """Generates a Juz Mushaf-style video and optionally uploads it to YouTube."""
-    logger.info(f"Starting Juz video generation job for Juz {juz}, Reciter: {reciter}, Pages: {start_page}-{end_page}")
-    video_details = await generate_juz_video(
-        juz, 
-        reciter, 
-        is_short, 
-        background_path, 
-        custom_title=custom_title, 
-        lines_per_page=lines_per_page,
-        start_page=start_page,
-        end_page=end_page
+    """Generates a Juz Mushaf-style video using FFmpeg engine by default and optionally uploads it to YouTube."""
+    logger.info(f"Starting Juz video generation job for Juz {juz}, Reciter: {reciter}, Pages: {start_page}-{end_page} (Engine: FFmpeg)")
+    
+    # Default to fast FFmpeg engine
+    video_details = await generate_mushaf_fast(
+        juz, reciter, engine_type="ffmpeg", 
+        is_short=is_short, background_path=background_path, 
+        custom_title=custom_title, is_juz=True, 
+        lines_per_page=lines_per_page, 
+        start_page=start_page, end_page=end_page
     )
     
     if not video_details:
@@ -404,8 +425,11 @@ async def create_juz_video_job(juz: int, reciter: str, is_short: bool = False,
         logger.warning(f"Short exceeds 60s ({duration:.2f}s). Skipping YouTube upload.")
         can_upload_to_youtube = False
     
+    logger.info(f"YouTube upload check: upload_after_generation={upload_after_generation}, can_upload_to_youtube={can_upload_to_youtube}")
+
     # Upload to YouTube if requested
     if upload_after_generation and can_upload_to_youtube:
+        logger.info("Attempting YouTube upload for Juz video...")
         target_channel_id = await _get_target_youtube_channel_id()
         
         target_playlist_id = None

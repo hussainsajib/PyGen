@@ -1,8 +1,0 @@
-{
-  "track_id": "mushaf_border_width_20260128",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-01-28T10:18:00Z",
-  "updated_at": "2026-01-28T10:18:00Z",
-  "description": "make the visible border configurable in the mushaf video genertion. also make the visible border narrower by 20%"
-}

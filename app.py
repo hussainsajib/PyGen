@@ -95,12 +95,18 @@ async def create_mushaf_video(
     custom_title: str = None,
     upload_after_generation: bool = False,
     lines_per_page: int = 15,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
 ):
     background_path = active_background
     with open("data/surah_data.json", "r", encoding="utf-8") as f:
         data = json.load(f)
         surah_name = data[str(surah)]["english_name"]
+
+    # Respect global config
+    final_upload = upload_after_generation
+    if config.get("UPLOAD_TO_YOUTUBE") == "True":
+        final_upload = True
 
     await enqueue_job(
         db,
@@ -112,7 +118,7 @@ async def create_mushaf_video(
         background_path=background_path,
         playlist_id=playlist_id if playlist_id != "none" else None,
         custom_title=custom_title,
-        upload_after_generation=upload_after_generation,
+        upload_after_generation=final_upload,
         lines_per_page=lines_per_page
     )
     return RedirectResponse(url="/jobs", status_code=303)
@@ -128,7 +134,8 @@ async def create_mushaf_fast_route(
     active_background: str = None,
     playlist_id: str = None,
     upload_after_generation: bool = False,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
 ):
     if engine not in ["ffmpeg", "opencv", "pyav"]:
         return HTMLResponse("Invalid engine type", status_code=400)
@@ -143,6 +150,11 @@ async def create_mushaf_fast_route(
             data = json.load(f)
             surah_name = data[str(target_num)]["english_name"]
             
+    # Respect global config
+    final_upload = upload_after_generation
+    if config.get("UPLOAD_TO_YOUTUBE") == "True":
+        final_upload = True
+
     from db_ops.crud_jobs import enqueue_job
     await enqueue_job(
         db,
@@ -154,7 +166,7 @@ async def create_mushaf_fast_route(
         background_path=active_background,
         engine_type=engine,
         custom_title="juz" if is_juz else "surah",
-        upload_after_generation=upload_after_generation,
+        upload_after_generation=final_upload,
         playlist_id=playlist_id if playlist_id != "none" else None
     )
     return RedirectResponse(url="/jobs", status_code=303)
@@ -356,11 +368,17 @@ async def create_juz_video(
     lines_per_page: int = 15,
     start_page: str = None,
     end_page: str = None,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
 ):
     # Convert empty strings to None for integer fields
     s_page = int(start_page) if start_page and start_page.strip() else None
     e_page = int(end_page) if end_page and end_page.strip() else None
+
+    # Respect global config
+    final_upload = upload_after_generation
+    if config.get("UPLOAD_TO_YOUTUBE") == "True":
+        final_upload = True
 
     await enqueue_job(
         db,
@@ -372,7 +390,7 @@ async def create_juz_video(
         background_path=active_background,
         playlist_id=playlist_id if playlist_id != "none" else None,
         custom_title=custom_title,
-        upload_after_generation=upload_after_generation,
+        upload_after_generation=final_upload,
         lines_per_page=lines_per_page,
         start_page=s_page,
         end_page=e_page
@@ -475,23 +493,37 @@ async def create_surah(request: Request,
                  surah_number: int, 
                  reciter: str,
                  custom_title: str = None,
-                 db: AsyncSession = Depends(get_db)
+                 db: AsyncSession = Depends(get_db),
+                 config: ConfigManager = Depends(get_config_manager)
     ):
     with open("data/surah_data.json", "r", encoding="utf-8") as f:
         data = json.load(f)
         surah_name = data[str(surah_number)]["english_name"]
-    await enqueue_job(db, surah_number, surah_name=surah_name, reciter=reciter, custom_title=custom_title, upload_after_generation=config.get("UPLOAD_TO_YOUTUBE") == "True")
+    
+    upload_after = False
+    if config.get("UPLOAD_TO_YOUTUBE") == "True":
+        upload_after = True
+        
+    await enqueue_job(db, surah_number, surah_name=surah_name, reciter=reciter, custom_title=custom_title, upload_after_generation=upload_after)
     return RedirectResponse(request.url_for("surah"))
 
 @app.get("/create-all-surah-videos", name="create_all_surah_videos")
-async def create_all_surah_videos(request: Request, reciter: str, db: AsyncSession = Depends(get_db)):
+async def create_all_surah_videos(request: Request, 
+                                reciter: str, 
+                                db: AsyncSession = Depends(get_db),
+                                config: ConfigManager = Depends(get_config_manager)
+    ):
     with open("data/surah_data.json", "r", encoding="utf-8") as f:
         data = json.load(f)
     
-        for surah_number in range(1, 115):
-            surah_name = data[str(surah_number)]["english_name"]
-            print(f"Enqueuing job for Surah {surah_number}: {surah_name} with reciter {reciter}")
-            await enqueue_job(db, surah_number, surah_name=surah_name, reciter=reciter)
+    upload_after = False
+    if config.get("UPLOAD_TO_YOUTUBE") == "True":
+        upload_after = True
+
+    for surah_number in range(1, 115):
+        surah_name = data[str(surah_number)]["english_name"]
+        print(f"Enqueuing job for Surah {surah_number}: {surah_name} with reciter {reciter}")
+        await enqueue_job(db, surah_number, surah_name=surah_name, reciter=reciter, upload_after_generation=upload_after)
     
     return RedirectResponse(request.url_for("surah"))
 

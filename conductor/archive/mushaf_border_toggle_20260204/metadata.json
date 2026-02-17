@@ -1,8 +1,0 @@
-{
-  "track_id": "mushaf_border_toggle_20260204",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-02-04T15:03:00Z",
-  "updated_at": "2026-02-04T15:03:00Z",
-  "description": "create config in /configs to toggle border for mushaf videos both shorts and regular video. also modify the code to conditionally show the border in the video. don't change other things in the code or video"
-}

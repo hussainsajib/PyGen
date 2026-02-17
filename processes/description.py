@@ -110,7 +110,7 @@ def seconds_to_hms(seconds: float) -> str:
 
 
 
-def generate_juz_details(juz_number: int, reciter: Reciter, offsets: dict, is_short: bool = False, language: str = "bengali") -> str:
+def generate_juz_details(juz_number: int, reciter: Reciter, offsets: dict, is_short: bool = False, language: str = "bengali", custom_title: str = None) -> str:
     """
     Generates localized title and description for a Juz video, including chapter markers.
     """
@@ -124,6 +124,9 @@ def generate_juz_details(juz_number: int, reciter: Reciter, offsets: dict, is_sh
     title = f"Juz {juz_number} Full - {reciter_name}"
     if language == "bengali":
         title = f"কুরআন তিলাওয়াত - পারা {e2b(str(juz_number))} - {reciter_name}"
+    
+    if is_short and custom_title:
+        title = f"{custom_title} - {title}"
         
     # 2. Description
     with open(filename, "a", encoding="utf-8") as f:

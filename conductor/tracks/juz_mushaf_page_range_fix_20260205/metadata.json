@@ -1,8 +1,0 @@
-{
-  "track_id": "juz_mushaf_page_range_fix_20260205",
-  "type": "bug",
-  "status": "new",
-  "created_at": "2026-02-05T18:02:00Z",
-  "updated_at": "2026-02-05T18:02:00Z",
-  "description": "when i created jus mushaf video for 2 pages, the video showed only 2 pages of the mushaf the audio was for the whole juz and duration. pregenerate the mushaf pages, and identify what surah is required before downloading them and stop the audio whre the mushaf page stops"
-}

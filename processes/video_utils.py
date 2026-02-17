@@ -157,44 +157,73 @@ def discover_assets(reciters=None):
                 }
 
     for video_file in video_files:
-        # Extract surah and other info from filename
-        # Pattern: quran_video_{surah}_{rest}.mp4
-        match = re.match(r'quran_video_(\d+)_(.+)\.mp4', video_file)
-        if not match:
-            continue
+        # Extract base name for consistent matching
+        video_base = os.path.splitext(video_file)[0]
+        
+        # Determine surah/juz number and type
+        surah_num = "0"
+        reciter_rest = ""
+        
+        if video_file.startswith("quran_video_"):
+            match = re.match(r'quran_video_(\d+)_(.+)\.mp4', video_file)
+            if match:
+                surah_num = match.group(1)
+                reciter_rest = match.group(2)
+        elif video_file.startswith("mushaf_video_"):
+            match = re.match(r'mushaf_video_(\d+)_(.+)\.mp4', video_file)
+            if match:
+                surah_num = match.group(1)
+                reciter_rest = match.group(2)
+        elif video_file.startswith("mushaf_juz_"):
+            match = re.match(r'mushaf_juz_(\d+)_(.+)\.mp4', video_file)
+            if match:
+                surah_num = match.group(1) # This is juz num
+                reciter_rest = match.group(2)
+        elif video_file.startswith("fast_"):
+            # fast_{engine}_{type}_{num}_{reciter}.mp4
+            parts = video_file.split("_")
+            if len(parts) >= 5:
+                surah_num = parts[3]
+                reciter_rest = "_".join(parts[4:])
+        else:
+            # Fallback for unknown patterns
+            reciter_rest = video_file
             
-        surah_num = match.group(1)
-        rest = match.group(2)
-        
         # Normalize rest (contains range and/or reciter)
-        normalized_rest = normalize(rest)
+        normalized_rest = normalize(reciter_rest)
         
-        # Check for screenshot
+        # Check for screenshot using the standard naming convention
         screenshot_present = False
-        if os.path.exists(screenshot_dir):
-            screenshot_pattern = f"screenshot_quran_video_{surah_num}_{rest}.png"
-            if os.path.exists(os.path.join(screenshot_dir, screenshot_pattern)):
-                screenshot_present = True
-            else:
-                for s_file in os.listdir(screenshot_dir):
-                    if s_file.startswith(f"screenshot_quran_video_{surah_num}_") and normalize(s_file) == normalize(f"screenshot_quran_video_{surah_num}_{rest}.png"):
-                        screenshot_present = True
-                        break
+        screenshot_filename = f"screenshot_{video_base}.png"
+        if os.path.exists(os.path.join(screenshot_dir, screenshot_filename)):
+            screenshot_present = True
+        elif os.path.exists(screenshot_dir):
+            # Fallback to fuzzy search if standard name doesn't exist
+            for s_file in os.listdir(screenshot_dir):
+                if normalize(s_file).startswith("screenshot") and normalized_rest in normalize(s_file):
+                    screenshot_present = True
+                    break
 
         # Check for details
         details_present = False
         details_filename = ""
         if os.path.exists(detail_dir):
             for d_file in os.listdir(detail_dir):
-                if d_file.startswith(f"{surah_num}_") and d_file.endswith(".txt"):
+                # Try exact match or fuzzy match based on surah/reciter
+                if surah_num != "0" and d_file.startswith(f"{surah_num}_") and d_file.endswith(".txt"):
                     d_base = d_file[:-4]
                     if normalize(d_base) in normalized_rest or normalized_rest in normalize(d_base):
                         details_present = True
                         details_filename = d_file
                         break
+                elif normalize(d_file).startswith(normalized_rest) or normalized_rest in normalize(d_file):
+                    # Fallback for Juz or other patterns
+                    details_present = True
+                    details_filename = d_file
+                    break
         
         # Identify reciter and playlist
-        reciter_name = re.sub(r'[\d_]+', ' ', rest).strip()
+        reciter_name = re.sub(r'[\d_]+', ' ', reciter_rest).strip()
         playlist_id = None
         reciter_key = None
         

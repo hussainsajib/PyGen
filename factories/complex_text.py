@@ -40,6 +40,11 @@ def render_complex_text_to_pil(text: str, font_path: str, font_size: int, color:
         # Add the alpha channel from the mask
         solid_color_img.putalpha(pil_mask)
         
+        # Trim empty space around the text
+        bbox = solid_color_img.getbbox()
+        if bbox:
+            solid_color_img = solid_color_img.crop(bbox)
+            
         return solid_color_img
 
     except Exception as e:

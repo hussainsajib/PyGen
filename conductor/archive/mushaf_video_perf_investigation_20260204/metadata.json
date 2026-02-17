@@ -1,8 +1,0 @@
-{
-  "track_id": "mushaf_video_perf_investigation_20260204",
-  "type": "investigation",
-  "status": "new",
-  "created_at": "2026-02-04T21:34:00Z",
-  "updated_at": "2026-02-04T21:34:00Z",
-  "description": "investigate why the mushaf video generation is very slow or is there a way to speed things up"
-}
