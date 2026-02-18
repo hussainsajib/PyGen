@@ -11,7 +11,7 @@
 - [x] Task: Refine `get_wbw_timestamps` and mapping logic to use decimal precision or robust rounding to prevent drift.    
 - [x] Task: Verify that all tests pass and coverage is maintained.
 - [x] Task: Conductor - User Manual Verification 'Implementation' (Protocol in workflow.md) (582f828)
-## Phase 3: Final Integration & Verification
-- [ ] Task: Run a full Juz 30 generation for Reciter Shuraym using the high-speed FFmpeg engine.
-- [ ] Task: Manually inspect the end of the video to ensure audio doesn't cut off and highlights stay aligned.
-- [ ] Task: Conductor - User Manual Verification 'Final Integration & Verification' (Protocol in workflow.md)
+## Phase 3: Final Integration & Verification [checkpoint: 3ddf0ba]
+- [x] Task: Run a full Juz 30 generation for Reciter Shuraym using the high-speed FFmpeg engine.
+- [x] Task: Manually inspect the end of the video to ensure audio doesn't cut off and highlights stay aligned.
+- [x] Task: Conductor - User Manual Verification 'Final Integration & Verification' (Protocol in workflow.md) (3ddf0ba)
