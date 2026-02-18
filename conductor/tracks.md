@@ -7,5 +7,5 @@
 
 ---
 
-- [ ] **Track: Fix Out-of-Bounds Audio Access in Juz Mushaf Generation**
+- [x] **Track: Fix Out-of-Bounds Audio Access in Juz Mushaf Generation**
 *Link: [./tracks/fix_juz_audio_bounds_20260218/](./tracks/fix_juz_audio_bounds_20260218/)*
