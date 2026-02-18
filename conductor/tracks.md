@@ -6,3 +6,8 @@
 *Link: [./tracks/fix_wbw_translation_20260216/](./tracks/fix_wbw_translation_20260216/)*
 
 
+
+---
+
+- [ ] **Track: Juz Mushaf Video Details & Localization Improvements**
+*Link: [./tracks/juz_metadata_localization_20260218/](./tracks/juz_metadata_localization_20260218/)*
