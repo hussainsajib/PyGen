@@ -2,5 +2,10 @@
 
 ---
 
-- [ ] **Track: Fix Missing Full Ayah Translation in WBW Videos**
+- [~] **Track: Fix Missing Full Ayah Translation in WBW Videos**
 *Link: [./tracks/fix_wbw_translation_20260216/](./tracks/fix_wbw_translation_20260216/)*
+
+---
+
+- [ ] **Track: Fix Out-of-Bounds Audio Access in Juz Mushaf Generation**
+*Link: [./tracks/fix_juz_audio_bounds_20260218/](./tracks/fix_juz_audio_bounds_20260218/)*
