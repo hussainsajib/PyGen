@@ -5,13 +5,12 @@
 - [x] Task: Identify the exact line in `processes/mushaf_video.py` or `factories/mushaf_ffmpeg_engine.py` (assuming high-speed FFmpeg was used) where the out-of-bounds access occurs.
 - [x] Task: Conductor - User Manual Verification 'Research & Reproduction' (Protocol in workflow.md) (8b2ce0a)
 
-## Phase 2: Implementation (TDD)
-- [ ] Task: Write failing tests in `tests/test_juz_audio_sync.py` that simulate floating-point drift in long-form audio concatenation.
-- [ ] Task: Implement a "padding" or "clamping" mechanism in the audio concatenation logic to ensure audio duration >= max timestamp.
-- [ ] Task: Refine `get_wbw_timestamps` and mapping logic to use decimal precision or robust rounding to prevent drift.
-- [ ] Task: Verify that all tests pass and coverage is maintained.
-- [ ] Task: Conductor - User Manual Verification 'Implementation' (Protocol in workflow.md)
-
+## Phase 2: Implementation (TDD) [checkpoint: 582f828]
+- [x] Task: Write failing tests in `tests/test_juz_audio_sync.py` that simulate floating-point drift in long-form audio concatenation.
+- [x] Task: Implement a "padding" or "clamping" mechanism in the audio concatenation logic to ensure audio duration >= max timestamp.
+- [x] Task: Refine `get_wbw_timestamps` and mapping logic to use decimal precision or robust rounding to prevent drift.    
+- [x] Task: Verify that all tests pass and coverage is maintained.
+- [x] Task: Conductor - User Manual Verification 'Implementation' (Protocol in workflow.md) (582f828)
 ## Phase 3: Final Integration & Verification
 - [ ] Task: Run a full Juz 30 generation for Reciter Shuraym using the high-speed FFmpeg engine.
 - [ ] Task: Manually inspect the end of the video to ensure audio doesn't cut off and highlights stay aligned.
