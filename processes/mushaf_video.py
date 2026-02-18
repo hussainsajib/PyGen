@@ -274,7 +274,7 @@ async def generate_mushaf_video(surah_number: int, reciter_key: str, is_short: b
                 final_chunk_clip = CompositeVideoClip(valid_chunk_clips, size=resolution).set_duration((chunk_end_ms - chunk_start_ms)/1000.0)
                 
                 audio_start = max(0, chunk_start_ms / 1000.0)
-                audio_end = min(total_duration, chunk_end_ms / 1000.0)
+                audio_end = min(total_duration - 0.001, chunk_end_ms / 1000.0)
                 if audio_end > audio_start:
                     final_chunk_clip = final_chunk_clip.set_audio(full_audio.subclip(audio_start, audio_end))
                 
@@ -417,7 +417,7 @@ async def prepare_juz_data_package(juz_number: int, reciter_db_obj, boundaries: 
             
             # Prepare recitation subclip
             start_t = s_timestamps[min(s_timestamps.keys())][0][1] / 1000.0
-            end_t = s_timestamps[max(s_timestamps.keys())][-1][2] / 1000.0
+            end_t = min(clip.duration - 0.001, s_timestamps[max(s_timestamps.keys())][-1][2] / 1000.0)
             final_audio_clips.append(clip.subclip(start_t, end_t))
             
             current_offset_ms += part_duration_ms
@@ -649,7 +649,7 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
 
                 try:
                     audio_start = max(0.0, float(chunk_start_ms) / 1000.0)
-                    audio_end = min(float(total_duration), float(chunk_end_ms) / 1000.0)
+                    audio_end = min(float(total_duration) - 0.001, float(chunk_end_ms) / 1000.0)
                     if float(audio_end) > float(audio_start):
                         final_chunk_clip = await run_in_threadpool(
                             lambda: final_chunk_clip.set_audio(full_audio.subclip(audio_start, audio_end))
