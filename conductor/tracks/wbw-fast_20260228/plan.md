@@ -4,7 +4,7 @@
 - [x] Task: Write failing integration tests for the new "WBW (Fast)" endpoint and form submission. [00ae414]
 - [x] Task: Implement a new FastAPI route (e.g., `/wbw-fast`) that serves the new UI. [3ac7591]
 - [x] Task: Modify the job submission logic in the new route to inject an `engine='ffmpeg'` flag (or equivalent identifier) into the queued job payload. [3ac7591]
-- [ ] Task: Update the background worker to parse the `engine` flag and route the generation task to the FFmpeg engine.
+- [x] Task: Update the background worker to parse the `engine` flag and route the generation task to the FFmpeg engine. [480c979]
 - [ ] Task: Conductor - User Manual Verification 'Backend Integration & Route Setup' (Protocol in workflow.md)
 
 ## Phase 2: User Interface & Frontend Form
