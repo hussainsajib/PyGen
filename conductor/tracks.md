@@ -14,6 +14,6 @@
 
 ---
 
-- [ ] **Track: WBW (Fast) Video Generation Endpoint**
+- [x] **Track: WBW (Fast) Video Generation Endpoint**
 *Link: [./tracks/wbw-fast_20260228/](./tracks/wbw-fast_20260228/)*
 
