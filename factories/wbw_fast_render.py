@@ -4,7 +4,11 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from factories.video import get_resolution
 from factories.font_utils import resolve_font_path
-from processes.video_configs import BACKGROUND_OPACITY, BACKGROUND_RGB, FONT_COLOR, COMMON
+from processes.video_configs import (
+    BACKGROUND_OPACITY, BACKGROUND_RGB, FONT_COLOR, COMMON,
+    get_arabic_text_position, get_translation_text_position,
+    get_arabic_textbox_size, get_translation_textbox_size
+)
 from config_manager import config_manager
 
 FONT_CACHE = {}
@@ -12,7 +16,14 @@ FONT_CACHE = {}
 def hex_to_rgb(hex_color: str):
     if not hex_color:
         return (0, 0, 0)
+    if isinstance(hex_color, tuple):
+        return hex_color
     hex_color = hex_color.lstrip('#')
+    if hex_color.startswith('rgb('):
+        try:
+             return tuple(map(int, hex_color.replace("rgb(", "").replace(")", "").split(",")))
+        except:
+             return (255, 255, 255)
     if len(hex_color) == 3:
         hex_color = ''.join([c*2 for c in hex_color])
     return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
@@ -34,9 +45,14 @@ class WBWFastRenderer:
         self.width, self.height = self.resolution
         self.background_path = background_path
         
-        # Load fonts
-        self.arabic_font_path = resolve_font_path("me_quran.ttf")
-        self.translation_font_path = resolve_font_path("kalpurush.ttf")
+        # Load fonts from config
+        self.arabic_font_name = COMMON["arabic_textbox_config"].get("font", "me_quran.ttf")
+        self.translation_font_name = COMMON["translation_textbox_config"].get("font", "kalpurush.ttf")
+        
+        self.arabic_font_path = resolve_font_path(self.arabic_font_name)
+        self.translation_font_path = resolve_font_path(self.translation_font_name)
+        
+        self.font_color = hex_to_rgb(FONT_COLOR)
         
         self.static_base = None # Cached PIL Image (RGBA)
         self._pre_rendered_frames = {} # Cache for highlight frames
@@ -50,6 +66,12 @@ class WBWFastRenderer:
             except:
                 FONT_CACHE[key] = ImageFont.load_default()
         return FONT_CACHE[key]
+
+    def _draw_text_with_shadow(self, draw, text, position, font, fill="white", shadow_color=(0,0,0,128), shadow_offset=(2, 2)):
+        # Draw shadow
+        draw.text((position[0] + shadow_offset[0], position[1] + shadow_offset[1]), text, font=font, fill=shadow_color)
+        # Draw main text
+        draw.text(position, text, font=font, fill=fill)
 
     def prepare_static_base(self):
         """Renders the background and all static text (Arabic + Translation)."""
@@ -72,46 +94,50 @@ class WBWFastRenderer:
         # 2. Draw static text
         draw = ImageDraw.Draw(self.static_base)
         
-        # Simplified drawing for skeleton:
-        # We need to calculate positions based on layout
         words = self.scene_data.get("words", [])
         translations = self.scene_data.get("translations", [])
-        
-        # Placeholder for standard layout (stacked)
-        # In a real implementation, we'd render word-by-word to get rects
-        arabic_size = 80
-        trans_size = 40
-        arabic_font = self._get_font(self.arabic_font_path, arabic_size)
-        trans_font = self._get_font(self.translation_font_path, trans_size)
-        
-        # For the skeleton, just render the whole lines centered
         arabic_text = " ".join(words)
         trans_text = " ".join(translations)
-        
-        # Arabic line (RTL handled by reversing if needed, but Pillow handles some RTL)
-        # Actually for QPC v2 we might need reversal.
-        # me_quran.ttf usually needs proper shaping.
-        
-        # Position calculation
-        y_center = self.height // 2
-        
-        # Draw Arabic
-        bbox_a = draw.textbbox((0, 0), arabic_text, font=arabic_font)
-        wa = bbox_a[2] - bbox_a[0]
-        draw.text(((self.width - wa) // 2, y_center - 100), arabic_text, font=arabic_font, fill="white")
-        
-        # Draw Translation
-        bbox_t = draw.textbbox((0, 0), trans_text, font=trans_font)
-        wt = bbox_t[2] - bbox_t[0]
-        draw.text(((self.width - wt) // 2, y_center + 50), trans_text, font=trans_font, fill="white")
-        
-        # Create dummy rects for all words to support testing multi-word highlight
-        # In Phase 2, this will be replaced with precise bounding box calculation.
-        self.word_rects = []
-        current_x = (self.width - wa) // 2
-        for _ in words:
-             self.word_rects.append([current_x, y_center - 120, current_x + 80, y_center - 20])
-             current_x += 100
+
+        if self.layout == "standard":
+            # --- Standard Layout Logic ---
+            arabic_config = get_arabic_textbox_size(self.is_short, arabic_text)
+            trans_config = get_translation_textbox_size(self.is_short, trans_text)
+            
+            arabic_font = self._get_font(self.arabic_font_path, arabic_config["fontsize"])
+            trans_font = self._get_font(self.translation_font_path, trans_config["fontsize"])
+            
+            # Position calculation (Match MoviePy logic)
+            # MoviePy Arabic position: get_arabic_text_position(is_short, arabic_clip.h)
+            # We need to estimate text height first
+            bbox_a = draw.textbbox((0, 0), arabic_text, font=arabic_font)
+            wa = bbox_a[2] - bbox_a[0]
+            ha = bbox_a[3] - bbox_a[1]
+            
+            arabic_y = get_arabic_text_position(self.is_short, ha)
+            arabic_pos = ((self.width - wa) // 2, arabic_y)
+            
+            self._draw_text_with_shadow(draw, arabic_text, arabic_pos, arabic_font, fill=self.font_color)
+            
+            # MoviePy Translation position: get_translation_text_position(is_short)
+            bbox_t = draw.textbbox((0, 0), trans_text, font=trans_font)
+            wt = bbox_t[2] - bbox_t[0]
+            
+            trans_y = get_translation_text_position(self.is_short)
+            trans_pos = ((self.width - wt) // 2, trans_y)
+            
+            self._draw_text_with_shadow(draw, trans_text, trans_pos, trans_font, fill=self.font_color)
+            
+            # Dummy rects for highlights (Phase 2 Task 2)
+            # We'll refine this in Task 5 (parity)
+            self.word_rects = []
+            current_x = arabic_pos[0]
+            for _ in words:
+                 self.word_rects.append([current_x, arabic_pos[1], current_x + 80, arabic_pos[1] + ha])
+                 current_x += 100
+        else:
+            # Placeholder for interlinear (implemented in next task)
+            self.word_rects = []
 
         # 3. Cache the base frame
         self._pre_rendered_frames[-1] = np.array(self.static_base.convert('RGB'))
