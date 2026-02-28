@@ -15,9 +15,9 @@
 - [x] Task: Refine text drawing to match MoviePy's anti-aliasing and drop-shadow effects for perfect parity. [b69a681]
 - [x] Task: Conductor - User Manual Verification 'Layout Logic & Visual Parity' (Protocol in workflow.md) [c00397c]
 
-## Phase 3: Pipeline Integration & Advanced Backgrounds
-- [ ] Task: Write failing integration tests for the `generate_wbw_fast` pipeline using the new renderer.
-- [ ] Task: Update `processes/wbw_fast_video.py` to use `WBWFastRenderer` instead of `MoviePyRenderer`.
-- [ ] Task: Implement support for video backgrounds by layering the fast-rendered text frames over video frames in the FFmpeg pipe.
-- [ ] Task: Optimize the FFmpeg encoding parameters (presets, threads) for maximum throughput with the new renderer.
-- [ ] Task: Conductor - User Manual Verification 'Pipeline Integration & Advanced Backgrounds' (Protocol in workflow.md)
+## Phase 3: Pipeline Integration & Advanced Backgrounds [checkpoint: 11a39e9]
+- [x] Task: Write failing integration tests for the `generate_wbw_fast` pipeline using the new renderer. [28f55ce]
+- [x] Task: Update `processes/wbw_fast_video.py` to use `WBWFastRenderer` instead of `MoviePyRenderer`. [1222e1c]
+- [x] Task: Implement support for video backgrounds by layering the fast-rendered text frames over video frames in the FFmpeg pipe. [a30e762]
+- [x] Task: Optimize the FFmpeg encoding parameters (presets, threads) for maximum throughput with the new renderer. [f7d23dc]
+- [x] Task: Conductor - User Manual Verification 'Pipeline Integration & Advanced Backgrounds' (Protocol in workflow.md) [11a39e9]
