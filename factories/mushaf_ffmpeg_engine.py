@@ -90,14 +90,14 @@ class FFmpegEngine:
             # If only one video, just rename/copy it
             os.rename(video_paths[0], output_path)
             return output_path
-            
+
         list_file = output_path + ".list.txt"
         with open(list_file, "w", encoding="utf-8") as f:
             for vp in video_paths:
                 # Escape single quotes and backslashes for ffmpeg concat demuxer
                 escaped_vp = os.path.abspath(vp).replace('\\', '/')
-                f.write(f"file '{escaped_vp}'\n")
-                
+                f.write(f"file 'file:{escaped_vp}'\n")
+
         ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
         concat_cmd = [
             ffmpeg_exe,
@@ -107,8 +107,7 @@ class FFmpegEngine:
             '-i', list_file,
             '-c', 'copy',
             output_path
-        ]
-        
+        ]        
         result = subprocess.run(concat_cmd, capture_output=True)
         if result.returncode != 0:
             raise RuntimeError(f"FFmpeg concat failed: {result.stderr.decode()}")
