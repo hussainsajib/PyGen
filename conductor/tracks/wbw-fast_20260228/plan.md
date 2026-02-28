@@ -1,8 +1,8 @@
 # Implementation Plan: WBW (Fast) Video Generation Endpoint
 
 ## Phase 1: Backend Integration & Route Setup
-- [ ] Task: Write failing integration tests for the new "WBW (Fast)" endpoint and form submission.
-- [ ] Task: Implement a new FastAPI route (e.g., `/wbw-fast`) that serves the new UI.
+- [x] Task: Write failing integration tests for the new "WBW (Fast)" endpoint and form submission. [00ae414]
+- [~] Task: Implement a new FastAPI route (e.g., `/wbw-fast`) that serves the new UI.
 - [ ] Task: Modify the job submission logic in the new route to inject an `engine='ffmpeg'` flag (or equivalent identifier) into the queued job payload.
 - [ ] Task: Update the background worker to parse the `engine` flag and route the generation task to the FFmpeg engine.
 - [ ] Task: Conductor - User Manual Verification 'Backend Integration & Route Setup' (Protocol in workflow.md)
