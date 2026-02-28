@@ -105,9 +105,13 @@ class WBWFastRenderer:
         wt = bbox_t[2] - bbox_t[0]
         draw.text(((self.width - wt) // 2, y_center + 50), trans_text, font=trans_font, fill="white")
         
-        # Pre-calculate a dummy highlight for the first word for testing
-        # In Phase 2, this will be precise.
-        self.word_rects = [[(self.width - wa) // 2, y_center - 120, (self.width - wa) // 2 + 100, y_center - 20]]
+        # Create dummy rects for all words to support testing multi-word highlight
+        # In Phase 2, this will be replaced with precise bounding box calculation.
+        self.word_rects = []
+        current_x = (self.width - wa) // 2
+        for _ in words:
+             self.word_rects.append([current_x, y_center - 120, current_x + 80, y_center - 20])
+             current_x += 100
 
         # 3. Cache the base frame
         self._pre_rendered_frames[-1] = np.array(self.static_base.convert('RGB'))
@@ -123,18 +127,32 @@ class WBWFastRenderer:
 
     def get_frame_at(self, timestamp_sec: float) -> np.ndarray:
         """Returns a numpy array (RGB) representing the frame at the given timestamp."""
-        if self.static_base is None:
+        if not self._pre_rendered_frames:
             self.prepare_static_base()
             
-        timestamp_ms = timestamp_sec * 1000
-        start_ms = self.scene_data.get("start_ms", 0)
-        end_ms = self.scene_data.get("end_ms", 0)
+        timestamp_ms = int(timestamp_sec * 1000)
         
         active_idx = -1
-        # In a real implementation, we'd loop through word segments
-        # For now, just a dummy check for the first word
-        if start_ms <= timestamp_ms <= end_ms:
-            active_idx = 0
+        word_segments = self.scene_data.get("word_segments", [])
         
-        frame = self._pre_rendered_frames.get(active_idx, self._pre_rendered_frames[-1]).copy()
-        return frame
+        if word_segments:
+            for i, segment in enumerate(word_segments):
+                if segment["start_ms"] <= timestamp_ms < segment["end_ms"]:
+                    active_idx = i
+                    break
+        else:
+            # Fallback if no word_segments provided (basic scene highlight)
+            start_ms = self.scene_data.get("start_ms", 0)
+            end_ms = self.scene_data.get("end_ms", 0)
+            if start_ms <= timestamp_ms <= end_ms:
+                active_idx = 0
+        
+        # We use active_idx to pick the right pre-rendered frame
+        # If active_idx is not in _pre_rendered_frames, use the base frame (-1)
+        frame = self._pre_rendered_frames.get(active_idx, self._pre_rendered_frames.get(-1))
+        
+        # If we still don't have a frame, return a black image
+        if frame is None:
+            return np.zeros((self.height, self.width, 3), dtype=np.uint8)
+            
+        return frame.copy()
