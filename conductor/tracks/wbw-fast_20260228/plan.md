@@ -15,8 +15,8 @@
 - [x] Task: Conductor - User Manual Verification 'User Interface & Frontend Form' (Protocol in workflow.md)
 
 ## Phase 3: Engine Integration & Feature Parity
-- [~] Task: Write failing unit/integration tests to verify intro, outro, background, and highlight generation using the FFmpeg engine specifically.
-- [ ] Task: Update the FFmpeg engine pipeline to correctly process and incorporate intro and outro screens.
-- [ ] Task: Ensure static image and stock video backgrounds are correctly layered within the FFmpeg pipeline.
-- [ ] Task: Verify that word-by-word highlights are accurately calculated and synchronized when using the FFmpeg backend.
+- [x] Task: Write failing unit/integration tests to verify intro, outro, background, and highlight generation using the FFmpeg engine specifically. [bda19bf]
+- [x] Task: Update the FFmpeg engine pipeline to correctly process and incorporate intro and outro screens. [62c10d2]
+- [x] Task: Ensure static image and stock video backgrounds are correctly layered within the FFmpeg pipeline. [62c10d2]
+- [x] Task: Verify that word-by-word highlights are accurately calculated and synchronized when using the FFmpeg backend. [62c10d2]
 - [ ] Task: Conductor - User Manual Verification 'Engine Integration & Feature Parity' (Protocol in workflow.md)
