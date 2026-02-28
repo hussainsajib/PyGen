@@ -135,8 +135,80 @@ class WBWFastRenderer:
             for _ in words:
                  self.word_rects.append([current_x, arabic_pos[1], current_x + 80, arabic_pos[1] + ha])
                  current_x += 100
+        elif self.layout == "interlinear":
+            # --- Interlinear Layout Logic (Match factories/single_clip.py) ---
+            space_width = 15
+            arabic_font_size = int(config_manager.get("WBW_FONT_SIZE_REGULAR", 60))
+            if self.is_short:
+                 arabic_font_size = int(config_manager.get("WBW_FONT_SIZE_SHORT", 40))
+            
+            trans_font_size = int(config_manager.get("WBW_TRANSLATION_FONT_SIZE", 20))
+            
+            arabic_font = self._get_font(self.arabic_font_path, arabic_font_size)
+            trans_font = self._get_font(self.translation_font_path, trans_font_size)
+            
+            processed_blocks = []
+            total_width = 0
+            
+            for i in range(len(words)):
+                word = words[i]
+                trans = translations[i] if i < len(translations) else ""
+                
+                # Arabic bbox
+                bbox_a = draw.textbbox((0, 0), word, font=arabic_font)
+                aw = bbox_a[2] - bbox_a[0]
+                ah = bbox_a[3] - bbox_a[1]
+                
+                # Translation bbox
+                bbox_t = draw.textbbox((0, 0), trans, font=trans_font)
+                tw = bbox_t[2] - bbox_t[0]
+                th = bbox_t[3] - bbox_t[1]
+                
+                block_w = max(aw, tw)
+                processed_blocks.append({
+                    "word": word,
+                    "trans": trans,
+                    "aw": aw, "ah": ah,
+                    "tw": tw, "th": th,
+                    "block_w": block_w
+                })
+                total_width += block_w
+                if i < len(words) - 1:
+                    total_width += space_width
+            
+            max_ah = max((b["ah"] for b in processed_blocks), default=0)
+            max_th = max((b["th"] for b in processed_blocks), default=0)
+            line_height = max_ah + 5 + 3 + 5 + max_th
+            
+            arabic_y_base = get_arabic_text_position(self.is_short, line_height)
+            
+            curr_x = (self.width + total_width) // 2 # Center the whole line
+            
+            self.word_rects = []
+            # RTL loop
+            for block in processed_blocks:
+                curr_x -= block["block_w"]
+                
+                # Arabic position
+                ax = curr_x + (block["block_w"] - block["aw"]) // 2
+                ay = arabic_y_base
+                self._draw_text_with_shadow(draw, block["word"], (ax, ay), arabic_font, fill=self.font_color)
+                
+                # Underline
+                ux = ax
+                uy = ay + block["ah"] + 2
+                draw.rectangle([ux, uy, ux + block["aw"], uy + 3], fill=self.font_color)
+                
+                # Translation position
+                tx = curr_x + (block["block_w"] - block["tw"]) // 2
+                ty = uy + 3 + 5
+                self._draw_text_with_shadow(draw, block["trans"], (tx, ty), trans_font, fill=self.font_color)
+                
+                # Highlight rect (around Arabic word)
+                self.word_rects.append([ax - 5, ay - 5, ax + block["aw"] + 5, ay + block["ah"] + 5])
+                
+                curr_x -= space_width
         else:
-            # Placeholder for interlinear (implemented in next task)
             self.word_rects = []
 
         # 3. Cache the base frame
