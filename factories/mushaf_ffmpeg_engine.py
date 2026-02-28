@@ -4,6 +4,9 @@ import imageio_ffmpeg
 from typing import Any
 from processes.performance import PerformanceMonitor
 
+from processes.video_configs import VIDEO_ENCODING_THREADS
+from config_manager import config_manager
+
 class FFmpegEngine:
     def __init__(self, renderer: Any, output_path: str, fps: int = 24):
         self.renderer = renderer
@@ -16,8 +19,10 @@ class FFmpegEngine:
         width, height = self.renderer.resolution
         
         # 1. Video Encoding Phase
-        # We write to a temporary video file first if audio is needed
         temp_video_path = self.output_path if not audio_path else self.output_path + ".temp.mp4"
+        
+        threads = config_manager.get("VIDEO_ENCODING_THREADS", VIDEO_ENCODING_THREADS)
+        preset = config_manager.get("FFMPEG_PRESET", "ultrafast")
         
         ffmpeg_cmd = [
             self.ffmpeg_exe,
@@ -29,7 +34,8 @@ class FFmpegEngine:
             '-r', str(self.fps),
             '-i', '-', # Input from pipe
             '-c:v', 'libx264',
-            '-preset', 'ultrafast',
+            '-preset', preset,
+            '-threads', str(threads),
             '-pix_fmt', 'yuv420p',
             temp_video_path
         ]
