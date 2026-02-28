@@ -1,11 +1,11 @@
 # Implementation Plan: High-Speed WBW Renderer
 
-## Phase 1: Core Renderer Foundation [checkpoint: 8304267]
-- [ ] Task: Write failing unit tests for the base `WBWFastRenderer` initialization and frame generation.
-- [ ] Task: Implement the `WBWFastRenderer` skeleton in `factories/wbw_fast_render.py` using Pillow for text drawing.
+## Phase 1: Core Renderer Foundation [checkpoint: 2bddd24]
+- [x] Task: Write failing unit tests for the base `WBWFastRenderer` initialization and frame generation. [dd07352]
+- [x] Task: Implement the `WBWFastRenderer` skeleton in `factories/wbw_fast_render.py` using Pillow for text drawing. [21d3a72]
 - [x] Task: Implement pre-rendering logic to generate and cache the base image (static text + background) for a scene. [21d3a72]
-- [ ] Task: Implement the `get_frame_at` method to apply dynamic highlight boxes over the cached base image.
-- [ ] Task: Conductor - User Manual Verification 'Core Renderer Foundation' (Protocol in workflow.md)
+- [x] Task: Implement the `get_frame_at` method to apply dynamic highlight boxes over the cached base image. [2efb22c]
+- [x] Task: Conductor - User Manual Verification 'Core Renderer Foundation' (Protocol in workflow.md) [2bddd24]
 
 ## Phase 2: Layout Logic & Visual Parity
 - [ ] Task: Write failing unit tests comparing `WBWFastRenderer` output against standard MoviePy frames for both Standard and Interlinear layouts.
