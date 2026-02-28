@@ -19,4 +19,4 @@
 - [x] Task: Update the FFmpeg engine pipeline to correctly process and incorporate intro and outro screens. [62c10d2]
 - [x] Task: Ensure static image and stock video backgrounds are correctly layered within the FFmpeg pipeline. [62c10d2]
 - [x] Task: Verify that word-by-word highlights are accurately calculated and synchronized when using the FFmpeg backend. [62c10d2]
-- [ ] Task: Conductor - User Manual Verification 'Engine Integration & Feature Parity' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Engine Integration & Feature Parity' (Protocol in workflow.md)
