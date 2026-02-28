@@ -7,7 +7,7 @@ import json
 import os
 from dotenv import load_dotenv
 from moviepy.config import change_settings
-from processes.processes import create_surah_video, manual_upload_to_youtube, manual_upload_to_facebook, create_wbw_video_job, create_mushaf_video_job, create_juz_video_job, create_mushaf_fast_job
+from processes.processes import create_surah_video, manual_upload_to_youtube, manual_upload_to_facebook, create_wbw_video_job, create_mushaf_video_job, create_juz_video_job, create_mushaf_fast_job, create_wbw_fast_job
 from fastapi.concurrency import run_in_threadpool
 
 load_dotenv()
@@ -49,18 +49,31 @@ async def job_worker():
                             details_filename=data["details_filename"]
                         )
                     elif job.job_type == "wbw":
-                        # Word-by-word video generation job
-                        await create_wbw_video_job(
-                            surah=job.surah_number,
-                            start_verse=job.start_verse,
-                            end_verse=job.end_verse,
-                            reciter=job.reciter,
-                            is_short=bool(job.is_short),
-                            upload_after_generation=bool(job.upload_after_generation),
-                            playlist_id=job.playlist_id,
-                            custom_title=job.custom_title,
-                            background_path=job.background_path
-                        )
+                        if job.engine_type == "ffmpeg":
+                            await create_wbw_fast_job(
+                                surah=job.surah_number,
+                                start_verse=job.start_verse,
+                                end_verse=job.end_verse,
+                                reciter=job.reciter,
+                                is_short=bool(job.is_short),
+                                upload_after_generation=bool(job.upload_after_generation),
+                                playlist_id=job.playlist_id,
+                                custom_title=job.custom_title,
+                                background_path=job.background_path
+                            )
+                        else:
+                            # Word-by-word video generation job (Standard)
+                            await create_wbw_video_job(
+                                surah=job.surah_number,
+                                start_verse=job.start_verse,
+                                end_verse=job.end_verse,
+                                reciter=job.reciter,
+                                is_short=bool(job.is_short),
+                                upload_after_generation=bool(job.upload_after_generation),
+                                playlist_id=job.playlist_id,
+                                custom_title=job.custom_title,
+                                background_path=job.background_path
+                            )
                     elif job.job_type == "mushaf_video":
                         # Mushaf video generation job
                         await create_mushaf_video_job(

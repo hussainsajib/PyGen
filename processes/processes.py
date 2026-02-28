@@ -139,7 +139,7 @@ async def create_surah_video(surah: int, reciter: str, custom_title: str = None,
     await record_media_asset(video_details)
     
     # Upload to YouTube if enabled in config
-    if upload_after_generation:
+    if upload_after_generation and video_details:
         try:
             target_channel_id = await _get_target_youtube_channel_id()
             video_id = await run_in_threadpool(upload_to_youtube, video_details, target_channel_id)
@@ -147,6 +147,17 @@ async def create_surah_video(surah: int, reciter: str, custom_title: str = None,
                 await update_media_asset_upload(video_details["video"], video_id)
         except Exception as e:
             print(f"YouTube upload failed: {e}")
+
+    async def create_wbw_fast_job(surah: int, start_verse: int, end_verse:int,
+                        reciter: str, is_short:bool = False,
+                        upload_after_generation: bool = False,
+                        playlist_id: str = None,
+                        custom_title: str = None,
+                        background_path: str = None):
+    """Generates a WBW video using the FFmpeg engine (stub for Phase 3)."""
+    # This will be implemented fully in Phase 3
+    print("WBW fast generation using ffmpeg engine requested. Stub implementation.")
+    pass
             
     # Sleep for 20 seconds before uploading to Facebook if YouTube upload was attempted/enabled
     if upload_after_generation:
