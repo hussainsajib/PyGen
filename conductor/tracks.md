@@ -13,5 +13,5 @@
 *Link: [./tracks/juz_metadata_localization_20260218/](./tracks/juz_metadata_localization_20260218/)*
 ---
 
-- [~] **Track: High-Speed WBW Renderer (Pillow/OpenCV)**
+- [x] **Track: High-Speed WBW Renderer (Pillow/OpenCV)**
 *Link: [./tracks/wbw-high-speed-renderer_20260228/](./tracks/wbw-high-speed-renderer_20260228/)*
