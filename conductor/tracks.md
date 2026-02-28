@@ -12,8 +12,3 @@
 - [x] **Track: Juz Mushaf Video Details & Localization Improvements**
 *Link: [./tracks/juz_metadata_localization_20260218/](./tracks/juz_metadata_localization_20260218/)*
 
----
-
-- [x] **Track: WBW (Fast) Video Generation Endpoint**
-*Link: [./tracks/wbw-fast_20260228/](./tracks/wbw-fast_20260228/)*
-
