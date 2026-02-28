@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Word-by-Word (Fast){% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Create Word-by-Word Video (Fast)</h3>
+            </div>
+            <div class="card-body">
+                <form action="/create-video" method="get">
+                    <input type="hidden" name="job_type" value="wbw">
+                    <input type="hidden" name="engine_type" value="ffmpeg">
+                    <!-- Surah Selection -->
+                    <div class="mb-3">
+                        <label for="surah" class="form-label">Select Surah:</label>
+                        <select id="surah" name="surah" class="form-select" onchange="updateVerseOptions()" required>      
+                            <option value="" disabled selected>Select Surah</option>
+                            {% for surah in surahs %}
+                            <option value="{{ surah.number }}">{{ surah.number }}. {{ surah.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Verse Range -->
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-6 mb-3 mb-md-0">
+                            <label for="start_verse" class="form-label">Starting Verse:</label>
+                            <select id="start_verse" name="start_verse" class="form-select" onchange="updateEndVerseOptions()" required>
+                                <option value="" disabled selected>-</option>
+                                <!-- Options populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="end_verse" class="form-label">Ending Verse:</label>
+                            <select id="end_verse" name="end_verse" class="form-select" required>
+                                <option value="" disabled selected>-</option>
+                                <!-- Options populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Reciter Selection -->
+                    <div class="mb-3">
+                        <label for="reciter" class="form-label">Select Reciter:</label>
+                        <select id="reciter" name="reciter" class="form-select" required>
+                            {% for r in reciters %}
+                            <option value="{{r.key}}" {% if r.key=="ar.alafasy" %} selected="selected"{% endif %}>{{ r.english_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Short Toggle -->
+                    <div class="mb-3">
+                        <label class="form-label d-block">Create short:</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="is_short_true" name="is_short" value="true" checked onclick="toggleTitleInput()">
+                            <label class="form-check-label" for="is_short_true">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="is_short_false" name="is_short" value="false" onclick="toggleTitleInput()">
+                            <label class="form-check-label" for="is_short_false">No</label>
+                        </div>
+                    </div>
+
+                    <!-- Video Title (Prefix) -->
+                    <div id="title_input_group" class="mb-3">
+                        <label for="custom_title" class="form-label">Video Title (Prefix):</label>
+                        <input type="text" id="custom_title" name="custom_title" class="form-control" placeholder="Optional title prefix">
+                    </div>
+
+                    <!-- Generation Settings -->
+                    <div class="card mb-4 border-primary shadow-sm">
+                        <div class="card-header bg-light py-2">
+                            <h6 class="mb-0 text-primary"><i class="fas fa-cog me-2"></i>Quick Settings (Global)</h6>      
+                        </div>
+                        <div class="card-body py-3">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="default_language_select" class="form-label small fw-bold">Default Language:</label>
+                                    <select id="default_language_select" name="default_language" class="form-select form-select-sm" onchange="updateGlobalConfig('DEFAULT_LANGUAGE', this.value)">
+                                        {% for lang in languages %}
+                                        <option value="{{ lang.name }}" {% if lang.name == default_language %}selected{% endif %}>{{ lang.name|title }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="upload_to_youtube_checkbox" {% if upload_to_youtube %}checked{% endif %} onchange="updateGlobalConfig('UPLOAD_TO_YOUTUBE', this.checked ? 'True' : 'False')">
+                                        <label class="form-check-label small" for="upload_to_youtube_checkbox">YouTube Upload</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="enable_facebook_upload_checkbox" {% if enable_facebook_upload %}checked{% endif %} onchange="updateGlobalConfig('ENABLE_FACEBOOK_UPLOAD', this.checked ? 'True' : 'False')">
+                                        <label class="form-check-label small" for="enable_facebook_upload_checkbox">Facebook Upload</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        {% include "partials/background_selector.html" %}
+                    </div>
+
+                    {% if upload_to_youtube %}
+                    <!-- YouTube Settings -->
+                    <div class="card mb-4 border-warning">
+                        <div class="card-header bg-warning text-dark py-2">
+                            <h6 class="mb-0"><i class="fab fa-youtube me-2"></i>YouTube Settings</h6>
+                        </div>
+                        <div class="card-body py-3">
+                            <p class="small text-muted mb-2">Automatic upload is enabled globally. Select an override playlist below if desired.</p>
+                            <div id="playlist_section">
+                                <label for="playlist_id" class="form-label small fw-bold">Target Playlist:</label>
+                                <select id="playlist_id" name="playlist_id" class="form-select form-select-sm">
+                                    <option value="none" selected>None (Upload Only)</option>
+                                    <option value="default">Use Reciter's Default Playlist</option>
+                                    {% for playlist in playlists %}
+                                    <option value="{{ playlist.id }}">{{ playlist.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <input type="hidden" name="upload_after_generation" value="true">
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Generate Fast Video</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const surahs = {{ surahs | tojson }};
+    const startVerseSelect = document.getElementById("start_verse");
+    const endVerseSelect = document.getElementById("end_verse");
+
+    // Populate verse options when a surah is selected
+    function updateVerseOptions() {
+        const surahNumber = document.getElementById("surah").value;
+        const selectedSurah = surahs.find(surah => surah.number == surahNumber);
+
+        // Clear existing options
+        startVerseSelect.innerHTML = "";
+        endVerseSelect.innerHTML = "";
+
+        // Populate start and end verse options with the full range of verses
+        for (let i = 1; i <= selectedSurah.total_verses; i++) {
+            const startOption = document.createElement("option");
+            startOption.value = i;
+            startOption.text = i;
+            startVerseSelect.add(startOption);
+        }
+
+        // Initially populate end_verse with the full range of verses
+        updateEndVerseOptions();
+    }
+
+    // Adjust end_verse options based on selected start_verse
+    function updateEndVerseOptions() {
+        const startVerse = parseInt(startVerseSelect.value, 10);
+        const surahNumber = document.getElementById("surah").value;
+        const selectedSurah = surahs.find(surah => surah.number == surahNumber);
+
+        if (!selectedSurah) return;
+
+        // Clear current options in end_verse
+        endVerseSelect.innerHTML = "";
+
+        // Populate end_verse dropdown with values starting from start_verse to total verses
+        for (let i = startVerse; i <= selectedSurah.total_verses; i++) {
+            const endOption = document.createElement("option");
+            endOption.value = i;
+            endOption.text = i;
+            endVerseSelect.add(endOption);
+        }
+        }
+
+    function toggleTitleInput() {
+        const isShort = document.getElementById("is_short_true").checked;
+        const titleGroup = document.getElementById("title_input_group");
+        if (isShort) {
+            titleGroup.classList.remove("d-none");
+        } else {
+            titleGroup.classList.add("d-none");
+        }
+    }
+
+    async function updateGlobalConfig(key, value) {
+        const element = event.target;
+
+        try {
+            const response = await fetch('/config/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ key: key, value: value })
+            });
+
+            if (response.ok) {
+                console.log(`Config ${key} updated to ${value}`);
+                // Success feedback: Brief green glow
+                element.style.boxShadow = '0 0 10px rgba(40, 167, 69, 0.5)';
+                setTimeout(() => element.style.boxShadow = '', 1000);
+            } else {
+                console.error(`Failed to update config ${key}`);
+                // Error feedback: Brief red glow
+                element.style.boxShadow = '0 0 10px rgba(220, 53, 69, 0.5)';
+                setTimeout(() => element.style.boxShadow = '', 1000);
+            }
+        } catch (error) {
+            console.error('Error updating config:', error);
+        }
+    }
+</script>
+{% endblock %}
