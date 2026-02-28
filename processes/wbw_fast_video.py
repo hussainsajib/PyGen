@@ -21,7 +21,16 @@ class MoviePyRenderer:
     def get_frame_at(self, timestamp_sec):
         return self.clip.get_frame(timestamp_sec)
 
-async def generate_wbw_fast(surah_number: int, start_verse: int, end_verse: int, reciter_key: str, engine_type: str, is_short: bool = False, background_path: str = None, custom_title: str = None):
+async def generate_wbw_fast(
+    surah_number: int, 
+    start_verse: int, 
+    end_verse: int, 
+    reciter_key: str, 
+    engine_type: str, 
+    is_short: bool = False, 
+    background_path: str = None, 
+    custom_title: str = None
+):
     """
     High-speed Word-by-Word video generation using FFmpeg pipeline.
     """
