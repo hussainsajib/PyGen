@@ -55,7 +55,7 @@ PyGen is an automated video generation platform designed specifically for creati
             - **Automated YouTube Chapters:** Automatic generation of clickable Surah-based chapter markers in video descriptions.
         - **Experimental High-Speed Engines:** Multi-backend rendering system for evaluating performance alternatives to MoviePy.
             - **Multi-Backend Support:** Choice of high-performance rendering paths using FFmpeg (Piped), OpenCV, or PyAV.
-            - **Optimized Pre-rendering:** Specialized caching strategy that pre-renders static overlays and highlight states, achieving up to 40x speed improvement over standard clip-based composition.
+            - **Optimized Pre-rendering:** Specialized caching strategy using Pillow and OpenCV that pre-renders static overlays and highlight states, achieving up to 40x speed improvement over standard clip-based composition.
             - **Integrated Benchmarking:** Automated tracking of generation time and memory usage for side-by-side performance evaluation.
             - **Seamless Distribution:** Fully connected to the social media distribution workflow, including automated metadata generation and upload triggers.
         - **Terminal Export Logging:** Automated printing of relative disk paths for successfully generated video files directly to the terminal for improved developer visibility.
