@@ -170,13 +170,20 @@ class WBWFastRenderer:
             
             self._draw_text_with_shadow(draw, trans_text, trans_pos, trans_font, fill=self.font_color)
             
-            # Dummy rects for highlights (Phase 2 Task 2)
-            # We'll refine this in Task 5 (parity)
+            # Precise word-by-word highlights for Standard layout (RTL)
             self.word_rects = []
-            current_x = arabic_pos[0]
-            for _ in words:
-                 self.word_rects.append([current_x, arabic_pos[1], current_x + 80, arabic_pos[1] + ha])
-                 current_x += 100
+            space_w = draw.textbbox((0, 0), " ", font=arabic_font)[2] - draw.textbbox((0, 0), " ", font=arabic_font)[0]
+            current_x = arabic_pos[0] + wa # Start from right side
+            
+            for word in words:
+                 bbox_w = draw.textbbox((0, 0), word, font=arabic_font)
+                 word_w = bbox_w[2] - bbox_w[0]
+                 
+                 # Position word so its right side is at current_x
+                 wx = current_x - word_w
+                 self.word_rects.append([wx - 5, arabic_pos[1] - 5, current_x + 5, arabic_pos[1] + ha + 5])
+                 
+                 current_x -= (word_w + space_w)
         elif self.layout == "interlinear":
             # --- Interlinear Layout Logic (Match factories/single_clip.py) ---
             space_width = 15
