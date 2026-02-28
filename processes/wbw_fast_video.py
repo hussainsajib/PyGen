@@ -21,6 +21,17 @@ class MoviePyRenderer:
     def get_frame_at(self, timestamp_sec):
         return self.clip.get_frame(timestamp_sec)
 
+from factories.wbw_fast_render import WBWFastRenderer, FastWBWVideoRenderer
+from db_ops.crud_surah import read_surah_data, read_timestamp_data
+from db_ops.crud_text import read_text_data, read_translation, get_full_translation_for_ayah
+from db_ops.crud_wbw import get_wbw_timestamps, get_wbw_text_for_ayah, get_wbw_translation_for_ayah
+from processes.wbw_utils import segment_words_with_timestamps
+from net_ops.download_file import download_mp3_temp
+from moviepy.editor import AudioFileClip, concatenate_audioclips
+from factories.video import make_silence
+
+# ... (MoviePyRenderer class remains)
+
 async def generate_wbw_fast(
     surah_number: int, 
     start_verse: int, 
@@ -43,12 +54,12 @@ async def generate_wbw_fast(
     
     current_language = lang_obj.name if lang_obj else "bengali"
     active_background = background_path if background_path else config_manager.get("ACTIVE_BACKGROUND")
+    translation_font = lang_obj.font if lang_obj else "arial.ttf"
+    brand_name = lang_obj.brand_name if lang_obj and lang_obj.brand_name else "Taqwa"
 
     export_dir = "exported_data/videos"
     os.makedirs(export_dir, exist_ok=True)
     
-    # We use get_filename to maintain consistency, but replace 'quran_video' with 'fast_ffmpeg_wbw' if needed.
-    # Actually, let's keep the standard naming so the UI finds it easily, but we'll prepend 'fast_' to identify it.
     std_filename = os.path.basename(get_filename(surah_number, start_verse, end_verse, reciter_db_obj.english_name, is_short))
     video_filename = f"fast_{engine_type}_{std_filename}"
     final_output_path = os.path.join(export_dir, video_filename)
@@ -66,33 +77,125 @@ async def generate_wbw_fast(
         )
         video_parts.append(intro_path)
 
-    # 2. Main WBW Video using fast FFmpeg pipeline
-    main_clip, _, _, _ = await build_wbw_video_clip(
-        surah_number, start_verse, end_verse, reciter_key, is_short, background_path, include_intro_outro=False
-    )
-    
-    if not main_clip:
-        return None
-        
+    # 2. Main WBW Video
     main_path = os.path.join(temp_dir, "main.mp4")
     
-    # Save audio temporarily
-    audio_path = os.path.join(temp_dir, "main_audio.m4a")
-    if main_clip.audio:
-        await run_in_threadpool(main_clip.audio.write_audiofile, audio_path, fps=44100, codec="aac", logger=None)
-    else:
-        audio_path = None
+    if engine_type == "pillow_opencv":
+        # --- NEW FAST PATH ---
+        # Fetch all required data
+        surah_url = read_surah_data(surah_number, reciter_db_obj.database)
+        downloaded_surah_file = download_mp3_temp(surah_url)
+        full_audio = AudioFileClip(downloaded_surah_file)
         
-    renderer = MoviePyRenderer(main_clip)
-    engine = FFmpegEngine(renderer=renderer, output_path=main_path, fps=24)
-    
-    await engine.generate(
-        duration_sec=main_clip.duration, 
-        audio_path=audio_path, 
-        performance_monitor=monitor
-    )
+        timestamp_data = read_timestamp_data(surah_number, reciter_db_obj.database)
+        verse_range_timestamps = [t for t in timestamp_data if start_verse <= t[1] <= end_verse]
+        
+        db_path = os.path.join("databases", "word-by-word", reciter_db_obj.wbw_database)
+        wbw_timestamps = get_wbw_timestamps(db_path, surah_number, start_verse, end_verse)
+        
+        text_db = "databases/text/qpc-hafs-word-by-word.db"
+        if current_language == "bengali":
+            trans_db = os.path.abspath("databases/translation/bengali/bangali-word-by-word-translation.sqlite")
+        else:
+            trans_db = os.path.abspath(f"databases/translation/{current_language}/word-by-word-translation.sqlite")
+
+        interlinear_enabled = config_manager.get("WBW_INTERLINEAR_ENABLED", "False") == "True"
+        layout = "interlinear" if interlinear_enabled else "standard"
+        
+        delay_sec = float(config_manager.get("WBW_DELAY_BETWEEN_AYAH", 0.5))
+        
+        scenes = []
+        audio_clips = []
+        current_global_sec = 0.0
+        
+        for tdata in verse_range_timestamps:
+            ayah = tdata[1]
+            segments = wbw_timestamps.get(ayah, [])
+            if not segments: continue
+            
+            arabic_words = get_wbw_text_for_ayah(text_db, surah_number, ayah)
+            trans_words = get_wbw_translation_for_ayah(trans_db, surah_number, ayah)
+            
+            # Duration for this ayah
+            ayah_duration = (segments[-1][2] - segments[0][1]) / 1000.0
+            
+            scene_data = {
+                "words": arabic_words,
+                "translations": trans_words,
+                "start_ms": 0,
+                "end_ms": int(ayah_duration * 1000),
+                "word_segments": [{"start_ms": int(s[1] - segments[0][1]), "end_ms": int(s[2] - segments[0][1])} for s in segments],
+                "reciter_name": reciter_db_obj.english_name,
+                "surah_name": surah_db_obj.english_name,
+                "verse_number": ayah,
+                "brand_name": brand_name,
+                "is_short": is_short,
+                "layout": layout
+            }
+            
+            renderer = WBWFastRenderer(scene_data, background_path=active_background)
+            scenes.append({
+                "start_sec": current_global_sec,
+                "end_sec": current_global_sec + ayah_duration,
+                "renderer": renderer
+            })
+            
+            # Audio subclip
+            ayah_audio = full_audio.subclip(segments[0][1] / 1000.0, segments[-1][2] / 1000.0)
+            audio_clips.append(ayah_audio)
+            
+            current_global_sec += ayah_duration
+            
+            if delay_sec > 0:
+                # Add delay scene (blank or last frame)
+                # For now, just extend the last scene's duration but without word highlights
+                scenes[-1]["end_sec"] += delay_sec
+                audio_clips.append(make_silence(delay_sec))
+                current_global_sec += delay_sec
+        
+        final_audio_path = os.path.join(temp_dir, "main_audio.m4a")
+        final_audio = concatenate_audioclips(audio_clips)
+        await run_in_threadpool(final_audio.write_audiofile, final_audio_path, fps=44100, codec="aac", logger=None)
+        
+        multi_renderer = FastWBWVideoRenderer(scenes, is_short=is_short)
+        engine = FFmpegEngine(renderer=multi_renderer, output_path=main_path, fps=24)
+        
+        await engine.generate(
+            duration_sec=current_global_sec, 
+            audio_path=final_audio_path, 
+            performance_monitor=monitor
+        )
+        
+    else:
+        # --- OLD MOVIEPY PATH ---
+        main_clip, _, _, _ = await build_wbw_video_clip(
+            surah_number, start_verse, end_verse, reciter_key, is_short, background_path, include_intro_outro=False
+        )
+        
+        if not main_clip:
+            return None
+            
+        # Save audio temporarily
+        audio_path = os.path.join(temp_dir, "main_audio.m4a")
+        if main_clip.audio:
+            await run_in_threadpool(main_clip.audio.write_audiofile, audio_path, fps=44100, codec="aac", logger=None)
+        else:
+            audio_path = None
+            
+        renderer = MoviePyRenderer(main_clip)
+        engine = FFmpegEngine(renderer=renderer, output_path=main_path, fps=24)
+        
+        await engine.generate(
+            duration_sec=main_clip.duration, 
+            audio_path=audio_path, 
+            performance_monitor=monitor
+        )
     
     video_parts.append(main_path)
+
+    # 3. Outro
+    # ...
+
 
     # 3. Conditionally generate and write Outro
     if not is_short and COMMON.get("enable_outro", True):
