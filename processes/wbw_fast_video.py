@@ -79,7 +79,7 @@ async def generate_wbw_fast(
     # Save audio temporarily
     audio_path = os.path.join(temp_dir, "main_audio.m4a")
     if main_clip.audio:
-        await run_in_threadpool(main_clip.audio.write_audiofile, audio_path, fps=44100, logger=None)
+        await run_in_threadpool(main_clip.audio.write_audiofile, audio_path, fps=44100, codec="aac", logger=None)
     else:
         audio_path = None
         
