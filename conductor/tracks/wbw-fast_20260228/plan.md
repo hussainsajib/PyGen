@@ -5,13 +5,13 @@
 - [x] Task: Implement a new FastAPI route (e.g., `/wbw-fast`) that serves the new UI. [3ac7591]
 - [x] Task: Modify the job submission logic in the new route to inject an `engine='ffmpeg'` flag (or equivalent identifier) into the queued job payload. [3ac7591]
 - [x] Task: Update the background worker to parse the `engine` flag and route the generation task to the FFmpeg engine. [480c979]
-- [ ] Task: Conductor - User Manual Verification 'Backend Integration & Route Setup' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Backend Integration & Route Setup' (Protocol in workflow.md)
 
 ## Phase 2: User Interface & Frontend Form
-- [ ] Task: Write failing UI unit tests or e2e test stubs for the new "WBW (Fast)" form layout.
-- [ ] Task: Create a new Jinja2 template for the simplified WBW interface, retaining intro, outro, background, and highlight settings, while removing unsupported ones.
-- [ ] Task: Update the main navigation bar to include the "WBW (Fast)" link pointing to the new route.
-- [ ] Task: Ensure form submission correctly serializes and passes all required settings to the backend endpoint.
+- [x] Task: Write failing UI unit tests or e2e test stubs for the new "WBW (Fast)" form layout. [0cb0e31]
+- [x] Task: Create a new Jinja2 template for the simplified WBW interface, retaining intro, outro, background, and highlight settings, while removing unsupported ones. [3ac7591]
+- [x] Task: Update the main navigation bar to include the "WBW (Fast)" link pointing to the new route. [99ec1b0]
+- [x] Task: Ensure form submission correctly serializes and passes all required settings to the backend endpoint. [0cb0e31]
 - [ ] Task: Conductor - User Manual Verification 'User Interface & Frontend Form' (Protocol in workflow.md)
 
 ## Phase 3: Engine Integration & Feature Parity
