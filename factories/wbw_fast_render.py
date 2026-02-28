@@ -5,9 +5,10 @@ from PIL import Image, ImageDraw, ImageFont
 from factories.video import get_resolution
 from factories.font_utils import resolve_font_path
 from processes.video_configs import (
-    BACKGROUND_OPACITY, BACKGROUND_RGB, FONT_COLOR, COMMON,
+    BACKGROUND_OPACITY, BACKGROUND_RGB, FONT_COLOR, COMMON, FOOTER_CONFIG,
     get_arabic_text_position, get_translation_text_position,
-    get_arabic_textbox_size, get_translation_textbox_size
+    get_arabic_textbox_size, get_translation_textbox_size,
+    get_reciter_info_position, get_surah_info_position, get_channel_info_position
 )
 from config_manager import config_manager
 
@@ -72,6 +73,47 @@ class WBWFastRenderer:
         draw.text((position[0] + shadow_offset[0], position[1] + shadow_offset[1]), text, font=font, fill=shadow_color)
         # Draw main text
         draw.text(position, text, font=font, fill=fill)
+
+    def _draw_footer(self, draw):
+        """Renders the footer (Reciter, Surah, Brand)."""
+        if not COMMON.get("enable_footer", True):
+            return
+            
+        footer_font = self._get_font(self.translation_font_path, FOOTER_CONFIG["fontsize"])
+        
+        # 1. Reciter
+        if COMMON.get("enable_reciter_info", True):
+            reciter_name = self.scene_data.get("reciter_name", "")
+            if reciter_name:
+                # get_reciter_info_position returns (x_ratio, y_ratio)
+                pos_r = get_reciter_info_position(self.is_short, 0)
+                px = int(self.width * pos_r[0])
+                py = int(self.height * pos_r[1])
+                self._draw_text_with_shadow(draw, reciter_name, (px, py), footer_font, fill=self.font_color)
+                
+        # 2. Surah Info
+        if COMMON.get("enable_surah_info", True):
+            surah_name = self.scene_data.get("surah_name", "")
+            verse_num = self.scene_data.get("verse_number", 0)
+            surah_text = f"{surah_name} : {verse_num}" if verse_num > 0 else surah_name
+            if surah_text:
+                bbox = draw.textbbox((0, 0), surah_text, font=footer_font)
+                sw = bbox[2] - bbox[0]
+                pos_s = get_surah_info_position(self.is_short, sw)
+                px = int(self.width * pos_s[0]) - (sw // 2)
+                py = int(self.height * pos_s[1])
+                self._draw_text_with_shadow(draw, surah_text, (px, py), footer_font, fill=self.font_color)
+                
+        # 3. Brand Info
+        if COMMON.get("enable_channel_info", True):
+            brand_name = self.scene_data.get("brand_name", "Taqwa")
+            if brand_name:
+                bbox = draw.textbbox((0, 0), brand_name, font=footer_font)
+                bw = bbox[2] - bbox[0]
+                pos_b = get_channel_info_position(self.is_short, bw)
+                px = int(self.width * pos_b[0]) - bw
+                py = int(self.height * pos_b[1])
+                self._draw_text_with_shadow(draw, brand_name, (px, py), footer_font, fill=self.font_color)
 
     def prepare_static_base(self):
         """Renders the background and all static text (Arabic + Translation)."""
@@ -210,11 +252,14 @@ class WBWFastRenderer:
                 curr_x -= space_width
         else:
             self.word_rects = []
+            
+        # 3. Draw Footer
+        self._draw_footer(draw)
 
-        # 3. Cache the base frame
+        # 4. Cache the base frame
         self._pre_rendered_frames[-1] = np.array(self.static_base.convert('RGB'))
         
-        # 4. Pre-render highlight frames
+        # 5. Pre-render highlight frames
         highlight_color = (255, 255, 0, 60) # Yellow with 23% alpha
         for i, rect in enumerate(self.word_rects):
             overlay = Image.new('RGBA', self.resolution, (0, 0, 0, 0))
