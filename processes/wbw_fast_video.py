@@ -86,8 +86,7 @@ async def generate_wbw_fast(
     renderer = MoviePyRenderer(main_clip)
     engine = FFmpegEngine(renderer=renderer, output_path=main_path, fps=24)
     
-    await run_in_threadpool(
-        engine.generate, 
+    await engine.generate(
         duration_sec=main_clip.duration, 
         audio_path=audio_path, 
         performance_monitor=monitor
