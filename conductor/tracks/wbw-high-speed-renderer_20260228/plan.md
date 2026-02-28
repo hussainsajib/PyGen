@@ -7,13 +7,13 @@
 - [x] Task: Implement the `get_frame_at` method to apply dynamic highlight boxes over the cached base image. [2efb22c]
 - [x] Task: Conductor - User Manual Verification 'Core Renderer Foundation' (Protocol in workflow.md) [2bddd24]
 
-## Phase 2: Layout Logic & Visual Parity
-- [ ] Task: Write failing unit tests comparing `WBWFastRenderer` output against standard MoviePy frames for both Standard and Interlinear layouts.
-- [ ] Task: Implement Standard stacked layout logic (Arabic line + Translation line) with proper font sizing and shadows.
-- [ ] Task: Implement Interlinear layout logic (word-over-translation) with solid underlines and precise word alignment.
-- [ ] Task: Implement footer rendering (Reciter, Surah, Brand) within the fast renderer.
-- [ ] Task: Refine text drawing to match MoviePy's anti-aliasing and drop-shadow effects for perfect parity.
-- [ ] Task: Conductor - User Manual Verification 'Layout Logic & Visual Parity' (Protocol in workflow.md)
+## Phase 2: Layout Logic & Visual Parity [checkpoint: c00397c]
+- [x] Task: Write failing unit tests comparing `WBWFastRenderer` output against standard MoviePy frames for both Standard and Interlinear layouts. [c22d6b7]
+- [x] Task: Implement Standard stacked layout logic (Arabic line + Translation line) with proper font sizing and shadows. [8069d4e]
+- [x] Task: Implement Interlinear layout logic (word-over-translation) with solid underlines and precise word alignment. [b413f6c]
+- [x] Task: Implement footer rendering (Reciter, Surah, Brand) within the fast renderer. [7eda545]
+- [x] Task: Refine text drawing to match MoviePy's anti-aliasing and drop-shadow effects for perfect parity. [b69a681]
+- [x] Task: Conductor - User Manual Verification 'Layout Logic & Visual Parity' (Protocol in workflow.md) [c00397c]
 
 ## Phase 3: Pipeline Integration & Advanced Backgrounds
 - [ ] Task: Write failing integration tests for the `generate_wbw_fast` pipeline using the new renderer.
