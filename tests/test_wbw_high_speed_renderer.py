@@ -4,13 +4,8 @@ from PIL import Image
 import os
 
 # We assume the class will be in factories/wbw_fast_render.py
-try:
-    from factories.wbw_fast_render import WBWFastRenderer
-except ImportError:
-    # This is expected during the 'Red' phase of TDD
-    WBWFastRenderer = None
+from factories.wbw_fast_render import WBWFastRenderer
 
-@pytest.mark.skipif(WBWFastRenderer is None, reason="WBWFastRenderer not implemented yet")
 def test_wbw_fast_renderer_initialization():
     # Mock data for a scene
     scene_data = {
@@ -33,7 +28,6 @@ def test_wbw_fast_renderer_initialization():
     assert renderer.scene_data == scene_data
     assert renderer.resolution == (1080, 1920)
 
-@pytest.mark.skipif(WBWFastRenderer is None, reason="WBWFastRenderer not implemented yet")
 def test_wbw_fast_renderer_frame_generation():
     scene_data = {
         "surah_number": 1,
@@ -66,9 +60,5 @@ def test_wbw_fast_renderer_frame_generation():
     assert frame_highlight.shape == (1920, 1080, 3)
     
     # Frames should be different due to highlight
+    # Note: This will currently FAIL because highlight logic is not implemented
     assert not np.array_equal(frame_0, frame_highlight)
-
-def test_trigger_red_phase():
-    """Explicitly fail if WBWFastRenderer is missing to confirm Red phase."""
-    if WBWFastRenderer is None:
-        pytest.fail("WBWFastRenderer class is missing! (Expected in Red phase)")

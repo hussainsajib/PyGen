@@ -3,7 +3,7 @@
 ## Phase 1: Core Renderer Foundation
 - [ ] Task: Write failing unit tests for the base `WBWFastRenderer` initialization and frame generation.
 - [ ] Task: Implement the `WBWFastRenderer` skeleton in `factories/wbw_fast_render.py` using Pillow for text drawing.
-- [ ] Task: Implement pre-rendering logic to generate and cache the base image (static text + background) for a scene.
+- [x] Task: Implement pre-rendering logic to generate and cache the base image (static text + background) for a scene. [21d3a72]
 - [ ] Task: Implement the `get_frame_at` method to apply dynamic highlight boxes over the cached base image.
 - [ ] Task: Conductor - User Manual Verification 'Core Renderer Foundation' (Protocol in workflow.md)
 
