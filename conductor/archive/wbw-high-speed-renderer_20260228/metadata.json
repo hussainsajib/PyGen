@@ -1,0 +1,8 @@
+{
+  "track_id": "wbw-high-speed-renderer_20260228",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-28T16:52:00Z",
+  "updated_at": "2026-02-28T16:52:00Z",
+  "description": "Implement a high-speed Pillow/OpenCV-based renderer for Word-by-Word videos to optimize performance beyond MoviePy's capabilities."
+}
