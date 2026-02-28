@@ -148,16 +148,65 @@ async def create_surah_video(surah: int, reciter: str, custom_title: str = None,
         except Exception as e:
             print(f"YouTube upload failed: {e}")
 
-    async def create_wbw_fast_job(surah: int, start_verse: int, end_verse:int,
+from processes.wbw_fast_video import generate_wbw_fast
+
+async def create_wbw_fast_job(surah: int, start_verse: int, end_verse:int,
                         reciter: str, is_short:bool = False,
                         upload_after_generation: bool = False,
                         playlist_id: str = None,
                         custom_title: str = None,
                         background_path: str = None):
-    """Generates a WBW video using the FFmpeg engine (stub for Phase 3)."""
-    # This will be implemented fully in Phase 3
-    print("WBW fast generation using ffmpeg engine requested. Stub implementation.")
-    pass
+    """Generates a WBW video using the FFmpeg engine."""
+    video_details = await generate_wbw_fast(
+        surah, start_verse, end_verse, reciter, engine_type="ffmpeg",
+        is_short=is_short, background_path=background_path, custom_title=custom_title
+    )
+    
+    if not video_details:
+        raise Exception("Error generating fast WBW video")
+        
+    screenshot_path = await run_in_threadpool(extract_frame, video_path=video_details["video"])
+    video_details["screenshot"] = screenshot_path
+    
+    await record_media_asset(video_details)
+
+    # Check duration for Shorts duration limit (YouTube)
+    duration = await run_in_threadpool(get_video_duration, video_details["video"])
+    can_upload_to_youtube = True
+    if is_short and duration > 60:
+        logger.warning(f"Short exceeds 60s ({duration:.2f}s). Skipping YouTube upload.")
+        can_upload_to_youtube = False
+    
+    # Upload to YouTube if requested
+    if upload_after_generation and can_upload_to_youtube:
+        target_channel_id = await _get_target_youtube_channel_id()
+        
+        target_playlist_id = None
+        if playlist_id == "default":
+            target_playlist_id = await _get_playlist_for_reciter(reciter)
+        elif playlist_id and playlist_id != "none":
+            target_playlist_id = playlist_id
+        
+        try:
+            video_id = await run_in_threadpool(
+                upload_to_youtube,
+                video_details=video_details,
+                target_channel_id=target_channel_id,
+                playlist_id=target_playlist_id
+            )
+            if video_id:
+                await update_media_asset_upload(video_details["video"], video_id)
+        except Exception as e:
+            print(f"YouTube upload failed: {e}")
+
+    # Sleep for 20 seconds before uploading to Facebook if YouTube upload was attempted/enabled
+    if upload_after_generation:
+        await asyncio.sleep(20)
+
+    # Upload to Facebook if enabled
+    await _upload_to_facebook_if_enabled(video_details)
+
+    return video_details
             
     # Sleep for 20 seconds before uploading to Facebook if YouTube upload was attempted/enabled
     if upload_after_generation:

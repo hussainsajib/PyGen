@@ -23,7 +23,7 @@ from processes.surah_video import create_ayah_clip, create_wbw_ayah_clip, create
 from db_ops.crud_language import fetch_localized_metadata
 from factories.composite_clip import generate_intro, generate_outro
 
-async def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_key: str, is_short: bool, custom_title: str = None, background_path: str = None):
+async def build_wbw_video_clip(surah_number: int, start_verse: int, end_verse: int, reciter_key: str, is_short: bool, background_path: str = None, include_intro_outro: bool = True):
     # Fetch localized metadata (reciter, lang_obj, surah_obj)
     async with async_session() as session:
         reciter_db_obj, lang_obj, surah_db_obj = await fetch_localized_metadata(session, surah_number, reciter_key, config_manager)
@@ -75,7 +75,7 @@ async def generate_video(surah_number: int, start_verse: int, end_verse: int, re
     clips = []
     
     # 3. Conditionally create Intro
-    if not is_short and COMMON["enable_intro"]:
+    if include_intro_outro and not is_short and COMMON["enable_intro"]:
         intro = generate_intro(surah, reciter, active_background, is_short, language=current_language)
         clips.append(intro)
     
@@ -88,9 +88,9 @@ async def generate_video(surah_number: int, start_verse: int, end_verse: int, re
                 clip = create_wbw_advanced_ayah_clip(surah, ayah, reciter, full_audio, is_short=is_short, segments=wbw_data[ayah], background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language, full_translation_db=full_translation_db)
                 if clip is None:
                     print(f"[INFO] - Falling back to standard clip for Ayah {ayah}", flush=True)
-                    clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language)
+                    clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language, full_translation_db=full_translation_db)
             else:
-                clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language)
+                clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language, full_translation_db=full_translation_db)
             clips.append(clip)
         except Exception as e:
             logger.error(f"Error creating clip for Surah {surah_num}, Ayah {ayah}: {e}")
@@ -99,13 +99,20 @@ async def generate_video(surah_number: int, start_verse: int, end_verse: int, re
     # 5. Check if clips list is empty before concatenation
     if not clips:
         logger.warning("No valid clips were generated for the given verse range.")
-        return None
+        return None, None, None
 
-    if not is_short and COMMON["enable_outro"]:
+    if include_intro_outro and not is_short and COMMON["enable_outro"]:
         outro = generate_outro(None, is_short)
         clips.append(outro)
 
     final_video = concatenate_videoclips(clips)
+    return final_video, surah, reciter, current_language
+
+async def generate_video(surah_number: int, start_verse: int, end_verse: int, reciter_key: str, is_short: bool, custom_title: str = None, background_path: str = None):
+    final_video, surah, reciter, current_language = await build_wbw_video_clip(surah_number, start_verse, end_verse, reciter_key, is_short, background_path, include_intro_outro=True)
+    if not final_video:
+        return None
+        
     output_path = get_filename(surah_number, start_verse, end_verse, reciter.english_name, is_short)
     
     final_video.write_videofile(output_path, codec='libx264', fps=24, audio_codec="aac", threads=VIDEO_ENCODING_THREADS, preset="ultrafast")

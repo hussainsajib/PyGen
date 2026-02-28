@@ -1,11 +1,11 @@
 import os
 import subprocess
 import imageio_ffmpeg
-from factories.mushaf_fast_render import MushafRenderer
+from typing import Any
 from processes.performance import PerformanceMonitor
 
 class FFmpegEngine:
-    def __init__(self, renderer: MushafRenderer, output_path: str, fps: int = 24):
+    def __init__(self, renderer: Any, output_path: str, fps: int = 24):
         self.renderer = renderer
         self.output_path = output_path
         self.fps = fps
@@ -80,3 +80,40 @@ class FFmpegEngine:
                 os.remove(temp_video_path)
         
         return self.output_path
+
+    @classmethod
+    def concat_videos(cls, video_paths: list[str], output_path: str):
+        """Concatenates multiple video files using FFmpeg demuxer."""
+        if not video_paths:
+            raise ValueError("No video paths provided for concatenation.")
+        if len(video_paths) == 1:
+            # If only one video, just rename/copy it
+            os.rename(video_paths[0], output_path)
+            return output_path
+            
+        list_file = output_path + ".list.txt"
+        with open(list_file, "w", encoding="utf-8") as f:
+            for vp in video_paths:
+                # Escape single quotes and backslashes for ffmpeg concat demuxer
+                escaped_vp = os.path.abspath(vp).replace('\\', '/')
+                f.write(f"file '{escaped_vp}'\n")
+                
+        ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+        concat_cmd = [
+            ffmpeg_exe,
+            '-y',
+            '-f', 'concat',
+            '-safe', '0',
+            '-i', list_file,
+            '-c', 'copy',
+            output_path
+        ]
+        
+        result = subprocess.run(concat_cmd, capture_output=True)
+        if result.returncode != 0:
+            raise RuntimeError(f"FFmpeg concat failed: {result.stderr.decode()}")
+            
+        if os.path.exists(list_file):
+            os.remove(list_file)
+            
+        return output_path
