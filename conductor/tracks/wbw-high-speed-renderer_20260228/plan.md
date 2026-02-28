@@ -1,6 +1,6 @@
 # Implementation Plan: High-Speed WBW Renderer
 
-## Phase 1: Core Renderer Foundation
+## Phase 1: Core Renderer Foundation [checkpoint: 8304267]
 - [ ] Task: Write failing unit tests for the base `WBWFastRenderer` initialization and frame generation.
 - [ ] Task: Implement the `WBWFastRenderer` skeleton in `factories/wbw_fast_render.py` using Pillow for text drawing.
 - [x] Task: Implement pre-rendering logic to generate and cache the base image (static text + background) for a scene. [21d3a72]
