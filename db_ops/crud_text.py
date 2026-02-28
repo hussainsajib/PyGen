@@ -8,9 +8,10 @@ TRANSLATION_DB = "./databases/translation/bengali/rawai_al_bayan.sqlite"
 def nested_dict():
     return defaultdict(nested_dict)
 
-def get_full_translation_for_ayah(surah_number: int, ayah_number: int, db_name: str = "rawai_al_bayan"):
+def get_full_translation_for_ayah(surah_number: int, ayah_number: int, db_name: str = "rawai_al_bayan", language: str = None):
     """Fetches the full translation text for a specific ayah."""
-    language = config_manager.get("DEFAULT_LANGUAGE", "bengali")
+    if language is None:
+        language = config_manager.get("DEFAULT_LANGUAGE", "bengali")
     
     # Construct path based on language
     db_path = os.path.abspath(f"databases/translation/{language}/{db_name}.sqlite")
@@ -30,14 +31,23 @@ def get_full_translation_for_ayah(surah_number: int, ayah_number: int, db_name: 
              db_path = f"./databases/translation/bengali/rawai_al_bayan.sqlite"
 
     try:
+        if not os.path.exists(db_path):
+            print(f"[DEBUG] Translation DB not found at path: {db_path}")
+            return ""
+            
         with sqlite3.connect(db_path) as conn:
             cursor = conn.cursor()
             query = "SELECT text FROM translation WHERE sura = ? AND ayah = ?"
             cursor.execute(query, (surah_number, ayah_number))
             result = cursor.fetchone()
-            return result[0] if result else ""
+            if result and result[0]:
+                text = str(result[0])
+                print(f"[DEBUG] Loaded full translation for {surah_number}:{ayah_number} from {db_name}: '{text[:30]}...'")
+                return text
+            print(f"[DEBUG] No translation found for {surah_number}:{ayah_number} in {db_name}")
+            return ""
     except Exception as e:
-        print(f"Error fetching full translation: {e}")
+        print(f"[ERROR] Error fetching full translation: {e}")
         return ""
 
 def read_text_data(surah_number: int):

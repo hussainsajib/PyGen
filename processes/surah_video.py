@@ -37,7 +37,7 @@ import json
 import anyio
 import os
 
-def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short: bool, background_image_path: str = None, translation_font: str = None, brand_name: str = None, language: str = "bengali"):
+def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short: bool, background_image_path: str = None, translation_font: str = None, brand_name: str = None, language: str = "bengali", full_translation_db: str = "rawai_al_bayan"):
     try:
         screen_size = get_resolution(is_short)
         current_clips = []
@@ -80,9 +80,20 @@ def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, s
                 surah_name_clip = generate_surah_info_clip(display_surah_name, ayah, is_short=is_short, duration=duration, language=language)
                 current_clips.append(surah_name_clip)
 
-            if COMMON["enable_channel_info"]:
-                brand_name_clip = generate_brand_clip(brand_name, is_short=is_short, duration=duration)
-                current_clips.append(brand_name_clip)
+        if COMMON["enable_channel_info"]:
+            brand_name_clip = generate_brand_clip(brand_name, is_short=is_short, duration=duration)
+            current_clips.append(brand_name_clip)
+
+        # Full Ayah Translation Overlay at bottom
+        full_trans_enabled = str(config_manager.get("WBW_FULL_TRANSLATION_ENABLED", "False")).lower() == "true"
+        if full_trans_enabled:
+            db_source = config_manager.get("WBW_FULL_TRANSLATION_SOURCE") or full_translation_db
+            print(f"[DEBUG] create_ayah_clip: Fetching full translation for {surah.number}:{ayah} (source={db_source})")
+            full_ayah_translation = get_full_translation_for_ayah(surah.number, ayah, db_source, language=language)
+            if full_ayah_translation:
+                full_trans_clip = generate_full_ayah_translation_clip(full_ayah_translation, is_short, duration, font=translation_font).set_duration(duration)
+                current_clips.append(full_trans_clip)
+
         composite = CompositeVideoClip(current_clips, size=screen_size).set_duration(duration)
     except Exception as e:
         print(str(e), flush=True)
@@ -96,7 +107,7 @@ def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, s
     return composite
 
 
-def create_wbw_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short: bool, segments: list, background_image_path: str = None, translation_font: str = None, brand_name: str = None):
+def create_wbw_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short: bool, segments: list, background_image_path: str = None, translation_font: str = None, brand_name: str = None, language: str = "bengali", full_translation_db: str = "rawai_al_bayan"):
     try:
         screen_size = get_resolution(is_short)
         current_clips = []
@@ -129,9 +140,19 @@ def create_wbw_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_m
                 display_surah_name = surah.bangla_name if language == "bengali" else surah.english_name
                 surah_name_clip = generate_surah_info_clip(display_surah_name, ayah, is_short=is_short, duration=duration)
                 current_clips.append(surah_name_clip)
-            if COMMON["enable_channel_info"]:
-                brand_name_clip = generate_brand_clip(brand_name, is_short=is_short, duration=duration)
-                current_clips.append(brand_name_clip)
+        if COMMON["enable_channel_info"]:
+            brand_name_clip = generate_brand_clip(brand_name, is_short=is_short, duration=duration)
+            current_clips.append(brand_name_clip)
+
+        # Full Ayah Translation Overlay at bottom
+        full_trans_enabled = str(config_manager.get("WBW_FULL_TRANSLATION_ENABLED", "False")).lower() == "true"
+        if full_trans_enabled:
+            db_source = config_manager.get("WBW_FULL_TRANSLATION_SOURCE") or full_translation_db
+            print(f"[DEBUG] create_wbw_ayah_clip: Fetching full translation for {surah.number}:{ayah} (source={db_source})")
+            full_ayah_translation = get_full_translation_for_ayah(surah.number, ayah, db_source, language=language)
+            if full_ayah_translation:
+                full_trans_clip = generate_full_ayah_translation_clip(full_ayah_translation, is_short, duration, font=translation_font).set_duration(duration)
+                current_clips.append(full_trans_clip)
                 
         composite = CompositeVideoClip(current_clips, size=screen_size).set_duration(duration)
         
@@ -168,10 +189,13 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
         interlinear_enabled = config_manager.get("WBW_INTERLINEAR_ENABLED", "False") == "True"
         interlinear_trans_font_size = int(config_manager.get("WBW_TRANSLATION_FONT_SIZE", 20))
         
-        full_trans_enabled = config_manager.get("WBW_FULL_TRANSLATION_ENABLED", "False") == "True"
+        full_trans_enabled = str(config_manager.get("WBW_FULL_TRANSLATION_ENABLED", "False")).lower() == "true"
         full_ayah_translation = ""
         if full_trans_enabled:
-            full_ayah_translation = get_full_translation_for_ayah(surah.number, ayah, full_translation_db)
+            # Prefer source from config if set, otherwise use language default
+            db_source = config_manager.get("WBW_FULL_TRANSLATION_SOURCE") or full_translation_db
+            print(f"[DEBUG] create_wbw_advanced_ayah_clip: Fetching full translation for {surah.number}:{ayah} (source={db_source})")
+            full_ayah_translation = get_full_translation_for_ayah(surah.number, ayah, db_source, language=language)
 
         if is_short:
             font_size = int(config_manager.get("WBW_FONT_SIZE_SHORT", 40))
@@ -214,11 +238,6 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
                 trans_clip = generate_wbw_advanced_translation_text_clip(line["translation_text"], is_short, line_duration, int(font_size * 0.8), font=translation_font)
                 current_line_clips.append(trans_clip)
             
-            # Full Ayah Translation Overlay at bottom
-            if full_trans_enabled and full_ayah_translation:
-                full_trans_clip = generate_full_ayah_translation_clip(full_ayah_translation, is_short, line_duration, font=translation_font)
-                current_line_clips.append(full_trans_clip)
-
             # Footer
             if COMMON["enable_footer"]:
                 if COMMON["enable_reciter_info"]:
@@ -229,6 +248,11 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
                     current_line_clips.append(generate_surah_info_clip(display_surah_name, ayah, is_short, line_duration, language=language))
                 if COMMON["enable_channel_info"]:
                     current_line_clips.append(generate_brand_clip(brand_name, is_short, line_duration))
+
+            # Full Ayah Translation Overlay at bottom (MOVE TO END to ensure it's on top)
+            if full_trans_enabled and full_ayah_translation:
+                full_trans_clip = generate_full_ayah_translation_clip(full_ayah_translation, is_short, line_duration, font=translation_font).set_duration(line_duration)
+                current_line_clips.append(full_trans_clip)
             
             line_composite = CompositeVideoClip(current_line_clips, size=screen_size).set_duration(line_duration)
             ayah_clips.append(line_composite)
@@ -326,10 +350,9 @@ async def generate_surah(surah_number: int, reciter_tag: str, custom_title: str 
                 if clip is None:
                     # Fallback to standard clip if WBW fails
                     print(f"[INFO] - Falling back to standard clip for Ayah {ayah}", flush=True)
-                    clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language)
+                    clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language, full_translation_db=full_translation_db)
             else:
-                print(f"DEBUG: Passing language to create_ayah_clip: {current_language}", flush=True)
-                clip = create_ayah_clip(surah, ayah, reciter,gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language)
+                clip = create_ayah_clip(surah, ayah, reciter,gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language, full_translation_db=full_translation_db)
         except Exception as e:
             print(f"[ERROR ] - Error creating clip for Surah {surah_number}, Ayah {ayah}: {e}", flush=True)
             raise e

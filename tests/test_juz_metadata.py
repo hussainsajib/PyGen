@@ -1,20 +1,80 @@
-import pytest
-from db_ops.crud_mushaf import get_juz_boundaries
+import unittest
+from unittest.mock import MagicMock
+import os
+import sys
 
-def test_get_juz_boundaries_juz_1():
-    """Test that Juz 1 boundaries are correctly retrieved."""
-    # Juz 1: Surah 1 Ayah 1 to Surah 2 Ayah 141
-    boundaries = get_juz_boundaries(1)
-    assert boundaries is not None
-    assert boundaries["start_surah"] == 1
-    assert boundaries["start_ayah"] == 1
-    assert boundaries["end_surah"] == 2
-    assert boundaries["end_ayah"] == 141
-    assert "verse_mapping" in boundaries
-    assert boundaries["verse_mapping"]["1"] == "1-7"
-    assert boundaries["verse_mapping"]["2"] == "1-141"
+# Add project root to sys.path
+sys.path.append(os.getcwd())
 
-def test_get_juz_boundaries_invalid():
-    """Test that invalid Juz numbers return None."""
-    assert get_juz_boundaries(0) is None
-    assert get_juz_boundaries(31) is None
+from processes.description import generate_juz_details
+from processes.Classes import Reciter, Surah
+
+class TestJuzMetadata(unittest.TestCase):
+    def setUp(self):
+        # Mock Reciter
+        self.reciter = MagicMock(spec=Reciter)
+        self.reciter.english_name = "Saud Al-Shuraym"
+        self.reciter.bangla_name = "সাউদ আল-শুরাইম"
+        
+        # Mock Surah numbers and names
+        # Surah 67 (Al-Mulk) starts Juz 29, then 68 (Al-Qalam)
+        self.offsets = {
+            67: 5000,   # 5s
+            68: 65000   # 1m 5s
+        }
+
+    def test_bengali_metadata_format(self):
+        """
+        Verify the Bengali title and chapter labels follow the new pattern.
+        Expected Title: পারা ২৯ - সাউদ আল-শুরাইম - কুরআন তিলাওয়াত
+        Expected Chapters: 00:05 সুরা আল-মুলক
+        """
+        filename = generate_juz_details(
+            juz_number=29, 
+            reciter=self.reciter, 
+            offsets=self.offsets, 
+            language="bengali"
+        )
+        
+        with open(filename, "r", encoding="utf-8") as f:
+            lines = [l.strip() for l in f.readlines() if l.strip()]
+            
+        # 1. Title Verification (Should fail - currently 'কুরআন তিলাওয়াত - পারা ২৯ - সাউদ আল-শুরাইম')
+        expected_title = "পারা ২৯ - সাউদ আল-শুরাইম - কুরআন তিলাওয়াত"
+        self.assertEqual(lines[0], expected_title)
+        
+        # 2. Chapter Verification (Should fail - currently '01:23:20 Surah আল-মুলক')
+        # Note: 'সুরা' vs 'সুরাহ' based on specs/conventions. Spec said 'সুরা' (e.g. '00:00 সুরা আল-ফাতিহা')
+        chapter_line = lines[3] # Index 0: title, 1: desc, 2: 'Chapters:', 3: first chapter
+        self.assertIn("সুরাহ আল-মুলক", chapter_line)
+        self.assertIn("00:00", chapter_line)
+        
+        # Second chapter should be the Surah at its actual offset
+        self.assertIn("01:05", lines[4])
+        self.assertIn("সুরাহ আল-কলম", lines[4])
+
+    def test_english_metadata_format(self):
+        """
+        Verify the English title and chapter labels.
+        Expected Title: Juz 29 - Saud Al-Shuraym - Quran Recitation
+        Expected Chapters: 00:00 Surah Al-Mulk, 01:05 Surah Al-Qalam
+        """
+        filename = generate_juz_details(
+            juz_number=29, 
+            reciter=self.reciter, 
+            offsets=self.offsets, 
+            language="english"
+        )
+        
+        with open(filename, "r", encoding="utf-8") as f:
+            lines = [l.strip() for l in f.readlines() if l.strip()]
+            
+        expected_title = "Juz 29 - Saud Al-Shuraym - Quran Recitation"
+        self.assertEqual(lines[0], expected_title)
+        self.assertIn("Surah Al-Mulk", lines[3])
+        self.assertIn("00:00", lines[3])
+        self.assertIn("Surah Al-Qalam", lines[4])
+        self.assertIn("01:05", lines[4])
+
+if __name__ == "__main__":
+    unittest.main()

@@ -13,6 +13,8 @@ import numpy as np
 import os
 import json
 
+from moviepy.config import get_setting
+
 # Load ligature data for Mushaf headers
 LIGATURE_DATA = {}
 try:
@@ -448,9 +450,26 @@ def generate_full_ayah_translation_clip(text: str, is_short: bool, duration: int
     config["fontsize"] = font_size
     if font:
         config["font"] = get_font_path(font)
-    translation_clip = TextClip(text, size=translation_sizes["size"], **config)
+    
+    # Force center alignment for better looks in full translation
+    config["align"] = "Center"
+    
+    # Ensure TextClip has duration
+    translation_clip = TextClip(text, size=translation_sizes["size"], **config).set_duration(duration)
+    
+    # Add a semi-transparent background box
+    bg_width = translation_clip.w + 40
+    bg_height = translation_clip.h + 20
+    bg_box = ColorClip(size=(bg_width, bg_height), color=(0, 0, 0)).set_opacity(0.6).set_duration(duration)
+    
+    # Composite them with explicit size and duration
+    final_clip = CompositeVideoClip(
+        [bg_box, translation_clip.set_position('center')],
+        size=(bg_width, bg_height)
+    ).set_duration(duration)
+    
     translation_pos = COMMON["f_full_ayah_translation_position"](is_short)
-    return translation_clip.set_position(('center', translation_pos)).set_duration(duration)
+    return final_clip.set_position(('center', translation_pos))
 
 def generate_reciter_name_clip(reciter_name_bangla: str, is_short: bool, duration: int) -> TextClip:
     reciter_name_clip = TextClip(reciter_name_bangla, font=resolve_font_path("kalpurush"), **FOOTER_CONFIG)

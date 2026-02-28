@@ -120,10 +120,15 @@ def generate_juz_details(juz_number: int, reciter: Reciter, offsets: dict, is_sh
         
     reciter_name = reciter.bangla_name if language == "bengali" else reciter.english_name
     
-    # 1. Title
-    title = f"Juz {juz_number} Full - {reciter_name}"
-    if language == "bengali":
-        title = f"কুরআন তিলাওয়াত - পারা {e2b(str(juz_number))} - {reciter_name}"
+    # Labels
+    juz_label = "পারা" if language == "bengali" else "Juz"
+    quran_recitation_label = "কুরআন তিলাওয়াত" if language == "bengali" else "Quran Recitation"
+    surah_label = "সুরাহ" if language == "bengali" else "Surah"
+    
+    juz_num_str = e2b(str(juz_number)) if language == "bengali" else str(juz_number)
+    
+    # 1. Title: [Localized Juz] [Num] - [Reciter] - [Localized Quran Recitation]
+    title = f"{juz_label} {juz_num_str} - {reciter_name} - {quran_recitation_label}"
     
     if is_short and custom_title:
         title = f"{custom_title} - {title}"
@@ -133,31 +138,39 @@ def generate_juz_details(juz_number: int, reciter: Reciter, offsets: dict, is_sh
         f.write(f"{title}\n\n")
         
         if language == "bengali":
-            f.write(f"সম্পূর্ণ পারা {e2b(str(juz_number))} তিলাওয়াত। কুরআনের এই সুন্দর তিলাওয়াতটি শুনুন এবং শেয়ার করুন।\n\n")
+            f.write(f"সম্পূর্ণ {juz_label} {juz_num_str} তিলাওয়াত। কুরআনের এই সুন্দর তিলাওয়াতটি শুনুন এবং শেয়ার করুন।\n\n")
         else:
-            f.write("Full Juz Recitation. Listen to this beautiful Quran recitation and share.\n\n")
+            f.write(f"Full {juz_label} {juz_number} Recitation. Listen to this beautiful Quran recitation and share.\n\n")
             
         # Chapter Markers
         f.write("Chapters:\n")
         # Sort surahs in the Juz by their start offset
         sorted_surahs = sorted(offsets.items(), key=lambda x: x[1])
-        for surah_num, offset_sec in sorted_surahs:
+        
+        for i, (surah_num, offset_ms) in enumerate(sorted_surahs):
+            # Force the first Surah to start at 00:00 to satisfy YouTube's requirements
+            # and include the intro silence in the first chapter.
+            if i == 0:
+                offset_sec = 0.0
+            else:
+                offset_sec = float(offset_ms) / 1000.0
+                
             s_obj = Surah(surah_num)
             s_name = s_obj.bangla_name if language == "bengali" else s_obj.english_name
-            f.write(f"{seconds_to_hms(offset_sec)} Surah {s_name}\n")
+            f.write(f"{seconds_to_hms(offset_sec)} {surah_label} {s_name}\n")
         f.write("\n")
         
         f.write("Subscribe for more Quran reminders: @TaqwaBangla\n")
         f.write("Social Links: https://www.facebook.com/profile.php?id=61570927757129\n\n")
         
         if language == "bengali":
-            f.write(f"#Para{juz_number} #FullPara #Quran #Recitation #TaqwaBangla #Islam\n\n")
+            f.write(f"#{juz_label.replace(' ', '')}{juz_number} #Full{juz_label.replace(' ', '')} #Quran #Recitation #TaqwaBangla #Islam\n\n")
         else:
             f.write(f"#Juz{juz_number} #FullJuz #Quran #Recitation #TaqwaBangla #Islam\n\n")
         
         # Tags
         if language == "bengali":
-            tags = ["Quran", "Islam", "Islamic", "Quran Tilawat", "Taqwa Bangla", reciter_name, f"পারা {e2b(str(juz_number))}"]
+            tags = ["Quran", "Islam", "Islamic", "Quran Tilawat", "Taqwa Bangla", reciter_name, f"{juz_label} {juz_num_str}"]
         else:
             tags = ["Quran", "Islam", "Islamic", "Quran Tilawat", "Taqwa Bangla", reciter_name, f"Juz {juz_number}"]
         f.write("TAGS: " + ", ".join(tags))

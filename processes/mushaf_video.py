@@ -466,6 +466,10 @@ async def generate_juz_video(juz_number: int, reciter_key: str, is_short: bool =
                 seg[1] += recitation_start_offset_ms
                 seg[2] += recitation_start_offset_ms
         
+        # Shift Surah offsets as well for accurate metadata
+        for s_num in offsets:
+            offsets[s_num] += recitation_start_offset_ms
+        
         # Prepend and append 5s silence to audio
         intro_silence = make_silence(5.0)
         ending_silence = make_silence(5.0)
