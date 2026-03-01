@@ -1,6 +1,7 @@
 import os
 import json
 import asyncio
+import time
 from typing import Optional
 from fastapi.concurrency import run_in_threadpool
 from dotenv import load_dotenv
@@ -1083,12 +1084,16 @@ async def image_generator_interface(
 
     active_bg = config.get("ACTIVE_BACKGROUND", "")
     default_hashtags = config.get("IMAGE_GEN_DEFAULT_HASHTAGS", "#Quran #TaqwaBangla #IslamicPost")
+    bg_rgb = config.get("BACKGROUND_RGB", "(0,0,0)")
+    font_color = config.get("FONT_COLOR", "white")
 
     return templates.TemplateResponse("image_generator.html", {
         "request": request,
         "surahs": surahs,
         "active_bg": active_bg,
-        "default_hashtags": default_hashtags
+        "default_hashtags": default_hashtags,
+        "bg_rgb": bg_rgb,
+        "font_color": font_color
     })
 
 async def _internal_generate_image(surah: int, ayah: int, background_path: str = None):
