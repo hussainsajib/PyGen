@@ -34,6 +34,27 @@ class FacebookClient:
             logger.error(f"Error uploading standard video to Facebook: {e}")
             return None
 
+    def upload_image(self, image_path: str, caption: str) -> Optional[str]:
+        """Uploads a photo to the Facebook Page."""
+        url = f"{self.base_url}/{self.page_id}/photos"
+        
+        params = {
+            "access_token": self.page_access_token,
+            "caption": caption
+        }
+        
+        try:
+            with open(image_path, 'rb') as f:
+                files = {"source": f}
+                response = httpx.post(url, params=params, files=files, timeout=60.0)
+                response.raise_for_status()
+                data = response.json()
+                logger.info(f"Successfully uploaded image to Facebook. ID: {data.get('id')}")
+                return data.get("id")
+        except Exception as e:
+            logger.error(f"Error uploading image to Facebook: {e}")
+            return None
+
     def upload_reel(self, video_path: str, description: str) -> Optional[str]:
         """Uploads a Reel to the Facebook Page using the Reels API."""
         # 1. Initialize the upload session
