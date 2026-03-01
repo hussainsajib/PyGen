@@ -33,6 +33,29 @@
                                 </select>
                             </div>
 
+                            <!-- Image Size Selection -->
+                            <div class="mb-3">
+                                <label for="image_size" class="form-label fw-bold">Image Format:</label>
+                                <select id="image_size" name="image_size" class="form-select" onchange="updatePreviewSize(); updatePreview();">
+                                    <option value="square">Square (1:1)</option>
+                                    <option value="portrait">Portrait (4:5)</option>
+                                    <option value="landscape">Landscape (1.91:1)</option>
+                                    <option value="story">Story (9:16)</option>
+                                </select>
+                            </div>
+
+                            <!-- Font Sizes -->
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label for="arabic_font_size" class="form-label fw-bold small">Arabic Size:</label>
+                                    <input type="number" id="arabic_font_size" class="form-control form-control-sm" value="80" min="20" max="250" onchange="updatePreview()">
+                                </div>
+                                <div class="col-6">
+                                    <label for="translation_font_size" class="form-label fw-bold small">Translation Size:</label>
+                                    <input type="number" id="translation_font_size" class="form-control form-control-sm" value="45" min="15" max="150" onchange="updatePreview()">
+                                </div>
+                            </div>
+
                             <!-- Background Selector -->
                             <div class="mb-4">
                                 {% include "partials/background_selector.html" %}
@@ -73,7 +96,7 @@
                                 </div>
                             </div>
                         </div>
-                        <p class="small text-muted mt-2">Note: Final image will be 1080x1080px.</p>
+                        <p id="dimensionNote" class="small text-muted mt-2">Note: Final image will be 1080x1080px.</p>
                     </div>
                 </div>
             </div>
@@ -102,10 +125,33 @@
         updatePreview();
     }
 
+    function updatePreviewSize() {
+        const size = document.getElementById('image_size').value;
+        const container = document.getElementById('previewContainer');
+        const note = document.getElementById('dimensionNote');
+        
+        if (size === 'square') {
+            container.style.aspectRatio = '1/1';
+            note.textContent = 'Note: Final image will be 1080x1080px.';
+        } else if (size === 'portrait') {
+            container.style.aspectRatio = '4/5';
+            note.textContent = 'Note: Final image will be 1080x1350px.';
+        } else if (size === 'landscape') {
+            container.style.aspectRatio = '16/9';
+            note.textContent = 'Note: Final image will be 1920x1080px.';
+        } else if (size === 'story') {
+            container.style.aspectRatio = '9/16';
+            note.textContent = 'Note: Final image will be 1080x1920px.';
+        }
+    }
+
     async function updatePreview() {
         const surah = document.getElementById('surah').value;
         const ayah = document.getElementById('ayah').value;
         const bg = document.getElementById('active_background').value;
+        const size = document.getElementById('image_size').value;
+        const arabicSize = document.getElementById('arabic_font_size').value;
+        const transSize = document.getElementById('translation_font_size').value;
 
         if (!surah || !ayah) return;
 
@@ -116,11 +162,10 @@
         loading.classList.remove('d-none');
         previewImg.classList.add('opacity-50');
 
-        let url = `/api/generate-image?surah=${surah}&ayah=${ayah}`;
+        let url = `/api/generate-image?surah=${surah}&ayah=${ayah}&image_size=${size}&arabic_font_size=${arabicSize}&translation_font_size=${transSize}`;
         if (bg) url += `&background_path=${encodeURIComponent(bg)}`;
 
         try {
-            // Use timestamp to avoid cache
             const cacheBuster = `&t=${new Date().getTime()}`;
             previewImg.src = url + cacheBuster;
             previewImg.onload = () => {
@@ -138,13 +183,16 @@
         const surah = document.getElementById('surah').value;
         const ayah = document.getElementById('ayah').value;
         const bg = document.getElementById('active_background').value;
+        const size = document.getElementById('image_size').value;
+        const arabicSize = document.getElementById('arabic_font_size').value;
+        const transSize = document.getElementById('translation_font_size').value;
 
         if (!surah || !ayah) {
             alert('Please select Surah and Ayah first.');
             return;
         }
 
-        let url = `/api/download-image?surah=${surah}&ayah=${ayah}`;
+        let url = `/api/download-image?surah=${surah}&ayah=${ayah}&image_size=${size}&arabic_font_size=${arabicSize}&translation_font_size=${transSize}`;
         if (bg) url += `&background_path=${encodeURIComponent(bg)}`;
         
         window.location.href = url;
@@ -155,6 +203,9 @@
         const ayah = document.getElementById('ayah').value;
         const bg = document.getElementById('active_background').value;
         const description = document.getElementById('description').value;
+        const size = document.getElementById('image_size').value;
+        const arabicSize = document.getElementById('arabic_font_size').value;
+        const transSize = document.getElementById('translation_font_size').value;
 
         if (!surah || !ayah) {
             alert('Please select Surah and Ayah first.');
@@ -170,6 +221,9 @@
         formData.append('surah', surah);
         formData.append('ayah', ayah);
         formData.append('description', description);
+        formData.append('image_size', size);
+        formData.append('arabic_font_size', arabicSize);
+        formData.append('translation_font_size', transSize);
         if (bg) formData.append('background_path', bg);
 
         try {
@@ -196,8 +250,10 @@
     // Initial check for background
     document.addEventListener('DOMContentLoaded', () => {
         const activeBg = "{{ active_bg }}";
-        if (activeBg) {
-            updateActiveBackground(activeBg, activeBg.split(/[\/]/).pop());
+        if (activeBg && activeBg.trim() !== "") {
+            const filename = activeBg.split(/[\\/]/).pop();
+            document.getElementById('selected_bg_name').innerText = filename;
+            document.getElementById('clear_bg_btn').classList.remove('d-none');
         }
     });
 </script>

@@ -1096,7 +1096,14 @@ async def image_generator_interface(
         "font_color": font_color
     })
 
-async def _internal_generate_image(surah: int, ayah: int, background_path: str = None):
+async def _internal_generate_image(
+    surah: int, 
+    ayah: int, 
+    background_path: str = None,
+    arabic_font_size: int = 80,
+    translation_font_size: int = 45,
+    image_size: str = "square" # square, portrait, landscape
+):
     # 1. Get real data
     page_number = await run_in_threadpool(crud_mushaf.get_page_for_verse, surah, ayah)
     db_wbw_path = "databases/text/word_by_word_qpc-v2.db"
@@ -1105,17 +1112,28 @@ async def _internal_generate_image(surah: int, ayah: int, background_path: str =
     surah_obj = await get_surah_by_number(surah)
     surah_name_bangla = surah_obj.bangla_name if surah_obj else f"Surah {surah}"
 
-    # 2. Generate
-    gen = ImageGenerator()
+    # 2. Determine dimensions
+    width, height = 1080, 1080
+    if image_size == "portrait":
+        width, height = 1080, 1350
+    elif image_size == "landscape":
+        width, height = 1920, 1080
+    elif image_size == "story":
+        width, height = 1080, 1920
+
+    # 3. Generate
+    gen = ImageGenerator(width=width, height=height)
     if background_path and os.path.exists(background_path):
         gen.set_background(background_path, dim_opacity=0.4)
     
-    y = 200
-    h = gen.render_arabic_ayah(words, page_number, font_size=80, y_pos=y)
-    y = 500
-    h = gen.render_bangla_translation(translation, font_size=45, y_pos=y)
-    y = 650
-    gen.render_metadata(surah_name_bangla, ayah, font_size=35, y_pos=y)
+    # Position logic based on height
+    y_arabic = height // 4
+    y_translation = height // 2
+    y_metadata = int(height * 0.8)
+
+    gen.render_arabic_ayah(words, page_number, font_size=arabic_font_size, y_pos=y_arabic)
+    gen.render_bangla_translation(translation, font_size=translation_font_size, y_pos=y_translation)
+    gen.render_metadata(surah_name_bangla, ayah, font_size=int(translation_font_size * 0.8), y_pos=y_metadata)
     gen.render_branding()
     
     img_io = io.BytesIO()
@@ -1128,12 +1146,18 @@ async def api_generate_image(
     surah: int, 
     ayah: int, 
     background_path: str = None,
+    arabic_font_size: int = 80,
+    translation_font_size: int = 45,
+    image_size: str = "square",
     config: ConfigManager = Depends(get_config_manager)
 ):
     if not background_path:
         background_path = config.get("ACTIVE_BACKGROUND")
         
-    img_io = await _internal_generate_image(surah, ayah, background_path)
+    img_io = await _internal_generate_image(
+        surah, ayah, background_path, 
+        arabic_font_size, translation_font_size, image_size
+    )
     return Response(content=img_io.getvalue(), media_type="image/png")
 
 @app.get("/api/download-image")
@@ -1141,12 +1165,18 @@ async def api_download_image(
     surah: int, 
     ayah: int, 
     background_path: str = None,
+    arabic_font_size: int = 80,
+    translation_font_size: int = 45,
+    image_size: str = "square",
     config: ConfigManager = Depends(get_config_manager)
 ):
     if not background_path:
         background_path = config.get("ACTIVE_BACKGROUND")
         
-    img_io = await _internal_generate_image(surah, ayah, background_path)
+    img_io = await _internal_generate_image(
+        surah, ayah, background_path,
+        arabic_font_size, translation_font_size, image_size
+    )
     return Response(
         content=img_io.getvalue(), 
         media_type="image/png",
@@ -1159,6 +1189,9 @@ async def api_post_image_to_facebook(
     ayah: int = Form(...),
     description: str = Form(...),
     background_path: str = Form(None),
+    arabic_font_size: int = Form(80),
+    translation_font_size: int = Form(45),
+    image_size: str = Form("square"),
     db: AsyncSession = Depends(get_db),
     config: ConfigManager = Depends(get_config_manager)
 ):
@@ -1166,7 +1199,10 @@ async def api_post_image_to_facebook(
     if not background_path:
         background_path = config.get("ACTIVE_BACKGROUND")
     
-    img_io = await _internal_generate_image(surah, ayah, background_path)
+    img_io = await _internal_generate_image(
+        surah, ayah, background_path,
+        arabic_font_size, translation_font_size, image_size
+    )
     
     # 2. Save temporarily for upload
     temp_dir = "exported_data/temp"
