@@ -64,5 +64,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Image Post Generator (Ayah & Bangla Translation)**
+- [x] **Track: Image Post Generator (Ayah & Bangla Translation)**
 *Link: [./tracks/image_generator_20260301/](./tracks/image_generator_20260301/)*
