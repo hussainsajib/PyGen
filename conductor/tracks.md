@@ -61,8 +61,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Juz Mushaf Video Details & Localization Improvements**
 *Link: [./tracks/juz_metadata_localization_20260218/](./tracks/juz_metadata_localization_20260218/)*
-
----
-
-- [x] **Track: Image Post Generator (Ayah & Bangla Translation)**
-*Link: [./tracks/image_generator_20260301/](./tracks/image_generator_20260301/)*
