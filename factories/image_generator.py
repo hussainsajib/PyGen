@@ -3,6 +3,7 @@ import sqlite3
 from PIL import Image, ImageDraw, ImageFont
 from factories.font_utils import resolve_font_path
 from factories.shaping_utils import render_shaped_text
+from bangla import convert_english_digit_to_bangla_digit as e2b
 from config_manager import config_manager
 
 class ImageGenerator:
@@ -109,7 +110,7 @@ class ImageGenerator:
 
     def render_metadata(self, surah_name, ayah_number, font_size=30, y_pos=600):
         """Renders localized metadata (Surah Name:Ayah Number)."""
-        text = f"{surah_name}:{ayah_number}"
+        text = f"{surah_name}:{e2b(str(ayah_number))}"
         shaped_img = render_shaped_text(text, self.bangla_font_path, font_size, (200, 200, 200))
         
         if not shaped_img:
