@@ -18,7 +18,7 @@ PyGen is an automated video generation platform designed specifically for creati
 - **Automated Video Assembly:** Intelligent blending of audio recitations with synchronized text translations and background visuals.
 - **Word-by-Word Synchronization:** Advanced video generation engine that renders synchronized Arabic words and translations using multi-line segmentation and configurable typography.
     - **Configurable Pacing:** Support for adjustable delays between verses to improve recitation flow.
-    - **Enhanced Overlays:** Optional full-ayah translation at the bottom of the screen with configurable database sources and font sizes.
+    - **Enhanced Overlays:** Optional full-ayah translation at the bottom of the screen with high-fidelity Pillow-based rendering, configurable database sources, and font sizes.
     - **Interlinear Rendering:** New specialized layout that centers translations directly beneath each Arabic word with solid underlines for improved clarity.
     - **High-Speed Engine:** A dedicated 'WBW (Fast)' generation pipeline utilizing direct FFmpeg subprocess piping to significantly reduce rendering times while maintaining full feature parity (intro/outro, highlights, backgrounds).
     - **Synchronized Inline Configuration:** Direct synchronization of core generation settings (Language, Social Media Toggles) between creation pages and global application configuration.
