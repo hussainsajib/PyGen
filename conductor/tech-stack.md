@@ -20,7 +20,7 @@
 - **High-Speed Encoding:** PyAV (Pythonic binding for FFmpeg libraries), OpenCV (C++ optimized video writing), and FFmpeg (Direct subprocess piping).
 - **Resource Management:** Dynamic CPU-aware threading for optimized video encoding.
 - **Computer Vision:** OpenCV (Used for image manipulation and analysis)
-- **Image Processing:** Pillow (PIL Fork - Comprehensive image library)
+- **Image Processing:** Pillow (PIL Fork - Used for high-fidelity image generation, text rendering, and composition)
 
 ## Frontend & Templating
 - **Frontend Framework:** React (Integrated with FastAPI for dynamic user interfaces)
