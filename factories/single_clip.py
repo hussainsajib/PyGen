@@ -443,33 +443,84 @@ def generate_translation_text_clip(text: str, is_short: bool, duration: int) -> 
     translation_pos = COMMON["f_translation_position"](is_short)
     return translation_clip.set_position(('center', translation_pos)).set_duration(duration)
 
-def generate_full_ayah_translation_clip(text: str, is_short: bool, duration: int, font: str = None) -> TextClip:
-    translation_sizes = COMMON["f_translation_size"](is_short, text)
+def generate_full_ayah_translation_clip(text: str, is_short: bool, duration: int, font: str = None) -> ImageClip:
+    """
+    Generates a full ayah translation clip using Pillow for high-fidelity rendering.
+    Returns an ImageClip.
+    """
+    resolution = get_resolution(is_short)
+    width, height = resolution
+    
     font_size = int(config_manager.get("WBW_FULL_TRANSLATION_FONT_SIZE", 30))
-    config = COMMON["translation_textbox_config"].copy()
-    config["fontsize"] = font_size
-    if font:
-        config["font"] = get_font_path(font)
+    if not font:
+        font_name = COMMON["translation_textbox_config"].get("font", "kalpurush.ttf")
+        font_path = resolve_font_path(font_name)
+    else:
+        font_path = resolve_font_path(font)
+        
+    try:
+        pil_font = ImageFont.truetype(font_path, font_size)
+    except:
+        pil_font = ImageFont.load_default()
+        
+    # Wrap text
+    max_text_width = int(width * 0.9)
+    lines = []
+    words = text.split()
+    current_line = []
     
-    # Force center alignment for better looks in full translation
-    config["align"] = "Center"
+    # Dummy draw for measurement
+    dummy_img = Image.new('RGBA', (1, 1))
+    draw = ImageDraw.Draw(dummy_img)
     
-    # Ensure TextClip has duration
-    translation_clip = TextClip(text, size=translation_sizes["size"], **config).set_duration(duration)
+    for word in words:
+        test_line = " ".join(current_line + [word])
+        bbox = draw.textbbox((0, 0), test_line, font=pil_font)
+        if bbox[2] - bbox[0] <= max_text_width:
+            current_line.append(word)
+        else:
+            lines.append(" ".join(current_line))
+            current_line = [word]
+    lines.append(" ".join(current_line))
     
-    # Add a semi-transparent background box
-    bg_width = translation_clip.w + 40
-    bg_height = translation_clip.h + 20
-    bg_box = ColorClip(size=(bg_width, bg_height), color=(0, 0, 0)).set_opacity(0.6).set_duration(duration)
+    line_height = pil_font.getbbox("Ay")[3] - pil_font.getbbox("Ay")[1] + 10
+    total_h = len(lines) * line_height
     
-    # Composite them with explicit size and duration
-    final_clip = CompositeVideoClip(
-        [bg_box, translation_clip.set_position('center')],
-        size=(bg_width, bg_height)
-    ).set_duration(duration)
+    # Create canvas for the text block
+    bg_padding = 20
+    canvas_w = max_text_width + (bg_padding * 2)
+    canvas_h = total_h + (bg_padding * 2)
     
-    translation_pos = COMMON["f_full_ayah_translation_position"](is_short)
-    return final_clip.set_position(('center', translation_pos))
+    txt_img = Image.new('RGBA', (canvas_w, canvas_h), (0, 0, 0, 153)) # 0.6 opacity black
+    draw = ImageDraw.Draw(txt_img)
+    
+    font_color = hex_to_rgb(FONT_COLOR) if isinstance(FONT_COLOR, str) and FONT_COLOR.startswith('#') else (255, 255, 255)
+    if isinstance(FONT_COLOR, str) and FONT_COLOR.startswith('rgb'):
+        try:
+            font_color = tuple(map(int, FONT_COLOR.replace("rgb(", "").replace(")", "").split(",")))
+        except:
+            font_color = (255, 255, 255)
+
+    curr_y = bg_padding
+    for line in lines:
+        bbox = draw.textbbox((0, 0), line, font=pil_font)
+        w = bbox[2] - bbox[0]
+        x = (canvas_w - w) // 2
+        # Simple shadow
+        draw.text((x + 2, curr_y + 2), line, font=pil_font, fill=(0, 0, 0, 128))
+        # Main text
+        draw.text((x, curr_y), line, font=pil_font, fill=font_color)
+        curr_y += line_height
+        
+    img_arr = np.array(txt_img)
+    clip = ImageClip(img_arr).set_duration(duration)
+    
+    # Position
+    from processes.video_configs import get_full_ayah_translation_position
+    y_pos = get_full_ayah_translation_position(is_short)
+    
+    return clip.set_position(('center', y_pos))
+
 
 def generate_reciter_name_clip(reciter_name_bangla: str, is_short: bool, duration: int) -> TextClip:
     reciter_name_clip = TextClip(reciter_name_bangla, font=resolve_font_path("kalpurush"), **FOOTER_CONFIG)

@@ -108,6 +108,9 @@ async def generate_wbw_fast(
         audio_clips = []
         current_global_sec = 0.0
         
+        full_trans_enabled = str(config_manager.get("WBW_FULL_TRANSLATION_ENABLED", "False")).lower() == "true"
+        full_trans_source = config_manager.get("WBW_FULL_TRANSLATION_SOURCE", "rawai_al_bayan")
+
         for tdata in verse_range_timestamps:
             ayah = tdata[1]
             segments = wbw_timestamps.get(ayah, [])
@@ -116,12 +119,17 @@ async def generate_wbw_fast(
             arabic_words = get_wbw_text_for_ayah(text_db, surah_number, ayah)
             trans_words = get_wbw_translation_for_ayah(trans_db, surah_number, ayah)
             
+            full_ayah_translation = ""
+            if full_trans_enabled:
+                full_ayah_translation = get_full_translation_for_ayah(surah_number, ayah, full_trans_source, language=current_language)
+
             # Duration for this ayah
             ayah_duration = (segments[-1][2] - segments[0][1]) / 1000.0
             
             scene_data = {
                 "words": arabic_words,
                 "translations": trans_words,
+                "full_ayah_translation": full_ayah_translation,
                 "start_ms": 0,
                 "end_ms": int(ayah_duration * 1000),
                 "word_segments": [{"start_ms": int(s[1] - segments[0][1]), "end_ms": int(s[2] - segments[0][1])} for s in segments],

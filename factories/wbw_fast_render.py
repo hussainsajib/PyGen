@@ -8,7 +8,8 @@ from processes.video_configs import (
     BACKGROUND_OPACITY, BACKGROUND_RGB, FONT_COLOR, COMMON, FOOTER_CONFIG,
     get_arabic_text_position, get_translation_text_position,
     get_arabic_textbox_size, get_translation_textbox_size,
-    get_reciter_info_position, get_surah_info_position, get_channel_info_position
+    get_reciter_info_position, get_surah_info_position, get_channel_info_position,
+    get_full_ayah_translation_position
 )
 from config_manager import config_manager
 
@@ -114,31 +115,75 @@ class WBWFastRenderer:
                 py = int(self.height * pos_b[1])
                 self._draw_text_with_shadow(draw, brand_name, (px, py), footer_font, fill=self.font_color)
 
+    def _draw_full_translation(self, draw):
+        """Renders the full ayah translation overlay at the bottom."""
+        full_text = self.scene_data.get("full_ayah_translation", "")
+        if not full_text:
+            return
+            
+        font_size = int(config_manager.get("WBW_FULL_TRANSLATION_FONT_SIZE", 30))
+        font = self._get_font(self.translation_font_path, font_size)
+        
+        max_width = int(self.width * 0.9)
+        lines = []
+        words = full_text.split()
+        current_line = []
+        
+        for word in words:
+            test_line = " ".join(current_line + [word])
+            bbox = draw.textbbox((0, 0), test_line, font=font)
+            if bbox[2] - bbox[0] <= max_width:
+                current_line.append(word)
+            else:
+                lines.append(" ".join(current_line))
+                current_line = [word]
+        lines.append(" ".join(current_line))
+        
+        line_height = font.getbbox("Ay")[3] - font.getbbox("Ay")[1] + 10
+        total_h = len(lines) * line_height
+        
+        y_base = get_full_ayah_translation_position(self.is_short)
+        
+        # Draw background box
+        bg_padding = 20
+        box_y0 = y_base - bg_padding
+        box_y1 = y_base + total_h + bg_padding
+        box_x0 = (self.width - max_width) // 2 - bg_padding
+        box_x1 = (self.width + max_width) // 2 + bg_padding
+        
+        overlay = Image.new('RGBA', self.resolution, (0, 0, 0, 0))
+        d_overlay = ImageDraw.Draw(overlay)
+        d_overlay.rectangle([box_x0, box_y0, box_x1, box_y1], fill=(0, 0, 0, 153))
+        self.static_base.alpha_composite(overlay)
+        
+        curr_y = y_base
+        for line in lines:
+            bbox = draw.textbbox((0, 0), line, font=font)
+            w = bbox[2] - bbox[0]
+            x = (self.width - w) // 2
+            self._draw_text_with_shadow(draw, line, (x, curr_y), font, fill=self.font_color)
+            curr_y += line_height
+
     def prepare_static_base(self):
         """Renders the background and all static text (Arabic + Translation)."""
-        # 1. Initialize background
         is_video_bg = self.background_path and (self.background_path.endswith('.mp4') or self.background_path.endswith('.mov'))
         
         if is_video_bg:
-            # For video background, we render text on a transparent base
             self.static_base = Image.new('RGBA', self.resolution, (0, 0, 0, 0))
         elif self.background_path and os.path.exists(self.background_path):
             self.static_base = Image.open(self.background_path).convert('RGBA')
             self.static_base = self.static_base.resize(self.resolution, Image.Resampling.LANCZOS)
         else:
-            # Fallback to standard background color logic
             bg_color = hex_to_rgb(config_manager.get("BACKGROUND_RGB", "#000000"))
             rgba_color = bg_color + (255,)
             self.static_base = Image.new('RGBA', self.resolution, rgba_color)
             
-        # Apply global dimming if configured (only for image/color background)
         if not is_video_bg:
             dimming = float(config_manager.get("MUSHAF_BACKGROUND_DIMMING", "0.3"))
             if dimming > 0:
                 overlay = Image.new('RGBA', self.resolution, (0, 0, 0, int(dimming * 255)))
                 self.static_base.alpha_composite(overlay)
 
-        # 2. Draw static text
         draw = ImageDraw.Draw(self.static_base)
         
         words = self.scene_data.get("words", [])
@@ -147,35 +192,24 @@ class WBWFastRenderer:
         trans_text = " ".join(translations)
 
         if self.layout == "standard":
-            # --- Standard Layout Logic ---
             arabic_config = get_arabic_textbox_size(self.is_short, arabic_text)
             trans_config = get_translation_textbox_size(self.is_short, trans_text)
-            
             arabic_font = self._get_font(self.arabic_font_path, arabic_config["fontsize"])
             trans_font = self._get_font(self.translation_font_path, trans_config["fontsize"])
-            
             bbox_a = draw.textbbox((0, 0), arabic_text, font=arabic_font)
             wa = bbox_a[2] - bbox_a[0]
             ha = bbox_a[3] - bbox_a[1]
-            
             arabic_y = get_arabic_text_position(self.is_short, ha)
             arabic_pos = ((self.width - wa) // 2, arabic_y)
-            
             self._draw_text_with_shadow(draw, arabic_text, arabic_pos, arabic_font, fill=self.font_color)
-            
             bbox_t = draw.textbbox((0, 0), trans_text, font=trans_font)
             wt = bbox_t[2] - bbox_t[0]
-            
             trans_y = get_translation_text_position(self.is_short)
             trans_pos = ((self.width - wt) // 2, trans_y)
-            
             self._draw_text_with_shadow(draw, trans_text, trans_pos, trans_font, fill=self.font_color)
-            
-            # Precise word-by-word highlights for Standard layout (RTL)
             self.word_rects = []
             space_w = draw.textbbox((0, 0), " ", font=arabic_font)[2] - draw.textbbox((0, 0), " ", font=arabic_font)[0]
-            current_x = arabic_pos[0] + wa # Start from right side
-            
+            current_x = arabic_pos[0] + wa
             for word in words:
                  bbox_w = draw.textbbox((0, 0), word, font=arabic_font)
                  word_w = bbox_w[2] - bbox_w[0]
@@ -183,20 +217,14 @@ class WBWFastRenderer:
                  self.word_rects.append([wx - 5, arabic_pos[1] - 5, current_x + 5, arabic_pos[1] + ha + 5])
                  current_x -= (word_w + space_w)
         elif self.layout == "interlinear":
-            # --- Interlinear Layout Logic ---
             space_width = 15
             arabic_font_size = int(config_manager.get("WBW_FONT_SIZE_REGULAR", 60))
-            if self.is_short:
-                 arabic_font_size = int(config_manager.get("WBW_FONT_SIZE_SHORT", 40))
-            
+            if self.is_short: arabic_font_size = int(config_manager.get("WBW_FONT_SIZE_SHORT", 40))
             trans_font_size = int(config_manager.get("WBW_TRANSLATION_FONT_SIZE", 20))
-            
             arabic_font = self._get_font(self.arabic_font_path, arabic_font_size)
             trans_font = self._get_font(self.translation_font_path, trans_font_size)
-            
             processed_blocks = []
             total_width = 0
-            
             for i in range(len(words)):
                 word = words[i]
                 trans = translations[i] if i < len(translations) else ""
@@ -210,13 +238,11 @@ class WBWFastRenderer:
                 processed_blocks.append({"word": word, "trans": trans, "aw": aw, "ah": ah, "tw": tw, "th": th, "block_w": block_w})
                 total_width += block_w
                 if i < len(words) - 1: total_width += space_width
-            
             max_ah = max((b["ah"] for b in processed_blocks), default=0)
             max_th = max((b["th"] for b in processed_blocks), default=0)
             line_height = max_ah + 5 + 3 + 5 + max_th
             arabic_y_base = get_arabic_text_position(self.is_short, line_height)
             curr_x = (self.width + total_width) // 2 
-            
             self.word_rects = []
             for block in processed_blocks:
                 curr_x -= block["block_w"]
@@ -234,16 +260,13 @@ class WBWFastRenderer:
         else:
             self.word_rects = []
             
-        # 3. Draw Footer
         self._draw_footer(draw)
+        self._draw_full_translation(draw)
 
-        # 4. Cache the base frame
-        is_video_bg = self.background_path and (self.background_path.endswith('.mp4') or self.background_path.endswith('.mov'))
         mode = 'RGBA' if is_video_bg else 'RGB'
         self._pre_rendered_frames[-1] = np.array(self.static_base.convert(mode))
         
-        # 5. Pre-render highlight frames
-        highlight_color = (255, 255, 0, 60) # Yellow with 23% alpha
+        highlight_color = (255, 255, 0, 60)
         for i, rect in enumerate(self.word_rects):
             overlay = Image.new('RGBA', self.resolution, (0, 0, 0, 0))
             draw_overlay = ImageDraw.Draw(overlay)
@@ -252,14 +275,11 @@ class WBWFastRenderer:
             self._pre_rendered_frames[i] = np.array(combined.convert(mode))
 
     def get_frame_at(self, timestamp_sec: float) -> np.ndarray:
-        """Returns a numpy array representing the frame at the given timestamp."""
         if not self._pre_rendered_frames:
             self.prepare_static_base()
-            
         timestamp_ms = int(timestamp_sec * 1000)
         active_idx = -1
         word_segments = self.scene_data.get("word_segments", [])
-        
         if word_segments:
             for i, segment in enumerate(word_segments):
                 if segment["start_ms"] <= timestamp_ms < segment["end_ms"]:
@@ -270,7 +290,6 @@ class WBWFastRenderer:
             end_ms = self.scene_data.get("end_ms", 0)
             if start_ms <= timestamp_ms <= end_ms:
                 active_idx = 0
-        
         frame = self._pre_rendered_frames.get(active_idx, self._pre_rendered_frames.get(-1))
         if frame is None:
             return np.zeros((self.height, self.width, 3), dtype=np.uint8)
@@ -278,10 +297,6 @@ class WBWFastRenderer:
 
 class FastWBWVideoRenderer:
     def __init__(self, scenes: list, is_short: bool = False):
-        """
-        Manages multiple WBWFastRenderer instances for a sequence of ayahs.
-        scenes: list of dicts { 'start_sec': float, 'end_sec': float, 'renderer': WBWFastRenderer }
-        """
         self.scenes = scenes
         self.is_short = is_short
         self.resolution = get_resolution(is_short)
@@ -289,22 +304,16 @@ class FastWBWVideoRenderer:
         self._last_scene_idx = 0
         
     def get_frame_at(self, timestamp_sec: float) -> np.ndarray:
-        # Optimization: start searching from last scene
         for i in range(self._last_scene_idx, len(self.scenes)):
             scene = self.scenes[i]
             if scene["start_sec"] <= timestamp_sec < scene["end_sec"]:
                 self._last_scene_idx = i
                 return scene["renderer"].get_frame_at(timestamp_sec - scene["start_sec"])
-                
-        # If not found (e.g. seeking backwards), search from beginning
         for i in range(len(self.scenes)):
             scene = self.scenes[i]
             if scene["start_sec"] <= timestamp_sec < scene["end_sec"]:
                 self._last_scene_idx = i
                 return scene["renderer"].get_frame_at(timestamp_sec - scene["start_sec"])
-                
-        # Fallback to last frame of last scene if past end
         if self.scenes and timestamp_sec >= self.scenes[-1]["end_sec"]:
              return self.scenes[-1]["renderer"].get_frame_at(self.scenes[-1]["end_sec"] - self.scenes[-1]["start_sec"] - 0.01)
-             
         return np.zeros((self.height, self.width, 3), dtype=np.uint8)

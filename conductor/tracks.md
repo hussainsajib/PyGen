@@ -15,5 +15,5 @@
 
 ---
 
-- [ ] **Track: Fix Missing Full Ayah Translation in WBW Videos**
+- [x] **Track: Fix Missing Full Ayah Translation in WBW Videos**
 *Link: [./tracks/wbw_translation_visibility_fix_20260228/](./tracks/wbw_translation_visibility_fix_20260228/)*
