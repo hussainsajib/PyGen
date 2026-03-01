@@ -59,6 +59,9 @@
                     <li class="nav-item">
                         <a class="nav-link {% if request.url.path == '/juz-video' %}active{% endif %}" href="{{ url_for('juz_video_creator') }}">Juz Mushaf</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.url.path == '/image-generator' %}active{% endif %}" href="{{ url_for('image_generator') }}">Image Generator</a>
+                    </li>
                 </ul>
             </div>
         </div>

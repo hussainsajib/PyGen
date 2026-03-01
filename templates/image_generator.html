@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Image Post Generator{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-info text-white">
+                <h3 class="mb-0"><i class="fas fa-image me-2"></i>Image Post Generator</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Controls Column -->
+                    <div class="col-md-6">
+                        <form id="imageGenForm">
+                            <!-- Surah Selection -->
+                            <div class="mb-3">
+                                <label for="surah" class="form-label fw-bold">Select Surah:</label>
+                                <select id="surah" name="surah" class="form-select" required onchange="updateAyahRange()">
+                                    <option value="" disabled selected>Select Surah</option>
+                                    {% for surah in surahs %}
+                                    <option value="{{ surah.number }}" data-verses="{{ surah.total_verses }}">{{ surah.number }}. {{ surah.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Ayah Selection -->
+                            <div class="mb-3">
+                                <label for="ayah" class="form-label fw-bold">Select Ayah:</label>
+                                <select id="ayah" name="ayah" class="form-select" required onchange="updatePreview()">
+                                    <option value="" disabled selected>Select Surah First</option>
+                                </select>
+                            </div>
+
+                            <!-- Background Selector -->
+                            <div class="mb-4">
+                                {% include "partials/background_selector.html" %}
+                            </div>
+
+                            <!-- Custom Description -->
+                            <div class="mb-3">
+                                <label for="description" class="form-label fw-bold">Custom Description/Caption:</label>
+                                <textarea id="description" name="description" class="form-control" rows="3" placeholder="Enter your post description here..."></textarea>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-primary" onclick="updatePreview()">
+                                    <i class="fas fa-sync-alt me-2"></i>Update Preview
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="downloadImage()">
+                                    <i class="fas fa-download me-2"></i>Download Image
+                                </button>
+                                <button type="button" id="fbPostBtn" class="btn btn-outline-primary" onclick="postToFacebook()">
+                                    <i class="fab fa-facebook me-2"></i>Post to Facebook
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Preview Column -->
+                    <div class="col-md-6 text-center">
+                        <label class="form-label fw-bold d-block mb-2">Live Preview (1:1 Square):</label>
+                        <div id="previewContainer" class="border rounded bg-light d-flex align-items-center justify-content-center overflow-hidden" style="aspect-ratio: 1/1; position: relative;">
+                            <img id="imagePreview" src="" alt="Image Preview" class="img-fluid d-none">
+                            <div id="previewPlaceholder" class="text-muted">
+                                <i class="fas fa-image fa-4x mb-2"></i>
+                                <p>Select Surah and Ayah to see preview</p>
+                            </div>
+                            <div id="previewLoading" class="position-absolute d-none">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="small text-muted mt-2">Note: Final image will be 1080x1080px.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateAyahRange() {
+        const surahSelect = document.getElementById('surah');
+        const ayahSelect = document.getElementById('ayah');
+        const selectedOption = surahSelect.options[surahSelect.selectedIndex];
+        
+        if (!selectedOption.value) return;
+
+        const totalVerses = parseInt(selectedOption.getAttribute('data-verses'));
+        
+        ayahSelect.innerHTML = '';
+        for (let i = 1; i <= totalVerses; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `Ayah ${i}`;
+            ayahSelect.appendChild(option);
+        }
+        
+        updatePreview();
+    }
+
+    async function updatePreview() {
+        const surah = document.getElementById('surah').value;
+        const ayah = document.getElementById('ayah').value;
+        const bg = document.getElementById('active_background').value;
+
+        if (!surah || !ayah) return;
+
+        const previewImg = document.getElementById('imagePreview');
+        const placeholder = document.getElementById('previewPlaceholder');
+        const loading = document.getElementById('previewLoading');
+
+        loading.classList.remove('d-none');
+        previewImg.classList.add('opacity-50');
+
+        let url = `/api/generate-image?surah=${surah}&ayah=${ayah}`;
+        if (bg) url += `&background_path=${encodeURIComponent(bg)}`;
+
+        try {
+            // Use timestamp to avoid cache
+            const cacheBuster = `&t=${new Date().getTime()}`;
+            previewImg.src = url + cacheBuster;
+            previewImg.onload = () => {
+                loading.classList.add('d-none');
+                previewImg.classList.remove('d-none', 'opacity-50');
+                placeholder.classList.add('d-none');
+            };
+        } catch (error) {
+            console.error('Preview failed:', error);
+            loading.classList.add('d-none');
+        }
+    }
+
+    function downloadImage() {
+        const surah = document.getElementById('surah').value;
+        const ayah = document.getElementById('ayah').value;
+        const bg = document.getElementById('active_background').value;
+
+        if (!surah || !ayah) {
+            alert('Please select Surah and Ayah first.');
+            return;
+        }
+
+        let url = `/api/download-image?surah=${surah}&ayah=${ayah}`;
+        if (bg) url += `&background_path=${encodeURIComponent(bg)}`;
+        
+        window.location.href = url;
+    }
+
+    async function postToFacebook() {
+        const surah = document.getElementById('surah').value;
+        const ayah = document.getElementById('ayah').value;
+        const bg = document.getElementById('active_background').value;
+        const description = document.getElementById('description').value;
+
+        if (!surah || !ayah) {
+            alert('Please select Surah and Ayah first.');
+            return;
+        }
+
+        const btn = document.getElementById('fbPostBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Posting...';
+        btn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('surah', surah);
+        formData.append('ayah', ayah);
+        formData.append('description', description);
+        if (bg) formData.append('background_path', bg);
+
+        try {
+            const response = await fetch('/api/post-image-to-facebook', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                alert('Successfully posted to Facebook! Post ID: ' + data.post_id);
+            } else {
+                alert('Failed to post: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Post failed:', error);
+            alert('Failed to post to Facebook. See console for details.');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    // Initial check for background
+    document.addEventListener('DOMContentLoaded', () => {
+        const activeBg = "{{ active_bg }}";
+        if (activeBg) {
+            updateActiveBackground(activeBg, activeBg.split(/[\/]/).pop());
+        }
+    });
+</script>
+{% endblock %}
