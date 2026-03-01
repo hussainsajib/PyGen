@@ -2,13 +2,14 @@ import os
 import sqlite3
 from PIL import Image, ImageDraw, ImageFont
 from factories.font_utils import resolve_font_path
+from factories.shaping_utils import render_shaped_text
 from config_manager import config_manager
 
 class ImageGenerator:
     def __init__(self, width=1080, height=1080):
         self.width = width
         self.height = height
-        self.canvas = Image.new("RGB", (self.width, self.height), color=(255, 255, 255))
+        self.canvas = Image.new("RGBA", (self.width, self.height), color=(255, 255, 255, 255))
         self.draw = ImageDraw.Draw(self.canvas)
         
         # Load default fonts
@@ -91,45 +92,58 @@ class ImageGenerator:
         return text_height
 
     def render_bangla_translation(self, text, font_size=40, y_pos=400):
-        """Renders Bangla translation text."""
-        font = ImageFont.truetype(self.bangla_font_path, font_size)
-        
-        bbox = self.draw.textbbox((0, 0), text, font=font)
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
-        
-        x_pos = (self.width - text_width) / 2
-        self.draw.text((x_pos, y_pos), text, font=font, fill=(255, 255, 255))
-        
-        return text_height
+        """Renders Bangla translation text using manual shaping."""
+        shaped_img = render_shaped_text(text, self.bangla_font_path, font_size, (255, 255, 255))
+        if not shaped_img:
+            # Fallback to standard Pillow (may have ordering issues)
+            font = ImageFont.truetype(self.bangla_font_path, font_size)
+            bbox = self.draw.textbbox((0, 0), text, font=font)
+            text_width = bbox[2] - bbox[0]
+            x_pos = (self.width - text_width) / 2
+            self.draw.text((x_pos, y_pos), text, font=font, fill=(255, 255, 255))
+            return bbox[3] - bbox[1]
+            
+        x_pos = (self.width - shaped_img.width) // 2
+        self.canvas.alpha_composite(shaped_img, (x_pos, y_pos))
+        return shaped_img.height
 
     def render_metadata(self, surah_name, ayah_number, font_size=30, y_pos=600):
         """Renders localized metadata (Surah Name:Ayah Number)."""
         text = f"{surah_name}:{ayah_number}"
-        font = ImageFont.truetype(self.bangla_font_path, font_size)
+        shaped_img = render_shaped_text(text, self.bangla_font_path, font_size, (200, 200, 200))
         
-        bbox = self.draw.textbbox((0, 0), text, font=font)
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
-        
-        x_pos = (self.width - text_width) / 2
-        self.draw.text((x_pos, y_pos), text, font=font, fill=(200, 200, 200))
-        
-        return text_height
+        if not shaped_img:
+            font = ImageFont.truetype(self.bangla_font_path, font_size)
+            bbox = self.draw.textbbox((0, 0), text, font=font)
+            text_width = bbox[2] - bbox[0]
+            x_pos = (self.width - text_width) / 2
+            self.draw.text((x_pos, y_pos), text, font=font, fill=(200, 200, 200))
+            return bbox[3] - bbox[1]
+            
+        x_pos = (self.width - shaped_img.width) // 2
+        self.canvas.alpha_composite(shaped_img, (x_pos, y_pos))
+        return shaped_img.height
 
     def render_branding(self, text="তাকওয়া বাংলা", font_size=25):
         """Renders branding watermark in the bottom-right corner."""
-        font = ImageFont.truetype(self.bangla_font_path, font_size)
+        shaped_img = render_shaped_text(text, self.bangla_font_path, font_size, (255, 255, 255))
         
-        bbox = self.draw.textbbox((0, 0), text, font=font)
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
-        
-        x_pos = self.width - text_width - 40
-        y_pos = self.height - text_height - 40
-        
-        self.draw.text((x_pos, y_pos), text, font=font, fill=(255, 255, 255))
+        if not shaped_img:
+            font = ImageFont.truetype(self.bangla_font_path, font_size)
+            bbox = self.draw.textbbox((0, 0), text, font=font)
+            text_width = bbox[2] - bbox[0]
+            text_height = bbox[3] - bbox[1]
+            x_pos = self.width - text_width - 40
+            y_pos = self.height - text_height - 40
+            self.draw.text((x_pos, y_pos), text, font=font, fill=(255, 255, 255))
+            return
+            
+        x_pos = self.width - shaped_img.width - 40
+        y_pos = self.height - shaped_img.height - 40
+        self.canvas.alpha_composite(shaped_img, (x_pos, y_pos))
 
     def save(self, output_path):
         """Saves the final image."""
-        self.canvas.save(output_path)
+        # Convert to RGB before saving to avoid alpha channel issues in some viewers
+        final_img = self.canvas.convert("RGB")
+        final_img.save(output_path)
