@@ -1,16 +1,23 @@
-from moviepy.editor import TextClip
 from PIL import Image, ImageOps
 import numpy as np
 import os
+from factories.shaping_utils import render_shaped_text
 
 def render_complex_text_to_pil(text: str, font_path: str, font_size: int, color: str) -> Image.Image:
     """
-    Renders complex text using a luma-masking technique for robustness.
-    1. Render Black text on White background (Proven to work).
-    2. Invert to get Alpha Mask.
-    3. Apply this mask to a solid canvas of the desired color.
+    Renders complex text using manual HarfBuzz shaping for speed and accuracy.
+    Falls back to MoviePy/ImageMagick (TextClip) only if manual shaping fails.
     """
     try:
+        # 1. Try manual HarfBuzz + FreeType shaping (Fastest & Accurate)
+        pil_img = render_shaped_text(text, font_path, font_size, color)
+        if pil_img:
+            return pil_img
+    except Exception as e:
+        print(f"[DEBUG] Manual shaping failed, falling back to TextClip: {e}")
+
+    try:
+        from moviepy.editor import TextClip
         # Sanitize path for ImageMagick (Forward slashes required on Windows sometimes)
         font_path = font_path.replace("\\", "/")
         

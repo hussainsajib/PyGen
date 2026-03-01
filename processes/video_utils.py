@@ -66,9 +66,8 @@ async def build_wbw_video_clip(surah_number: int, start_verse: int, end_verse: i
     # Fetch WBW data if reciter has it
     wbw_data = {}
     if reciter and reciter.wbw_database:
-        print(f"[INFO] - WBW database found: {reciter.wbw_database}", flush=True)
         db_path = os.path.join("databases", "word-by-word", reciter.wbw_database)
-        wbw_data = get_wbw_timestamps(db_path, surah_number, start_verse, end_verse)
+        wbw_data = get_wbw_timestamps(db_path, surah.number, start_verse, end_verse)
 
     active_background = background_path if background_path else config_manager.get("ACTIVE_BACKGROUND")
     
@@ -84,10 +83,8 @@ async def build_wbw_video_clip(surah_number: int, start_verse: int, end_verse: i
         surah_num, ayah, gstart_ms, gend_ms, seg_str = tdata
         try:
             if ayah in wbw_data:
-                print(f"[INFO] - Creating Advanced WBW clip for Ayah {ayah}", flush=True)
                 clip = create_wbw_advanced_ayah_clip(surah, ayah, reciter, full_audio, is_short=is_short, segments=wbw_data[ayah], background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language, full_translation_db=full_translation_db)
                 if clip is None:
-                    print(f"[INFO] - Falling back to standard clip for Ayah {ayah}", flush=True)
                     clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language, full_translation_db=full_translation_db)
             else:
                 clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=is_short, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language, full_translation_db=full_translation_db)

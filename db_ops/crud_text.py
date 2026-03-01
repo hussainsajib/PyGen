@@ -42,7 +42,6 @@ def get_full_translation_for_ayah(surah_number: int, ayah_number: int, db_name: 
             result = cursor.fetchone()
             if result and result[0]:
                 text = str(result[0])
-                print(f"[DEBUG] Loaded full translation for {surah_number}:{ayah_number} from {db_name}: '{text[:30]}...'")
                 return text
             print(f"[DEBUG] No translation found for {surah_number}:{ayah_number} in {db_name}")
             return ""

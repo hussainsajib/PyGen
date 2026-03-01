@@ -88,7 +88,6 @@ def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, s
         full_trans_enabled = str(config_manager.get("WBW_FULL_TRANSLATION_ENABLED", "False")).lower() == "true"
         if full_trans_enabled:
             db_source = config_manager.get("WBW_FULL_TRANSLATION_SOURCE") or full_translation_db
-            print(f"[DEBUG] create_ayah_clip: Fetching full translation for {surah.number}:{ayah} (source={db_source})")
             full_ayah_translation = get_full_translation_for_ayah(surah.number, ayah, db_source, language=language)
             if full_ayah_translation:
                 full_trans_clip = generate_full_ayah_translation_clip(full_ayah_translation, is_short, duration, font=translation_font).set_duration(duration)
@@ -103,7 +102,6 @@ def create_ayah_clip(surah: Surah, ayah, reciter: Reciter, gstart_ms, gend_ms, s
     # Subclip the audio for the ayah (convert global ms to seconds)
     ayah_audio = full_audio.subclip(gstart_ms / 1000.0, gend_ms / 1000.0)
     composite = composite.set_audio(ayah_audio)
-    print(f"[INFO] - Created composite video clip for Surah {surah.number}, Ayah {ayah}", flush=True)
     return composite
 
 
@@ -194,7 +192,6 @@ def create_wbw_advanced_ayah_clip(surah: Surah, ayah, reciter: Reciter, full_aud
         if full_trans_enabled:
             # Prefer source from config if set, otherwise use language default
             db_source = config_manager.get("WBW_FULL_TRANSLATION_SOURCE") or full_translation_db
-            print(f"[DEBUG] create_wbw_advanced_ayah_clip: Fetching full translation for {surah.number}:{ayah} (source={db_source})")
             full_ayah_translation = get_full_translation_for_ayah(surah.number, ayah, db_source, language=language)
 
         if is_short:
@@ -328,7 +325,6 @@ async def generate_surah(surah_number: int, reciter_tag: str, custom_title: str 
     # Fetch WBW data if reciter has it
     wbw_data = {}
     if reciter and reciter.wbw_database:
-        print(f"[INFO] - WBW database found: {reciter.wbw_database}", flush=True)
         db_path = os.path.join("databases", "word-by-word", reciter.wbw_database)
         wbw_data = get_wbw_timestamps(db_path, surah_number, 1, 114) # Fetch all for this surah
 
@@ -337,19 +333,16 @@ async def generate_surah(surah_number: int, reciter_tag: str, custom_title: str 
     clips = []
     if COMMON["enable_intro"]:
         intro = generate_intro(surah=surah, reciter=reciter, background_image_url=active_background, is_short=False, language=current_language)
-        print(f"[INFO] - Intro generated", flush=True)
         clips.append(intro)
-    print(f"[INFO] - Going inside the ayah loop", flush=True)
+
     for tdata in timestamp_data:
         surah_number, ayah, gstart_ms, gend_ms, seg_str = tdata
         try:
             # Use Advanced WBW clip if data exists for this ayah
             if ayah in wbw_data:
-                print(f"[INFO] - Creating Advanced WBW clip for Ayah {ayah}", flush=True)
                 clip = create_wbw_advanced_ayah_clip(surah, ayah, reciter, full_audio, is_short=False, segments=wbw_data[ayah], background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language, full_translation_db=full_translation_db)
                 if clip is None:
                     # Fallback to standard clip if WBW fails
-                    print(f"[INFO] - Falling back to standard clip for Ayah {ayah}", flush=True)
                     clip = create_ayah_clip(surah, ayah, reciter, gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language, full_translation_db=full_translation_db)
             else:
                 clip = create_ayah_clip(surah, ayah, reciter,gstart_ms, gend_ms, surah_data, translation_data, full_audio, is_short=False, background_image_path=active_background, translation_font=translation_font, brand_name=brand_name, language=current_language, full_translation_db=full_translation_db)
@@ -361,7 +354,7 @@ async def generate_surah(surah_number: int, reciter_tag: str, custom_title: str 
     if COMMON["enable_outro"]:
         outro = generate_outro(background_image_url=None, is_short=False)
         clips.append(outro)
-    print(f"[INFO] - Going to concatenate the clips", flush=True)
+
     # Concatenate all ayah clips one after the other
     final_video = concatenate_videoclips(clips)
     print(f"[INFO] - Going to write the final video", flush=True)

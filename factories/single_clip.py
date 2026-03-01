@@ -494,22 +494,23 @@ def generate_full_ayah_translation_clip(text: str, is_short: bool, duration: int
     txt_img = Image.new('RGBA', (canvas_w, canvas_h), (0, 0, 0, 153)) # 0.6 opacity black
     draw = ImageDraw.Draw(txt_img)
     
-    font_color = hex_to_rgb(FONT_COLOR) if isinstance(FONT_COLOR, str) and FONT_COLOR.startswith('#') else (255, 255, 255)
-    if isinstance(FONT_COLOR, str) and FONT_COLOR.startswith('rgb'):
-        try:
-            font_color = tuple(map(int, FONT_COLOR.replace("rgb(", "").replace(")", "").split(",")))
-        except:
-            font_color = (255, 255, 255)
+    from factories.complex_text import render_complex_text_to_pil
+    
+    font_color_str = FONT_COLOR
+    if not isinstance(font_color_str, str):
+        font_color_str = f"rgb({font_color_str[0]},{font_color_str[1]},{font_color_str[2]})"
 
     curr_y = bg_padding
     for line in lines:
-        bbox = draw.textbbox((0, 0), line, font=pil_font)
-        w = bbox[2] - bbox[0]
-        x = (canvas_w - w) // 2
-        # Simple shadow
-        draw.text((x + 2, curr_y + 2), line, font=pil_font, fill=(0, 0, 0, 128))
-        # Main text
-        draw.text((x, curr_y), line, font=pil_font, fill=font_color)
+        # Use existing complex text factory for proper shaping (Bengali/Arabic)
+        line_img = render_complex_text_to_pil(line, font_path, font_size, font_color_str)
+        
+        # Center the rendered line on our canvas
+        lw, lh = line_img.size
+        lx = (canvas_w - lw) // 2
+        
+        # Paste with alpha
+        txt_img.paste(line_img, (lx, curr_y), line_img)
         curr_y += line_height
         
     img_arr = np.array(txt_img)
