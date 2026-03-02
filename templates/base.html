@@ -24,43 +24,46 @@
                         <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('surah') }}">Surah</a>
+                        <a class="nav-link" href="{{ url_for('mushaf') }}">Mushaf</a>
+                    </li>
+                    
+                    <!-- Video Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Video
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('surah') }}">Surah Video</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('wbw') }}">Word-by-Word</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('wbw_fast') }}">WBW (Fast)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('mushaf_video_creator') }}">Mushaf Video</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('juz_video_creator') }}">Juz Mushaf</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('image_generator') }}">Image Generator</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('tafseer') }}">Tafseer</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('jobs') }}">Jobs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('playlists') }}">Playlists</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('wbw') }}">Word-by-Word</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('wbw_fast') }}">WBW (Fast)</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('config') }}">Config</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('reciters_list') }}">Reciters</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('manual_upload') }}">Manual Upload</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('mushaf') }}">Mushaf</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.url.path == '/mushaf_video' %}active{% endif %}" href="{{ url_for('mushaf_video_creator') }}">Mushaf Video</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.url.path == '/juz-video' %}active{% endif %}" href="{{ url_for('juz_video_creator') }}">Juz Mushaf</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.url.path == '/image-generator' %}active{% endif %}" href="{{ url_for('image_generator') }}">Image Generator</a>
+
+                    <!-- Settings Dropdown -->
+                    <li class="nav-item dropdown ms-lg-auto">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-cog me-1"></i>Settings
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('config') }}"><i class="fas fa-sliders-h me-2"></i>App Config</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('reciters_list') }}"><i class="fas fa-microphone me-2"></i>Reciters</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('playlists') }}"><i class="fas fa-list me-2"></i>Playlists</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('jobs') }}"><i class="fas fa-tasks me-2"></i>Background Jobs</a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
