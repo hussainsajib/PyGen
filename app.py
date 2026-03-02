@@ -1,6 +1,7 @@
 import os
 import json
 import asyncio
+import time
 from typing import Optional
 from fastapi.concurrency import run_in_threadpool
 from dotenv import load_dotenv
@@ -38,6 +39,12 @@ from processes.youtube_utils import (
 from net_ops.unsplash import search_unsplash, download_unsplash_image
 from net_ops.pexels import search_pexels_videos
 from net_ops.download_file import download_file
+from factories.image_generator import ImageGenerator
+from db_ops.crud_wbw import get_wbw_text_for_ayah
+from db_ops.crud_text import get_full_translation_for_ayah
+from db_ops.crud_surah import get_surah_by_number
+from fastapi.responses import FileResponse, Response
+import io
 
 load_dotenv()
 IMAGEMAGICK_BINARY=os.getenv("IMAGEMAGICK_BINARY")
@@ -1058,3 +1065,190 @@ def validate_wbw_exists(filename: str):
     if not filename:
         return True # Optional field
     return os.path.exists(os.path.join("databases", "word-by-word", filename))
+
+# --- Image Generator Endpoints ---
+
+@app.get("/image-generator", name="image_generator", response_class=HTMLResponse)
+async def image_generator_interface(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
+):
+    surahs = []
+    with open("data/surah_data.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+        for k, v in data.items():
+            surah = {"number": int(v["serial"]), "name": v["english_name"], "total_verses": v["total_ayah"]}
+            surahs.append(surah)
+    surahs.sort(key=lambda x: x["number"])
+
+    active_bg = config.get("ACTIVE_BACKGROUND", "")
+    default_hashtags = config.get("IMAGE_GEN_DEFAULT_HASHTAGS", "#Quran #TaqwaBangla #IslamicPost")
+    bg_rgb = config.get("BACKGROUND_RGB", "(0,0,0)")
+    font_color = config.get("FONT_COLOR", "white")
+
+    return templates.TemplateResponse("image_generator.html", {
+        "request": request,
+        "surahs": surahs,
+        "active_bg": active_bg,
+        "default_hashtags": default_hashtags,
+        "bg_rgb": bg_rgb,
+        "font_color": font_color
+    })
+
+async def _internal_generate_image(
+    surah: int, 
+    ayah: int, 
+    background_path: str = None,
+    arabic_font_size: int = 80,
+    translation_font_size: int = 45,
+    image_size: str = "square" # square, portrait, landscape
+):
+    # 1. Get real data
+    page_number = await run_in_threadpool(crud_mushaf.get_page_for_verse, surah, ayah)
+    db_wbw_path = "databases/text/word_by_word_qpc-v2.db"
+    words = await run_in_threadpool(get_wbw_text_for_ayah, db_wbw_path, surah, ayah)
+    translation = await run_in_threadpool(get_full_translation_for_ayah, surah, ayah, language="bengali")
+    surah_obj = await get_surah_by_number(surah)
+    surah_name_bangla = surah_obj.bangla_name if surah_obj else f"Surah {surah}"
+
+    # 2. Determine dimensions
+    width, height = 1080, 1080
+    if image_size == "portrait":
+        width, height = 1080, 1350
+    elif image_size == "landscape":
+        width, height = 1920, 1080
+    elif image_size == "story":
+        width, height = 1080, 1920
+
+    # 3. Generate
+    gen = ImageGenerator(width=width, height=height)
+    if background_path and os.path.exists(background_path):
+        gen.set_background(background_path, dim_opacity=0.4)
+    
+    # Position logic based on height
+    y_arabic = height // 4
+    y_translation = height // 2
+    y_metadata = int(height * 0.8)
+
+    gen.render_arabic_ayah(words, page_number, font_size=arabic_font_size, y_pos=y_arabic)
+    gen.render_bangla_translation(translation, font_size=translation_font_size, y_pos=y_translation)
+    gen.render_metadata(surah_name_bangla, ayah, font_size=int(translation_font_size * 0.8), y_pos=y_metadata)
+    gen.render_branding()
+    
+    img_io = io.BytesIO()
+    gen.canvas.save(img_io, 'PNG')
+    img_io.seek(0)
+    return img_io
+
+@app.get("/api/generate-image")
+async def api_generate_image(
+    surah: int, 
+    ayah: int, 
+    background_path: str = None,
+    arabic_font_size: int = 80,
+    translation_font_size: int = 45,
+    image_size: str = "square",
+    config: ConfigManager = Depends(get_config_manager)
+):
+    if not background_path:
+        background_path = config.get("ACTIVE_BACKGROUND")
+        
+    img_io = await _internal_generate_image(
+        surah, ayah, background_path, 
+        arabic_font_size, translation_font_size, image_size
+    )
+    return Response(content=img_io.getvalue(), media_type="image/png")
+
+@app.get("/api/download-image")
+async def api_download_image(
+    surah: int, 
+    ayah: int, 
+    background_path: str = None,
+    arabic_font_size: int = 80,
+    translation_font_size: int = 45,
+    image_size: str = "square",
+    config: ConfigManager = Depends(get_config_manager)
+):
+    if not background_path:
+        background_path = config.get("ACTIVE_BACKGROUND")
+        
+    img_io = await _internal_generate_image(
+        surah, ayah, background_path,
+        arabic_font_size, translation_font_size, image_size
+    )
+    return Response(
+        content=img_io.getvalue(), 
+        media_type="image/png",
+        headers={"Content-Disposition": f"attachment; filename=ayah_{surah}_{ayah}.png"}
+    )
+
+@app.post("/api/post-image-to-facebook")
+async def api_post_image_to_facebook(
+    surah: int = Form(...),
+    ayah: int = Form(...),
+    description: str = Form(...),
+    background_path: str = Form(None),
+    arabic_font_size: int = Form(80),
+    translation_font_size: int = Form(45),
+    image_size: str = Form("square"),
+    db: AsyncSession = Depends(get_db),
+    config: ConfigManager = Depends(get_config_manager)
+):
+    # 1. Generate Image
+    if not background_path:
+        background_path = config.get("ACTIVE_BACKGROUND")
+    
+    img_io = await _internal_generate_image(
+        surah, ayah, background_path,
+        arabic_font_size, translation_font_size, image_size
+    )
+    
+    # 2. Save temporarily for upload
+    temp_dir = "exported_data/temp"
+    if not os.path.exists(temp_dir):
+        os.makedirs(temp_dir)
+    import time
+    temp_path = os.path.join(temp_dir, f"fb_post_{surah}_{ayah}_{int(time.time())}.png")
+    
+    with open(temp_path, "wb") as f:
+        f.write(img_io.getvalue())
+        
+    # 3. Get Facebook Credentials
+    fb_token = os.getenv("FB_PAGE_ACCESS_TOKEN")
+    fb_page_id = os.getenv("FB_PAGE_ID")
+    
+    if not fb_token or not fb_page_id:
+        return JSONResponse({"status": "error", "message": "Facebook credentials not configured in environment variables."}, status_code=400)
+        
+    # 4. Prepare Caption
+    template = config.get("IMAGE_GEN_CAPTION_TEMPLATE", "{user_description}\n\n{surah_name} আয়াত {ayah_number}\n\n{hashtags}")
+    hashtags = config.get("IMAGE_GEN_DEFAULT_HASHTAGS", "#Quran #TaqwaBangla")
+    
+    surah_obj = await get_surah_by_number(surah)
+    surah_name = surah_obj.bangla_name if surah_obj else f"সূরা {surah}"
+    
+    caption = template.format(
+        user_description=description,
+        surah_name=surah_name,
+        ayah_number=ayah,
+        hashtags=hashtags
+    )
+    
+    # 5. Upload
+    from processes.facebook_utils import FacebookClient
+    fb = FacebookClient(fb_token, fb_page_id)
+    
+    try:
+        post_id = await run_in_threadpool(fb.upload_image, temp_path, caption)
+        if post_id:
+            return {"status": "success", "post_id": post_id}
+        else:
+            return JSONResponse({"status": "error", "message": "Failed to upload to Facebook. Check logs."}, status_code=500)
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+    finally:
+        # Cleanup
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
