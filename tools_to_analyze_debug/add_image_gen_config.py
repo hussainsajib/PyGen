@@ -14,7 +14,7 @@ async def add_config_keys():
     async with async_session() as session:
         keys_to_add = {
             "IMAGE_GEN_DEFAULT_HASHTAGS": "#Quran #TaqwaBangla #IslamicPost #Deen",
-            "IMAGE_GEN_CAPTION_TEMPLATE": "{user_description}\n\n{surah_name} Ayah {ayah_number}\n\n{hashtags}"
+            "IMAGE_GEN_CAPTION_TEMPLATE": "{user_description}\n\n{surah_name} আয়াত {ayah_number}\n\n{hashtags}"
         }
         
         for key, value in keys_to_add.items():

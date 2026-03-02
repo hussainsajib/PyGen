@@ -1214,17 +1214,15 @@ async def api_post_image_to_facebook(
     with open(temp_path, "wb") as f:
         f.write(img_io.getvalue())
         
-    # 3. Get Facebook Credentials for the language
-    lang_name = config.get("DEFAULT_LANGUAGE", "bengali")
-    stmt = select(Language).where(Language.name == lang_name)
-    result = await db.execute(stmt)
-    lang_obj = result.scalar_one_or_none()
+    # 3. Get Facebook Credentials
+    fb_token = os.getenv("FB_PAGE_ACCESS_TOKEN")
+    fb_page_id = os.getenv("FB_PAGE_ID")
     
-    if not lang_obj or not lang_obj.facebook_page_id or not lang_obj.facebook_access_token:
-        return JSONResponse({"status": "error", "message": f"Facebook credentials not configured for language: {lang_name}"}, status_code=400)
+    if not fb_token or not fb_page_id:
+        return JSONResponse({"status": "error", "message": "Facebook credentials not configured in environment variables."}, status_code=400)
         
     # 4. Prepare Caption
-    template = config.get("IMAGE_GEN_CAPTION_TEMPLATE", "{user_description}\n\n{surah_name} Ayah {ayah_number}\n\n{hashtags}")
+    template = config.get("IMAGE_GEN_CAPTION_TEMPLATE", "{user_description}\n\n{surah_name} আয়াত {ayah_number}\n\n{hashtags}")
     hashtags = config.get("IMAGE_GEN_DEFAULT_HASHTAGS", "#Quran #TaqwaBangla")
     
     surah_obj = await get_surah_by_number(surah)
@@ -1239,7 +1237,7 @@ async def api_post_image_to_facebook(
     
     # 5. Upload
     from processes.facebook_utils import FacebookClient
-    fb = FacebookClient(lang_obj.facebook_access_token, lang_obj.facebook_page_id)
+    fb = FacebookClient(fb_token, fb_page_id)
     
     try:
         post_id = await run_in_threadpool(fb.upload_image, temp_path, caption)
